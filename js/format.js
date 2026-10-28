@@ -1,5 +1,4 @@
 const LOCALE = 'en-GB';
-const DAY_MS = 24 * 60 * 60 * 1000;
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
@@ -17,11 +16,10 @@ export function formatWhen(date) {
 }
 
 export function formatDay(date) {
-  const daysAgo = Math.round((startOfDay(new Date()) - startOfDay(date)) / DAY_MS);
-  if (daysAgo === 0) return 'Today';
-  if (daysAgo === 1) return 'Yesterday';
-  const year = date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric';
-  return date.toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short', year });
+  const pad = (number) => String(number).padStart(2, '0');
+  const isoDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' });
+  return `${isoDate} ${weekday}`;
 }
 
 export const dayKey = (date) => startOfDay(date).getTime();
