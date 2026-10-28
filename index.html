@@ -42,6 +42,21 @@
         </form>
       </div>
 
+      <div class="field" id="variant-picker">
+        <div class="label-row" id="variant-label-row">
+          <span class="label" id="variant-label">Variant</span>
+          <button type="button" class="btn-text" id="variant-edit" data-action="toggle-edit">Edit</button>
+        </div>
+        <div class="chips" id="variant-chips" role="group" aria-labelledby="variant-label"></div>
+        <form class="add-form" id="variant-add" hidden>
+          <input class="input" id="variant-name" aria-labelledby="variant-label" placeholder="Variant, e.g. Left"
+            autocomplete="off" enterkeyhint="done">
+          <button class="btn btn-primary">Add</button>
+          <button type="button" class="btn-text" data-action="cancel-add">Cancel</button>
+        </form>
+        <button type="button" class="btn-text variant-new" id="variant-new" data-action="start-add">+ Variant</button>
+      </div>
+
       <div class="log-controls" id="log-controls">
         <div class="field">
           <label class="label" for="reps">Reps</label>

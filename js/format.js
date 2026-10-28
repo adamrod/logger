@@ -5,7 +5,7 @@ export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) =>
 
 export const roundValue = (value) => Math.round(value * 100) / 100;
 
-export const describeSet = ({ reps, weight }) => `${reps} × ${roundValue(weight)} kg`;
+export const describeSet = ({ variant, reps, weight }) => [variant, `${reps} × ${roundValue(weight)} kg`].filter(Boolean).join(' · ');
 
 export function formatWhen(date) {
   const year = date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric';

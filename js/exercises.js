@@ -1,21 +1,28 @@
-import { getEntries, getExerciseList, saveExerciseList } from './store.js';
+import { visibleNames, withName, withoutName } from './name-list.js';
+import { getEntries, getExerciseList, getVariantList, saveExerciseList, saveVariantList } from './store.js';
 
-export function allExercises() {
-  const { added, removed } = getExerciseList();
-  const logged = getEntries().map((entry) => entry.exercise);
-  return [...new Set([...added, ...logged])].filter((name) => !removed.includes(name));
-}
+const loggedExercises = () => getEntries().map((entry) => entry.exercise);
+
+const loggedVariants = (exercise) => getEntries()
+  .filter((entry) => entry.exercise === exercise && entry.variant)
+  .map((entry) => entry.variant);
+
+export const allExercises = () => visibleNames(getExerciseList(), loggedExercises());
+
+export const allVariants = (exercise) => visibleNames(getVariantList(exercise), loggedVariants(exercise));
 
 export function addExercise(name) {
-  const { added, removed } = getExerciseList();
-  const known = [...allExercises(), ...removed].find((existing) => existing.toLowerCase() === name.toLowerCase()) ?? name;
-  if (!allExercises().includes(known)) {
-    saveExerciseList({ added: [...added, known], removed: removed.filter((existing) => existing !== known) });
-  }
+  const { name: known, list } = withName(getExerciseList(), loggedExercises(), name);
+  if (list !== getExerciseList()) saveExerciseList(list);
   return known;
 }
 
-export function removeExercise(name) {
-  const { added, removed } = getExerciseList();
-  saveExerciseList({ added: added.filter((existing) => existing !== name), removed: [...removed, name] });
+export const removeExercise = (name) => saveExerciseList(withoutName(getExerciseList(), name));
+
+export function addVariant(exercise, name) {
+  const { name: known, list } = withName(getVariantList(exercise), loggedVariants(exercise), name);
+  if (list !== getVariantList(exercise)) saveVariantList(exercise, list);
+  return known;
 }
+
+export const removeVariant = (exercise, name) => saveVariantList(exercise, withoutName(getVariantList(exercise), name));

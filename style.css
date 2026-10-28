@@ -163,6 +163,29 @@ ul { padding: 0; list-style: none; }
 .add-form .btn { padding: 0 18px; font-size: 16px; }
 .add-form .btn-text { height: 56px; padding: 0 8px; font-size: 16px; }
 
+.label-row { display: flex; align-items: center; justify-content: space-between; height: 18px; }
+.label-row .btn-text { margin-right: -12px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  max-width: 100%;
+  height: 44px;
+  padding: 0 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--bg);
+  font-size: 16px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chip[aria-pressed="true"] { border-color: var(--text); background: var(--text); color: var(--bg); }
+.chip-new { width: 44px; padding: 0; font-size: 22px; font-weight: 400; line-height: 1; }
+
+.variant-new { align-self: flex-start; margin: -6px 0 -6px -12px; }
+
 .log-controls { display: flex; flex-direction: column; gap: 12px; }
 .log-controls > .btn, .edit-actions { margin-top: 4px; }
 

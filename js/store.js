@@ -1,15 +1,16 @@
 import { parseCsv, toCsv } from './csv.js';
 import { notifyChange } from './events.js';
 
-export const ENTRY_COLUMNS = ['timestamp', 'exercise', 'reps', 'weight'];
+export const ENTRY_COLUMNS = ['timestamp', 'exercise', 'variant', 'reps', 'weight'];
 export const ENTRY_NUMBERS = ['reps', 'weight'];
 
-const KEYS = { entries: 'logger.v2.entries.csv', exercises: 'logger.v2.exercise-list', sync: 'logger.v2.sync' };
+const KEYS = { entries: 'logger.v2.entries.csv', exercises: 'logger.v2.exercise-list', variants: 'logger.v2.variant-lists', sync: 'logger.v2.sync' };
 const EMPTY_SYNC = { lastSyncAt: null, deletedIds: [], editedIds: [] };
-const NO_EXERCISES = { added: [], removed: [] };
+const EMPTY_LIST = { added: [], removed: [] };
 
 let entries = parseCsv(localStorage.getItem(KEYS.entries) ?? '', ENTRY_NUMBERS);
-let exerciseList = JSON.parse(localStorage.getItem(KEYS.exercises) ?? 'null') ?? NO_EXERCISES;
+let exerciseList = JSON.parse(localStorage.getItem(KEYS.exercises) ?? 'null') ?? EMPTY_LIST;
+let variantLists = JSON.parse(localStorage.getItem(KEYS.variants) ?? '{}');
 let syncMeta = { ...EMPTY_SYNC, ...JSON.parse(localStorage.getItem(KEYS.sync) ?? '{}') };
 
 export const getEntries = () => entries;
@@ -17,6 +18,8 @@ export const getEntries = () => entries;
 export const entryDate = (entry) => new Date(entry.timestamp);
 
 export const getExerciseList = () => exerciseList;
+
+export const getVariantList = (exercise) => variantLists[exercise] ?? EMPTY_LIST;
 
 export const getSyncMeta = () => syncMeta;
 
@@ -44,6 +47,11 @@ export function saveExerciseList(list) {
   save();
 }
 
+export function saveVariantList(exercise, list) {
+  variantLists = { ...variantLists, [exercise]: list };
+  save();
+}
+
 export function applySync({ entries: synced, at }) {
   const syncedIds = new Set(synced.map((entry) => entry.timestamp));
   const loggedMeanwhile = entries.filter((entry) => entry.timestamp > at && !syncedIds.has(entry.timestamp));
@@ -67,6 +75,7 @@ function nextUniqueTimestamp() {
 function save() {
   localStorage.setItem(KEYS.entries, toCsv(entries, ENTRY_COLUMNS));
   localStorage.setItem(KEYS.exercises, JSON.stringify(exerciseList));
+  localStorage.setItem(KEYS.variants, JSON.stringify(variantLists));
   localStorage.setItem(KEYS.sync, JSON.stringify(syncMeta));
   notifyChange();
 }

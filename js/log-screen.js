@@ -1,5 +1,6 @@
-import { allExercises } from './exercises.js';
+import { allExercises, allVariants } from './exercises.js';
 import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
+import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
 import { describeSet, escapeHtml, formatWhen, roundValue } from './format.js';
 import { addEntry, deleteEntry, entryDate, getEntries, updateEntry } from './store.js';
 
@@ -9,6 +10,8 @@ const FIELDS = {
 };
 const EMPTY_SET = { reps: 0, weight: 0 };
 
+const variantOf = (entry) => entry?.variant ?? '';
+
 const controls = document.getElementById('log-controls');
 const inputs = { reps: document.getElementById('reps'), weight: document.getElementById('weight') };
 const logButton = document.getElementById('log-button');
@@ -17,6 +20,7 @@ const editActions = document.getElementById('edit-actions');
 const historyEl = document.getElementById('history-list');
 
 let selected = getEntries().at(-1)?.exercise;
+let selectedVariant = variantOf(getEntries().at(-1));
 let editingId = null;
 let confirmingId = null;
 
@@ -25,20 +29,22 @@ const actions = {
   log: () => {
     const set = readSet();
     confirmingId = null;
-    if (set) addEntry({ exercise: currentExercise(), ...set });
+    if (set) addEntry({ exercise: currentExercise(), variant: currentVariant(), ...set });
   },
   save: () => {
     const set = readSet();
     if (!set) return;
     const id = editingId;
     editingId = null;
-    updateEntry(id, set);
+    updateEntry(id, { variant: selectedVariant, ...set });
   },
   'cancel-edit': () => { editingId = null; renderLog(); },
   edit: ({ id }) => {
+    const entry = getEntries().find((e) => e.timestamp === id);
     editingId = id;
     confirmingId = null;
-    fillForm(getEntries().find((entry) => entry.timestamp === id));
+    selectedVariant = variantOf(entry);
+    fillForm(entry);
     renderLog();
   },
   delete: ({ id }) => { confirmingId = id; renderLog(); },
@@ -48,6 +54,7 @@ const actions = {
 
 export function initLog() {
   initExercisePicker(selectExercise);
+  initVariantPicker(selectVariant);
   fillForm(lastSetOf(currentExercise()) ?? EMPTY_SET);
   [controls, historyEl].forEach((container) => container.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
@@ -66,6 +73,7 @@ export function renderLog() {
   const exercise = currentExercise();
   const sets = getEntries().filter((entry) => entry.exercise === exercise).toReversed();
   renderExercisePicker(exercise);
+  renderVariantPicker(exercise, currentVariant());
   logButton.hidden = editingId !== null;
   editActions.hidden = editingId === null;
   updateSaveButtons();
@@ -78,16 +86,32 @@ function currentExercise() {
   return allExercises().includes(selected) ? selected : allExercises()[0];
 }
 
+function currentVariant() {
+  return allVariants(currentExercise()).includes(selectedVariant) ? selectedVariant : '';
+}
+
 function selectExercise(exercise) {
   selected = exercise;
+  selectedVariant = variantOf(lastSetOf(exercise));
   editingId = null;
   confirmingId = null;
   fillForm(lastSetOf(exercise) ?? EMPTY_SET);
   renderLog();
 }
 
+function selectVariant(variant) {
+  const last = lastSetOfVariant(currentExercise(), variant);
+  selectedVariant = variant;
+  if (last && editingId === null) fillForm(last);
+  renderLog();
+}
+
 function lastSetOf(exercise) {
   return getEntries().findLast((entry) => entry.exercise === exercise);
+}
+
+function lastSetOfVariant(exercise, variant) {
+  return getEntries().findLast((entry) => entry.exercise === exercise && variantOf(entry) === variant);
 }
 
 function fillForm({ reps, weight }) {
@@ -115,7 +139,7 @@ function stepField(key, direction) {
 }
 
 function setHtml(entry) {
-  const text = describeSet(entry);
+  const text = escapeHtml(describeSet(entry));
   const when = formatWhen(entryDate(entry));
   return `
     <li class="set">
