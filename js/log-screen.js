@@ -158,7 +158,7 @@ function setHtml(entry) {
   const unsynced = isUnsynced(entry) ? '<span class="set-unsynced">Not synced</span>' : '';
   return `
     <li class="set">
-      <span class="set-info"><span class="set-text">${text}</span><span class="set-when">${time}${unsynced}</span></span>
+      <span class="set-info"><span class="set-text">${text}</span>${unsynced}</span>
       <span class="set-actions">${setActionsHtml(entry.timestamp, `${text}, ${formatDay(date)} ${time}`)}</span>
     </li>`;
 }

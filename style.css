@@ -103,13 +103,13 @@ ul { padding: 0; list-style: none; }
 
 .picker-button {
   width: 100%;
-  height: 56px;
+  height: 48px;
   padding: 0 16px;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--bg);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   text-align: left;
   text-overflow: ellipsis;
@@ -159,9 +159,9 @@ ul { padding: 0; list-style: none; }
 }
 
 .add-form { display: flex; gap: 8px; }
-.add-form .input { flex: 1; height: 56px; font-size: 18px; }
-.add-form .btn { padding: 0 18px; font-size: 16px; }
-.add-form .btn-text { height: 56px; padding: 0 8px; font-size: 16px; }
+.add-form .input { flex: 1; height: 48px; font-size: 17px; }
+.add-form .btn { height: 48px; padding: 0 18px; font-size: 16px; }
+.add-form .btn-text { height: 48px; padding: 0 8px; font-size: 16px; }
 
 .label-row { display: flex; align-items: center; justify-content: space-between; height: 18px; }
 .label-row .btn-text { margin-right: -12px; }
@@ -187,22 +187,23 @@ ul { padding: 0; list-style: none; }
 .variant-new { align-self: flex-start; margin: -6px 0 -6px -12px; }
 
 .log-controls { display: flex; flex-direction: column; gap: 12px; }
+.log-controls .btn { height: 48px; font-size: 16px; }
 .log-controls > .btn, .edit-actions { margin-top: 4px; }
 
 .stepper { display: flex; gap: 8px; }
 
 .step-btn {
   flex: none;
-  width: 64px;
-  height: 64px;
+  width: 52px;
+  height: 52px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--bg);
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
 }
 
-.step-value { flex: 1; height: 64px; padding: 0 12px; font-size: 28px; font-weight: 600; text-align: center; }
+.step-value { flex: 1; height: 52px; padding: 0 12px; font-size: 24px; font-weight: 600; text-align: center; }
 
 .edit-actions { display: flex; gap: 12px; }
 .edit-actions .btn-secondary { flex: 1; }
@@ -237,6 +238,7 @@ ul { padding: 0; list-style: none; }
   background: var(--bg);
   font-size: 13px;
   font-weight: 600;
+  text-align: center;
 }
 
 .set {
@@ -244,22 +246,20 @@ ul { padding: 0; list-style: none; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 0;
   border-bottom: 1px solid var(--row-divider);
 }
 .set:last-child { border-bottom: none; }
 
 .day + .day { border-top: 1px solid var(--border); }
 
-.set-info { display: flex; flex-direction: column; min-width: 0; }
-.set-text { font-size: 16px; line-height: 20px; font-weight: 600; }
-.set-when { display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 16px; color: var(--muted); }
+.set-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.set-text { overflow: hidden; font-size: 16px; line-height: 20px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 
-.set-unsynced { display: flex; align-items: center; gap: 5px; }
+.set-unsynced { flex: none; display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
 .set-unsynced::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--text); }
 
 .set-actions { flex: none; display: flex; align-items: center; }
-.set-actions .btn-text { height: 36px; padding: 0 10px; font-size: 14px; }
+.set-actions .btn-text { height: 32px; padding: 0 10px; font-size: 14px; }
 .set-actions .btn-text:last-child { padding-right: 0; }
 .set-editing { font-size: 14px; color: var(--muted); }
 
