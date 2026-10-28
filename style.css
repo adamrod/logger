@@ -225,6 +225,7 @@ ul { padding: 0; list-style: none; }
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  isolation: isolate;
 }
 .history-list::-webkit-scrollbar { display: none; }
 
