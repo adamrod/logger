@@ -23,6 +23,8 @@ export const getVariantList = (exercise) => variantLists[exercise] ?? EMPTY_LIST
 
 export const getSyncMeta = () => syncMeta;
 
+export const isUnsynced = (entry) => isPending(entry) || syncMeta.editedIds.includes(entry.timestamp);
+
 export function addEntry(entry) {
   entries = [...entries, { timestamp: nextUniqueTimestamp(), ...entry }];
   save();

@@ -1,8 +1,8 @@
 import { allExercises, allVariants } from './exercises.js';
 import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
 import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
-import { describeSet, escapeHtml, formatWhen, roundValue } from './format.js';
-import { addEntry, deleteEntry, entryDate, getEntries, updateEntry } from './store.js';
+import { dayKey, describeSet, escapeHtml, formatDay, formatTime, roundValue } from './format.js';
+import { addEntry, deleteEntry, entryDate, getEntries, isUnsynced, updateEntry } from './store.js';
 
 const FIELDS = {
   reps: { step: 1, min: 0, invalidChars: /[^0-9]/g, parse: (text) => parseInt(text, 10) },
@@ -78,7 +78,7 @@ export function renderLog() {
   editActions.hidden = editingId === null;
   updateSaveButtons();
   historyEl.innerHTML = sets.length
-    ? `<ul>${sets.map(setHtml).join('')}</ul>`
+    ? groupByDay(sets).map(dayHtml).join('')
     : '<p class="empty">No sets logged yet.</p>';
 }
 
@@ -138,13 +138,28 @@ function stepField(key, direction) {
   updateSaveButtons();
 }
 
+function groupByDay(sets) {
+  return [...Map.groupBy(sets, (entry) => dayKey(entryDate(entry))).values()];
+}
+
+function dayHtml(sets) {
+  const day = formatDay(entryDate(sets[0]));
+  return `
+    <section class="day" aria-label="${day}">
+      <h3 class="day-label">${day}</h3>
+      <ul>${sets.map(setHtml).join('')}</ul>
+    </section>`;
+}
+
 function setHtml(entry) {
   const text = escapeHtml(describeSet(entry));
-  const when = formatWhen(entryDate(entry));
+  const date = entryDate(entry);
+  const time = formatTime(date);
+  const unsynced = isUnsynced(entry) ? '<span class="set-unsynced">Not synced</span>' : '';
   return `
     <li class="set">
-      <span class="set-info"><span class="set-text">${text}</span><span class="set-when">${when}</span></span>
-      <span class="set-actions">${setActionsHtml(entry.timestamp, `${text}, ${when}`)}</span>
+      <span class="set-info"><span class="set-text">${text}</span><span class="set-when">${time}${unsynced}</span></span>
+      <span class="set-actions">${setActionsHtml(entry.timestamp, `${text}, ${formatDay(date)} ${time}`)}</span>
     </li>`;
 }
 
