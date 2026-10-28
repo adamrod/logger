@@ -1,5 +1,7 @@
 export function visibleNames({ added, removed }, logged) {
-  return [...new Set([...added, ...logged])].filter((name) => !removed.includes(name));
+  return [...new Set([...added, ...logged])]
+    .filter((name) => !removed.includes(name))
+    .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 }
 
 export function withName(list, logged, name) {
