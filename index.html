@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Logger</title>
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Logger">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <section class="screen" id="screen-log" hidden>
+    <header class="topbar">
+      <a class="link" href="#settings">Settings</a>
+    </header>
+
+    <div class="log-form">
+      <div class="field" id="exercise-picker">
+        <span class="label" id="exercise-label">Exercise</span>
+        <div class="picker" id="exercise-select">
+          <button type="button" class="picker-button" id="exercise-button" data-action="toggle"
+            aria-labelledby="exercise-label exercise-button" aria-controls="exercise-menu" aria-expanded="false"></button>
+          <div class="picker-menu" id="exercise-menu" hidden>
+            <ul id="exercise-options"></ul>
+            <button type="button" class="option-new" data-action="start-add">+ New exercise</button>
+          </div>
+        </div>
+        <form class="add-form" id="exercise-add" hidden>
+          <input class="input" id="exercise-name" aria-labelledby="exercise-label" placeholder="Exercise name"
+            autocomplete="off" enterkeyhint="done">
+          <button class="btn btn-primary">Add</button>
+          <button type="button" class="btn-text" id="exercise-cancel" data-action="cancel-add">Cancel</button>
+        </form>
+      </div>
+
+      <div class="log-controls" id="log-controls">
+        <div class="field">
+          <label class="label" for="reps">Reps</label>
+          <div class="stepper">
+            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="-1" aria-label="Decrease reps">−</button>
+            <input class="input step-value" id="reps" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="1" aria-label="Increase reps">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="weight">Weight</label>
+          <div class="stepper">
+            <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="-1" aria-label="Decrease weight">−</button>
+            <input class="input step-value" id="weight" inputmode="decimal" enterkeyhint="done" autocomplete="off">
+            <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="1" aria-label="Increase weight">+</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="log-button" data-action="log">Log set</button>
+        <div class="edit-actions" id="edit-actions" hidden>
+          <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>
+          <button type="button" class="btn btn-primary" id="save-button" data-action="save">Save changes</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="history" aria-labelledby="history-heading">
+      <h2 class="label" id="history-heading">History</h2>
+      <div class="history-list" id="history-list"></div>
+    </section>
+  </section>
+
+  <section class="screen" id="screen-settings" hidden>
+    <header class="topbar is-back">
+      <a class="link" href="#log">Back</a>
+    </header>
+    <main class="settings">
+      <h1 class="title">Settings</h1>
+
+      <section class="settings-section" aria-labelledby="sync-heading">
+        <h2 class="label" id="sync-heading">Sync with GitHub</h2>
+        <div class="field">
+          <label class="field-name" for="setting-owner">Owner</label>
+          <input class="input" id="setting-owner" data-setting="owner" placeholder="your-username"
+            autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label class="field-name" for="setting-repo">Repository</label>
+          <input class="input" id="setting-repo" data-setting="repo" placeholder="logger-data"
+            autocomplete="off" autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label class="field-name" for="setting-token">Access token</label>
+          <input class="input" id="setting-token" data-setting="token" type="password" placeholder="github_pat_…"
+            autocomplete="off" spellcheck="false">
+        </div>
+        <div class="sync-row">
+          <span class="sync-status" id="sync-status"></span>
+          <button type="button" class="btn btn-primary" id="sync-now">Sync now</button>
+        </div>
+      </section>
+
+      <section class="settings-section" aria-labelledby="data-heading">
+        <h2 class="label" id="data-heading">Data</h2>
+        <button type="button" class="btn btn-secondary" id="export-csv">Export CSV</button>
+      </section>
+
+      <p class="version" id="app-version"></p>
+    </main>
+  </section>
+
+</div>
+</body>
+</html>
