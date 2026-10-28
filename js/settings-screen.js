@@ -1,20 +1,21 @@
-import { toCsv } from './csv.js';
 import { formatWhen } from './format.js';
 import { getSettings, isSyncConfigured, updateSettings } from './settings.js';
-import { ENTRY_COLUMNS, getEntries, getSyncMeta } from './store.js';
+import { bodyWeights, sets } from './store.js';
 import { sync, syncState } from './sync.js';
 
 const settingInputs = document.querySelectorAll('[data-setting]');
 const statusEl = document.getElementById('sync-status');
 const syncButton = document.getElementById('sync-now');
-const exportButton = document.getElementById('export-csv');
+const exportSetsButton = document.getElementById('export-sets');
+const exportBodyWeightButton = document.getElementById('export-body-weight');
 
 export function initSettings() {
   settingInputs.forEach((input) => input.addEventListener('change', () => {
     updateSettings({ [input.dataset.setting]: input.value.trim() });
   }));
   syncButton.addEventListener('click', sync);
-  exportButton.addEventListener('click', exportCsv);
+  exportSetsButton.addEventListener('click', () => exportCsv(sets));
+  exportBodyWeightButton.addEventListener('click', () => exportCsv(bodyWeights));
 }
 
 export function renderSettings() {
@@ -27,17 +28,17 @@ export function renderSettings() {
 }
 
 function syncStatusText() {
-  const { lastSyncAt } = getSyncMeta();
+  const { lastSyncAt } = sets.getSyncMeta();
   if (syncState.running) return 'Syncing…';
   if (syncState.error) return syncState.error;
   if (!isSyncConfigured()) return 'Add a token to sync';
   return lastSyncAt ? `Last synced ${formatWhen(new Date(lastSyncAt))}` : 'Not synced yet';
 }
 
-function exportCsv() {
-  const blob = new Blob([toCsv(getEntries(), ENTRY_COLUMNS)], { type: 'text/csv' });
+function exportCsv(log) {
+  const blob = new Blob([log.asCsv()], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
-  const link = Object.assign(document.createElement('a'), { href: url, download: 'data.csv' });
+  const link = Object.assign(document.createElement('a'), { href: url, download: log.file });
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

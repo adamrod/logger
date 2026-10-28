@@ -17,12 +17,13 @@
 </head>
 <body>
 <div class="app">
+  <nav class="tabs" aria-label="Sections">
+    <a class="tab" href="#log">Exercises</a>
+    <a class="tab" href="#body-weight">Body weight</a>
+    <a class="tab" href="#settings">Settings</a>
+  </nav>
 
   <section class="screen" id="screen-log" hidden>
-    <header class="topbar">
-      <a class="link" href="#settings">Settings</a>
-    </header>
-
     <div class="log-form">
       <div class="field" id="exercise-picker">
         <span class="label" id="exercise-label">Exercise</span>
@@ -83,18 +84,44 @@
     </div>
 
     <section class="history" aria-labelledby="history-heading">
-      <h2 class="label" id="history-heading">History</h2>
+      <div class="history-head">
+        <h2 class="label" id="history-heading">History</h2>
+        <button type="button" class="btn-text sync-button">Sync</button>
+      </div>
       <div class="history-list" id="history-list"></div>
     </section>
   </section>
 
-  <section class="screen" id="screen-settings" hidden>
-    <header class="topbar is-back">
-      <a class="link" href="#log">Back</a>
-    </header>
-    <main class="settings">
-      <h1 class="title">Settings</h1>
+  <section class="screen" id="screen-body-weight" hidden>
+    <div class="log-form">
+      <div class="log-controls" id="body-weight-controls">
+        <div class="field">
+          <label class="label" for="body-weight">Weight</label>
+          <div class="stepper">
+            <button type="button" class="step-btn" data-action="step" data-dir="-1" aria-label="Decrease body weight">−</button>
+            <input class="input step-value" id="body-weight" inputmode="decimal" enterkeyhint="done" autocomplete="off">
+            <button type="button" class="step-btn" data-action="step" data-dir="1" aria-label="Increase body weight">+</button>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="body-weight-log" data-action="log">Log weight</button>
+        <div class="edit-actions" id="body-weight-edit-actions" hidden>
+          <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>
+          <button type="button" class="btn btn-primary" id="body-weight-save" data-action="save">Save changes</button>
+        </div>
+      </div>
+    </div>
 
+    <section class="history" aria-labelledby="body-weight-history-heading">
+      <div class="history-head">
+        <h2 class="label" id="body-weight-history-heading">History</h2>
+        <button type="button" class="btn-text sync-button">Sync</button>
+      </div>
+      <div class="history-list" id="body-weight-history"></div>
+    </section>
+  </section>
+
+  <section class="screen" id="screen-settings" hidden>
+    <main class="settings">
       <section class="settings-section" aria-labelledby="sync-heading">
         <h2 class="label" id="sync-heading">Sync with GitHub</h2>
         <div class="field">
@@ -114,13 +141,14 @@
         </div>
         <div class="sync-row">
           <span class="sync-status" id="sync-status"></span>
-          <button type="button" class="btn btn-primary" id="sync-now">Sync now</button>
+          <button type="button" class="btn btn-primary" id="sync-now">Sync</button>
         </div>
       </section>
 
       <section class="settings-section" aria-labelledby="data-heading">
         <h2 class="label" id="data-heading">Data</h2>
-        <button type="button" class="btn btn-secondary" id="export-csv">Export CSV</button>
+        <button type="button" class="btn btn-secondary" id="export-sets">Export sets CSV</button>
+        <button type="button" class="btn btn-secondary" id="export-body-weight">Export body weight CSV</button>
       </section>
 
       <p class="version" id="app-version"></p>

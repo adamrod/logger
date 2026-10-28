@@ -2,9 +2,7 @@ import { parseCsv, toCsv } from './csv.js';
 import { notifyChange } from './events.js';
 import { readFile, writeFile } from './github.js';
 import { getSettings, isSyncConfigured } from './settings.js';
-import { ENTRY_COLUMNS, ENTRY_NUMBERS, applySync, getEntries, getSyncMeta } from './store.js';
-
-const DATA_PATH = 'data.csv';
+import { entryLogs } from './store.js';
 
 export const syncState = { running: false, error: null };
 
@@ -31,14 +29,18 @@ export function mergeEntries(local, remote, { lastSyncAt, deletedIds, editedIds 
 }
 
 async function syncWithRepo() {
-  const at = new Date().toISOString();
   const repo = getSettings();
-  const remote = await readFile(repo, DATA_PATH);
-  const remoteEntries = parseCsv(remote?.text ?? '', ENTRY_NUMBERS).filter((entry) => entry.timestamp);
-  const entries = mergeEntries(getEntries(), remoteEntries, getSyncMeta());
-  const text = toCsv(entries, ENTRY_COLUMNS);
-  if (text !== remote?.text) await writeFile(repo, DATA_PATH, text, remote?.sha);
-  applySync({ entries, at });
+  for (const log of entryLogs) await syncLog(repo, log);
+}
+
+async function syncLog(repo, log) {
+  const at = new Date().toISOString();
+  const remote = await readFile(repo, log.file);
+  const remoteEntries = parseCsv(remote?.text ?? '', log.numbers).filter((entry) => entry.timestamp);
+  const entries = mergeEntries(log.getEntries(), remoteEntries, log.getSyncMeta());
+  const text = toCsv(entries, log.columns);
+  if (text !== remote?.text) await writeFile(repo, log.file, text, remote?.sha);
+  log.applySync({ entries, at });
 }
 
 function setSyncState(changes) {

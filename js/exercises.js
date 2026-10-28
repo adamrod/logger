@@ -1,9 +1,9 @@
 import { visibleNames, withName, withoutName } from './name-list.js';
-import { getEntries, getExerciseList, getVariantList, saveExerciseList, saveVariantList } from './store.js';
+import { getExerciseList, getVariantList, saveExerciseList, saveVariantList, sets } from './store.js';
 
-const loggedExercises = () => getEntries().map((entry) => entry.exercise);
+const loggedExercises = () => sets.getEntries().map((entry) => entry.exercise);
 
-const loggedVariants = (exercise) => getEntries()
+const loggedVariants = (exercise) => sets.getEntries()
   .filter((entry) => entry.exercise === exercise && entry.variant)
   .map((entry) => entry.variant);
 
