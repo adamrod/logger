@@ -1,4 +1,4 @@
-const VERSION = 12;
+const VERSION = 13;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -7,6 +7,7 @@ const APP_SHELL = [
   'manifest.webmanifest',
   'js/app-version.js',
   'js/app.js',
+  'js/body-weight-chart.js',
   'js/body-weight-screen.js',
   'js/csv.js',
   'js/entry-log.js',

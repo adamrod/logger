@@ -2,9 +2,11 @@ import { entryDate } from './entry-log.js';
 import { dayKey, escapeHtml, formatDay, formatTime } from './format.js';
 
 export function historyHtml(entries, view) {
-  return entries.length
-    ? groupByDay(entries.toReversed()).map((day) => dayHtml(day, view)).join('')
-    : `<p class="empty">${view.empty}</p>`;
+  if (!entries.length) return `<p class="empty">${view.empty}</p>`;
+  const newestFirst = entries.toReversed();
+  return view.flat
+    ? `<ul class="entries">${entriesHtml(newestFirst, view)}</ul>`
+    : groupByDay(newestFirst).map((day) => dayHtml(day, view)).join('');
 }
 
 function groupByDay(entries) {
@@ -16,21 +18,30 @@ function dayHtml(entries, view) {
   return `
     <section class="day" aria-label="${day}">
       <h3 class="day-label">${day}</h3>
-      <ul>${entries.map((entry) => entryHtml(entry, view)).join('')}</ul>
+      <ul>${entriesHtml(entries, view)}</ul>
     </section>`;
 }
+
+const entriesHtml = (entries, view) => entries.map((entry) => entryHtml(entry, view)).join('');
 
 function entryHtml(entry, view) {
   const text = escapeHtml(view.describe(entry));
   const date = entryDate(entry);
+  const day = formatDay(date);
   const time = formatTime(date);
-  const timeHtml = view.showTime ? `<span class="set-time">${time}</span>` : '';
-  const unsynced = view.isUnsynced(entry) ? '<span class="set-unsynced">Not synced</span>' : '';
+  const whenHtml = view.flat ? `<span class="set-time">${day}</span><span class="set-time">${time}</span>` : '';
   return `
     <li class="set">
-      <span class="set-info"><span class="set-text">${text}</span>${timeHtml}${unsynced}</span>
-      <span class="set-actions">${actionsHtml(entry.timestamp, `${text}, ${formatDay(date)} ${time}`, view)}</span>
+      ${whenHtml}<span class="set-info"><span class="set-text">${text}</span>${unsyncedHtml(entry, view)}</span>
+      <span class="set-actions">${actionsHtml(entry.timestamp, `${text}, ${day} ${time}`, view)}</span>
     </li>`;
+}
+
+function unsyncedHtml(entry, { isUnsynced, flat }) {
+  if (!isUnsynced(entry)) return '';
+  return flat
+    ? '<span class="set-unsynced" role="img" aria-label="Not synced"></span>'
+    : '<span class="set-unsynced">Not synced</span>';
 }
 
 function actionsHtml(id, label, { editingId, confirmingId }) {

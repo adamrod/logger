@@ -1,3 +1,4 @@
+import { initChart, renderChart } from './body-weight-chart.js';
 import { onAction } from './events.js';
 import { roundValue } from './format.js';
 import { historyHtml } from './history.js';
@@ -49,16 +50,18 @@ export function initBodyWeight() {
   fillForm(bodyWeights.getEntries().at(-1));
   onAction([controls, historyEl], actions);
   bindNumberInput(input, FIELD, updateSaveButtons);
+  initChart();
 }
 
 export function renderBodyWeight() {
   logButton.hidden = editingId !== null;
   editActions.hidden = editingId === null;
   updateSaveButtons();
+  renderChart();
   historyEl.innerHTML = historyHtml(bodyWeights.getEntries(), {
     describe: ({ weight }) => String(roundValue(weight)),
     isUnsynced: bodyWeights.isUnsynced,
-    showTime: true,
+    flat: true,
     editingId,
     confirmingId,
     empty: 'No weights logged yet.',

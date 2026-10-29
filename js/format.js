@@ -15,6 +15,8 @@ export function formatWhen(date) {
   return `${day} · ${formatTime(date)}`;
 }
 
+export const formatShortDay = (date) => date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
+
 export function formatDay(date) {
   const pad = (number) => String(number).padStart(2, '0');
   const isoDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
