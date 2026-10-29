@@ -19,7 +19,7 @@ const changeEl = document.getElementById('chart-change');
 const extremesEl = document.getElementById('chart-extremes');
 const plot = document.getElementById('chart-plot');
 
-let range = '3M';
+let range = 'All';
 let points = [];
 let selectedId = null;
 
