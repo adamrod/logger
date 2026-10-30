@@ -1,7 +1,7 @@
 import { initChart, renderChart } from './body-weight-chart.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
-import { formatDay, formatTime, roundValue } from './format.js';
+import { formatDay, formatDelta, formatTime, roundValue } from './format.js';
 import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
@@ -63,9 +63,11 @@ export function renderBodyWeight() {
   editActions.hidden = editingId === null;
   updateSaveButtons();
   renderChart();
-  historyEl.innerHTML = historyHtml(bodyWeights.getEntries(), {
+  const entries = bodyWeights.getEntries();
+  const changes = changesByTimestamp(entries);
+  historyEl.innerHTML = historyHtml(entries, {
     lead: [(entry) => formatDay(entryDate(entry)), (entry) => formatTime(entryDate(entry))],
-    valueHtml: describeWeight,
+    valueHtml: (entry) => weightHtml(entry, changes.get(entry.timestamp)),
     describe: describeWeight,
     isUnsynced: bodyWeights.isUnsynced,
     flat: true,
@@ -73,6 +75,15 @@ export function renderBodyWeight() {
     confirmingId,
     empty: 'No weights logged yet.',
   });
+}
+
+function changesByTimestamp(entries) {
+  return new Map(entries.slice(1).map((entry, i) => [entry.timestamp, entry.weight - entries[i].weight]));
+}
+
+function weightHtml(entry, change) {
+  const weight = `<span class="set-weight">${describeWeight(entry)}</span>`;
+  return change === undefined ? weight : `${weight}<span class="set-change">${formatDelta(change)}</span>`;
 }
 
 function fillForm(entry) {
