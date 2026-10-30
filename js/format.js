@@ -1,5 +1,6 @@
 const LOCALE = 'en-GB';
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const DAY_MS = 86400000;
 const SIGNS = { '-1': '−', 0: '±', 1: '+' };
 
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
@@ -42,6 +43,8 @@ export function formatShortWhen(date) {
 }
 
 export const dayKey = (date) => startOfDay(date).getTime();
+
+export const daysBetween = (from, to) => Math.round((dayKey(to) - dayKey(from)) / DAY_MS);
 
 const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 

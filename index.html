@@ -81,7 +81,12 @@
         <button type="button" class="btn btn-primary" id="log-button" data-action="log">Log set</button>
         <div class="edit-actions" id="edit-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>
-          <button type="button" class="btn btn-primary" id="save-button" data-action="save">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-action="delete">Delete</button>
+          <button type="button" class="btn btn-primary" id="save-button" data-action="save">Save</button>
+        </div>
+        <div class="edit-actions" id="delete-actions" hidden>
+          <button type="button" class="btn btn-secondary" data-action="cancel-delete">Keep</button>
+          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete set</button>
         </div>
       </div>
     </div>
@@ -163,7 +168,12 @@
         <button type="button" class="btn btn-primary" id="body-weight-log" data-action="log">Log weight</button>
         <div class="edit-actions" id="body-weight-edit-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>
-          <button type="button" class="btn btn-primary" id="body-weight-save" data-action="save">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-action="delete">Delete</button>
+          <button type="button" class="btn btn-primary" id="body-weight-save" data-action="save">Save</button>
+        </div>
+        <div class="edit-actions" id="body-weight-delete-actions" hidden>
+          <button type="button" class="btn btn-secondary" data-action="cancel-delete">Keep</button>
+          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete weight</button>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { initChart, renderChart } from './body-weight-chart.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
-import { formatDay, formatDelta, formatTime, roundValue } from './format.js';
+import { daysBetween, formatDay, formatDelta, formatTime, roundValue } from './format.js';
 import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
@@ -15,10 +15,11 @@ const input = document.getElementById('body-weight');
 const logButton = document.getElementById('body-weight-log');
 const saveButton = document.getElementById('body-weight-save');
 const editActions = document.getElementById('body-weight-edit-actions');
+const deleteActions = document.getElementById('body-weight-delete-actions');
 const historyEl = document.getElementById('body-weight-history');
 
 let editingId = null;
-let confirmingId = null;
+let confirmingDelete = false;
 
 const actions = {
   step: ({ dir }) => {
@@ -27,7 +28,6 @@ const actions = {
   },
   log: () => {
     const weight = readWeight();
-    confirmingId = null;
     if (!weight) return;
     bodyWeights.add({ weight });
     revealNewest(historyEl);
@@ -37,18 +37,24 @@ const actions = {
     if (!weight) return;
     const id = editingId;
     editingId = null;
+    confirmingDelete = false;
     bodyWeights.update(id, { weight });
   },
-  'cancel-edit': () => { editingId = null; renderBodyWeight(); },
+  'cancel-edit': () => { editingId = null; confirmingDelete = false; renderBodyWeight(); },
   edit: ({ id }) => {
     editingId = id;
-    confirmingId = null;
+    confirmingDelete = false;
     fillForm(bodyWeights.getEntries().find((e) => e.timestamp === id));
     renderBodyWeight();
   },
-  delete: ({ id }) => { confirmingId = id; renderBodyWeight(); },
-  'cancel-delete': () => { confirmingId = null; renderBodyWeight(); },
-  'confirm-delete': ({ id }) => { confirmingId = null; bodyWeights.remove(id); },
+  delete: () => { confirmingDelete = true; renderBodyWeight(); },
+  'cancel-delete': () => { confirmingDelete = false; renderBodyWeight(); },
+  'confirm-delete': () => {
+    const id = editingId;
+    editingId = null;
+    confirmingDelete = false;
+    bodyWeights.remove(id);
+  },
 };
 
 export function initBodyWeight() {
@@ -60,7 +66,8 @@ export function initBodyWeight() {
 
 export function renderBodyWeight() {
   logButton.hidden = editingId !== null;
-  editActions.hidden = editingId === null;
+  editActions.hidden = editingId === null || confirmingDelete;
+  deleteActions.hidden = !confirmingDelete;
   updateSaveButtons();
   renderChart();
   const entries = bodyWeights.getEntries();
@@ -72,18 +79,24 @@ export function renderBodyWeight() {
     isUnsynced: bodyWeights.isUnsynced,
     flat: true,
     editingId,
-    confirmingId,
     empty: 'No weights logged yet.',
   });
 }
 
 function changesByTimestamp(entries) {
-  return new Map(entries.slice(1).map((entry, i) => [entry.timestamp, entry.weight - entries[i].weight]));
+  return new Map(entries.slice(1).map((entry, i) => [entry.timestamp, changeFrom(entries[i], entry)]));
 }
+
+const changeFrom = (previous, entry) => ({
+  delta: entry.weight - previous.weight,
+  days: daysBetween(entryDate(previous), entryDate(entry)),
+});
 
 function weightHtml(entry, change) {
   const weight = `<span class="set-weight">${describeWeight(entry)}</span>`;
-  return change === undefined ? weight : `${weight}<span class="set-change">${formatDelta(change)}</span>`;
+  if (!change) return weight;
+  const gap = change.days > 1 ? ` · ${change.days}d` : '';
+  return `${weight}<span class="set-change">${formatDelta(change.delta)}${gap}</span>`;
 }
 
 function fillForm(entry) {

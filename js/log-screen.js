@@ -20,13 +20,14 @@ const inputs = { reps: document.getElementById('reps'), weight: document.getElem
 const logButton = document.getElementById('log-button');
 const saveButton = document.getElementById('save-button');
 const editActions = document.getElementById('edit-actions');
+const deleteActions = document.getElementById('delete-actions');
 const historyEl = document.getElementById('history-list');
 const analysisLink = document.getElementById('analysis-link');
 
 let selected = sets.getEntries().at(-1)?.exercise;
 let selectedVariant = variantOf(sets.getEntries().at(-1));
 let editingId = null;
-let confirmingId = null;
+let confirmingDelete = false;
 
 const actions = {
   step: ({ field, dir }) => {
@@ -35,7 +36,6 @@ const actions = {
   },
   log: () => {
     const set = readSet();
-    confirmingId = null;
     if (!set) return;
     sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
     revealNewest(historyEl);
@@ -45,20 +45,26 @@ const actions = {
     if (!set) return;
     const id = editingId;
     editingId = null;
+    confirmingDelete = false;
     sets.update(id, { variant: selectedVariant, ...set });
   },
-  'cancel-edit': () => { editingId = null; renderLog(); },
+  'cancel-edit': () => { editingId = null; confirmingDelete = false; renderLog(); },
   edit: ({ id }) => {
     const entry = sets.getEntries().find((e) => e.timestamp === id);
     editingId = id;
-    confirmingId = null;
+    confirmingDelete = false;
     selectedVariant = variantOf(entry);
     fillForm(entry);
     renderLog();
   },
-  delete: ({ id }) => { confirmingId = id; renderLog(); },
-  'cancel-delete': () => { confirmingId = null; renderLog(); },
-  'confirm-delete': ({ id }) => { confirmingId = null; sets.remove(id); },
+  delete: () => { confirmingDelete = true; renderLog(); },
+  'cancel-delete': () => { confirmingDelete = false; renderLog(); },
+  'confirm-delete': () => {
+    const id = editingId;
+    editingId = null;
+    confirmingDelete = false;
+    sets.remove(id);
+  },
 };
 
 export function initLog() {
@@ -74,7 +80,8 @@ export function renderLog() {
   renderExercisePicker(exercise);
   renderVariantPicker(exercise, currentVariant());
   logButton.hidden = editingId !== null;
-  editActions.hidden = editingId === null;
+  editActions.hidden = editingId === null || confirmingDelete;
+  deleteActions.hidden = !confirmingDelete;
   updateSaveButtons();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
   analysisLink.hidden = exerciseSets.length === 0;
@@ -84,7 +91,6 @@ export function renderLog() {
     describe: describeSet,
     isUnsynced: sets.isUnsynced,
     editingId,
-    confirmingId,
     empty: 'No sets logged yet.',
   });
 }
@@ -101,7 +107,7 @@ function selectExercise(exercise) {
   selected = exercise;
   selectedVariant = variantOf(lastSetOf(exercise));
   editingId = null;
-  confirmingId = null;
+  confirmingDelete = false;
   fillForm(lastSetOf(exercise) ?? EMPTY_SET);
   renderLog();
 }
