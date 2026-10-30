@@ -3,6 +3,8 @@ const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'
 const DAY_MS = 86400000;
 const SIGNS = { '-1': '−', 0: '±', 1: '+' };
 
+const pad = (number) => String(number).padStart(2, '0');
+
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 
 export const roundValue = (value) => Math.round(value * 100) / 100;
@@ -48,7 +50,18 @@ export const daysBetween = (from, to) => Math.round((dayKey(to) - dayKey(from)) 
 
 const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
+export function formatDuration(ms) {
+  const seconds = Math.floor(ms / 1000);
+  return `${Math.floor(seconds / 60)}:${pad(seconds % 60)}`;
+}
+
+export const formatDateTimeValue = (date) => `${formatIsoDate(date)}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+export function parseDateTimeValue(value) {
+  const [year, month, day, hours, minutes] = value.split(/\D/).map(Number);
+  return new Date(year, month - 1, day, hours, minutes);
+}
+
 function formatIsoDate(date) {
-  const pad = (number) => String(number).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }

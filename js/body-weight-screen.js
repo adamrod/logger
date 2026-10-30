@@ -5,6 +5,7 @@ import { daysBetween, formatDay, formatDelta, formatTime, roundValue } from './f
 import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
+import { readWhen, showWhen } from './when-field.js';
 
 const FIELD = { ...DECIMAL, step: 0.1, min: 0 };
 
@@ -16,6 +17,8 @@ const logButton = document.getElementById('body-weight-log');
 const saveButton = document.getElementById('body-weight-save');
 const editActions = document.getElementById('body-weight-edit-actions');
 const deleteActions = document.getElementById('body-weight-delete-actions');
+const whenField = document.getElementById('body-weight-when-field');
+const whenInput = document.getElementById('body-weight-when');
 const historyEl = document.getElementById('body-weight-history');
 
 let editingId = null;
@@ -38,13 +41,14 @@ const actions = {
     const id = editingId;
     editingId = null;
     confirmingDelete = false;
-    bodyWeights.update(id, { weight });
+    bodyWeights.update(id, { weight, timestamp: readWhen(whenInput, id) });
   },
   'cancel-edit': () => { editingId = null; confirmingDelete = false; renderBodyWeight(); },
   edit: ({ id }) => {
     editingId = id;
     confirmingDelete = false;
     fillForm(bodyWeights.getEntries().find((e) => e.timestamp === id));
+    showWhen(whenInput, id);
     renderBodyWeight();
   },
   delete: () => { confirmingDelete = true; renderBodyWeight(); },
@@ -68,6 +72,7 @@ export function renderBodyWeight() {
   logButton.hidden = editingId !== null;
   editActions.hidden = editingId === null || confirmingDelete;
   deleteActions.hidden = !confirmingDelete;
+  whenField.hidden = editingId === null;
   updateSaveButtons();
   renderChart();
   const entries = bodyWeights.getEntries();

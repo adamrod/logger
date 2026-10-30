@@ -5,7 +5,9 @@ import { onAction } from './events.js';
 import { describeSet, roundValue } from './format.js';
 import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
+import { initRestTimer, renderRestTimer } from './rest-timer.js';
 import { sets } from './store.js';
+import { readWhen, showWhen } from './when-field.js';
 
 const FIELDS = {
   reps: { ...INTEGER, step: 1, min: 0 },
@@ -21,6 +23,8 @@ const logButton = document.getElementById('log-button');
 const saveButton = document.getElementById('save-button');
 const editActions = document.getElementById('edit-actions');
 const deleteActions = document.getElementById('delete-actions');
+const whenField = document.getElementById('set-when-field');
+const whenInput = document.getElementById('set-when');
 const historyEl = document.getElementById('history-list');
 const analysisLink = document.getElementById('analysis-link');
 
@@ -46,7 +50,7 @@ const actions = {
     const id = editingId;
     editingId = null;
     confirmingDelete = false;
-    sets.update(id, { variant: selectedVariant, ...set });
+    sets.update(id, { variant: selectedVariant, ...set, timestamp: readWhen(whenInput, id) });
   },
   'cancel-edit': () => { editingId = null; confirmingDelete = false; renderLog(); },
   edit: ({ id }) => {
@@ -55,6 +59,7 @@ const actions = {
     confirmingDelete = false;
     selectedVariant = variantOf(entry);
     fillForm(entry);
+    showWhen(whenInput, id);
     renderLog();
   },
   delete: () => { confirmingDelete = true; renderLog(); },
@@ -73,6 +78,7 @@ export function initLog() {
   fillForm(lastSetOf(currentExercise()) ?? EMPTY_SET);
   onAction([controls, historyEl], actions);
   Object.entries(inputs).forEach(([key, input]) => bindNumberInput(input, FIELDS[key], updateSaveButtons));
+  initRestTimer();
 }
 
 export function renderLog() {
@@ -82,7 +88,9 @@ export function renderLog() {
   logButton.hidden = editingId !== null;
   editActions.hidden = editingId === null || confirmingDelete;
   deleteActions.hidden = !confirmingDelete;
+  whenField.hidden = editingId === null;
   updateSaveButtons();
+  renderRestTimer();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
   analysisLink.hidden = exerciseSets.length === 0;
   historyEl.innerHTML = historyHtml(exerciseSets, {

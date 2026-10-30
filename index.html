@@ -38,11 +38,11 @@
             <button type="button" class="option-new" data-action="start-add">+ New exercise</button>
           </div>
         </div>
-        <form class="add-form" id="exercise-add" hidden>
+        <form class="add-form" id="exercise-form" hidden>
           <input class="input" id="exercise-name" aria-labelledby="exercise-label" placeholder="Exercise name"
             autocomplete="off" enterkeyhint="done">
-          <button class="btn btn-primary">Add</button>
-          <button type="button" class="btn-text" id="exercise-cancel" data-action="cancel-add">Cancel</button>
+          <button class="btn btn-primary" id="exercise-submit">Add</button>
+          <button type="button" class="btn-text" id="exercise-cancel" data-action="cancel-name">Cancel</button>
         </form>
       </div>
 
@@ -63,7 +63,10 @@
 
       <div class="log-controls" id="log-controls">
         <div class="field">
-          <label class="label" for="reps">Repetitions</label>
+          <div class="label-row">
+            <label class="label" for="reps">Repetitions</label>
+            <span class="rest-timer" id="rest-timer" role="timer" hidden></span>
+          </div>
           <div class="stepper">
             <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="-1" aria-label="Decrease repetitions">−</button>
             <input class="input step-value" id="reps" inputmode="numeric" enterkeyhint="done" autocomplete="off">
@@ -77,6 +80,10 @@
             <input class="input step-value" id="weight" inputmode="decimal" enterkeyhint="done" autocomplete="off">
             <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="1" aria-label="Increase weight">+</button>
           </div>
+        </div>
+        <div class="field" id="set-when-field" hidden>
+          <label class="label" for="set-when">Date and time</label>
+          <input class="input when-input" id="set-when" type="datetime-local">
         </div>
         <button type="button" class="btn btn-primary" id="log-button" data-action="log">Log set</button>
         <div class="edit-actions" id="edit-actions" hidden>
@@ -164,6 +171,10 @@
             <input class="input step-value" id="body-weight" inputmode="decimal" enterkeyhint="done" autocomplete="off">
             <button type="button" class="step-btn" data-action="step" data-dir="1" aria-label="Increase body weight">+</button>
           </div>
+        </div>
+        <div class="field" id="body-weight-when-field" hidden>
+          <label class="label" for="body-weight-when">Date and time</label>
+          <input class="input when-input" id="body-weight-when" type="datetime-local">
         </div>
         <button type="button" class="btn btn-primary" id="body-weight-log" data-action="log">Log weight</button>
         <div class="edit-actions" id="body-weight-edit-actions" hidden>

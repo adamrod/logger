@@ -1,4 +1,5 @@
 import { parseCsv, toCsv } from './csv.js';
+import { byTimestamp } from './entry-log.js';
 import { notifyChange, onEdit } from './events.js';
 import { readFile, writeFile } from './github.js';
 import { getSettings, isSyncConfigured } from './settings.js';
@@ -48,15 +49,16 @@ export async function sync() {
   }
 }
 
-export function mergeEntries(local, remote, { lastSyncAt, deletedIds, editedIds }) {
+export function mergeEntries(local, remote, { lastSyncAt, addedIds, deletedIds, editedIds }) {
   const remoteIds = new Set(remote.map((entry) => entry.timestamp));
   const deletedHere = new Set(deletedIds);
   const editedHere = new Map(local.filter((entry) => editedIds.includes(entry.timestamp)).map((entry) => [entry.timestamp, entry]));
-  const isNewHere = (entry) => !remoteIds.has(entry.timestamp) && (!lastSyncAt || entry.timestamp > lastSyncAt);
+  const isAddedHere = (entry) => !lastSyncAt || entry.timestamp > lastSyncAt || addedIds.includes(entry.timestamp);
+  const isNewHere = (entry) => !remoteIds.has(entry.timestamp) && isAddedHere(entry);
   const remoteKept = remote
     .filter((entry) => !deletedHere.has(entry.timestamp))
     .map((entry) => editedHere.get(entry.timestamp) ?? entry);
-  return [...remoteKept, ...local.filter(isNewHere)].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  return [...remoteKept, ...local.filter(isNewHere)].sort(byTimestamp);
 }
 
 function syncSoon() {
@@ -80,10 +82,11 @@ async function syncWithRepo() {
 }
 
 async function syncLog(repo, log) {
-  const at = new Date().toISOString();
   const remote = await readFile(repo, log.file);
   const remoteEntries = parseCsv(remote?.text ?? '', log.numbers).filter((entry) => entry.timestamp);
-  const entries = mergeEntries(log.getEntries(), remoteEntries, log.getSyncMeta());
+  const at = new Date().toISOString();
+  const local = log.beginSync();
+  const entries = mergeEntries(local.entries, remoteEntries, local.syncMeta);
   const text = toCsv(entries, log.columns);
   if (text !== remote?.text) await writeFile(repo, log.file, text, remote?.sha);
   log.applySync({ entries, at });

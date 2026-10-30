@@ -151,26 +151,32 @@ ul { padding: 0; list-style: none; }
 .option-pick {
   flex: 1;
   min-width: 0;
-  height: 48px;
+  height: 44px;
   padding: 0 16px;
+  overflow: hidden;
   border: none;
   background: none;
-  font-size: 17px;
+  font-size: 16px;
   text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .option-pick[aria-current="true"] { font-weight: 700; }
 
-.option-remove { flex: none; height: 48px; padding: 0 16px; border: none; background: none; font-size: 15px; color: var(--muted); }
-.option-remove.is-confirm { color: var(--text); font-weight: 700; }
+.option-icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: none; background: none; color: var(--muted); }
+.option-icon:last-child { margin-right: 4px; }
+.option-confirm { flex: none; height: 44px; padding: 0 16px; border: none; background: none; font-size: 15px; font-weight: 700; }
+
+.icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 
 .option-new {
   width: 100%;
-  height: 48px;
+  height: 44px;
   padding: 0 16px;
   border: none;
   border-top: 1px solid var(--divider);
   background: none;
-  font-size: 17px;
+  font-size: 16px;
   text-align: left;
 }
 
@@ -220,6 +226,11 @@ ul { padding: 0; list-style: none; }
 }
 
 .step-value { flex: 1; height: 52px; padding: 0 12px; font-size: 24px; font-weight: 600; text-align: center; }
+
+.rest-timer { font-size: 13px; font-weight: 600; }
+
+.when-input { display: flex; align-items: center; width: 100%; -webkit-appearance: none; appearance: none; text-align: left; }
+.when-input::-webkit-date-and-time-value { text-align: left; }
 
 .edit-actions { display: flex; gap: 12px; }
 .edit-actions .btn-secondary { flex: 1; padding: 0 12px; }

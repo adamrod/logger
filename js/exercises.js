@@ -1,5 +1,5 @@
-import { visibleNames, withName, withoutName } from './name-list.js';
-import { getExerciseList, getVariantList, saveExerciseList, saveVariantList, sets } from './store.js';
+import { forgetName, visibleNames, withName, withoutName } from './name-list.js';
+import { getExerciseList, getVariantList, moveVariantList, saveExerciseList, saveVariantList, sets } from './store.js';
 
 const loggedExercises = () => sets.getEntries().map((entry) => entry.exercise);
 
@@ -18,6 +18,19 @@ export function addExercise(name) {
 }
 
 export const removeExercise = (name) => saveExerciseList(withoutName(getExerciseList(), name));
+
+export function renameExercise(from, to) {
+  const others = loggedExercises().filter((name) => name !== from);
+  const { name: known, list } = withName(forgetName(getExerciseList(), from), others, to);
+  if (known === from) return from;
+  saveExerciseList(list);
+  moveVariantList(from, known);
+  sets.updateWhere((entry) => entry.exercise === from, { exercise: known });
+  return known;
+}
+
+export const isOtherExercise = (name, other) => allExercises()
+  .some((existing) => existing !== other && existing.toLowerCase() === name.toLowerCase());
 
 export function addVariant(exercise, name) {
   const { name: known, list } = withName(getVariantList(exercise), loggedVariants(exercise), name);

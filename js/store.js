@@ -1,5 +1,6 @@
 import { createEntryLog } from './entry-log.js';
 import { notifyChange } from './events.js';
+import { mergeLists } from './name-list.js';
 
 const KEYS = { exercises: 'logger.v2.exercise-list', variants: 'logger.v2.variant-lists' };
 const EMPTY_LIST = { added: [], removed: [] };
@@ -33,8 +34,15 @@ export function saveExerciseList(list) {
   notifyChange();
 }
 
-export function saveVariantList(exercise, list) {
-  variantLists = { ...variantLists, [exercise]: list };
+export const saveVariantList = (exercise, list) => saveVariantLists({ ...variantLists, [exercise]: list });
+
+export function moveVariantList(from, to) {
+  const { [from]: moved = EMPTY_LIST, ...others } = variantLists;
+  saveVariantLists({ ...others, [to]: mergeLists(others[to] ?? EMPTY_LIST, moved) });
+}
+
+function saveVariantLists(lists) {
+  variantLists = lists;
   localStorage.setItem(KEYS.variants, JSON.stringify(variantLists));
   notifyChange();
 }

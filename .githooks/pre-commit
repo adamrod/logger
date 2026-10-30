@@ -1,0 +1,24 @@
+#!/bin/sh
+worker=$(git show :sw.js)
+failed=0
+
+fail() {
+  echo "pre-commit: $1"
+  failed=1
+}
+
+for file in $(git ls-files index.html style.css manifest.webmanifest 'js/*.js' 'icons/*'); do
+  printf '%s\n' "$worker" | grep -qF "'$file'" || fail "sw.js APP_SHELL is missing $file"
+done
+
+for file in $(printf '%s\n' "$worker" | sed -n "s/^  '\(.*\)',\$/\1/p"); do
+  [ "$file" = "./" ] || git ls-files --error-unmatch "$file" >/dev/null 2>&1 || fail "sw.js APP_SHELL lists $file, which is not in the repo"
+done
+
+if git diff --cached --name-only | grep -qE '^(index\.html|style\.css|manifest\.webmanifest|sw\.js|js/|icons/)'; then
+  git diff --cached -U0 sw.js | grep -q '^+const VERSION = ' || fail "app files changed, bump VERSION in sw.js"
+fi
+
+tests/run.sh >/dev/null 2>&1 || fail "tests failed, run tests/run.sh"
+
+exit $failed
