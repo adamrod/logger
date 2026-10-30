@@ -56,4 +56,3 @@ route();
 initAutoSync();
 
 initAppVersion();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });

@@ -10,6 +10,23 @@ export function initAppVersion() {
     if (current === null) showRunning(latest);
     else if (latest !== current) reloadWhenIdle();
   });
+  workers.register('sw.js', { updateViaCache: 'none' }).then(activateUpdates);
+}
+
+function activateUpdates(registration) {
+  if (registration.waiting) activate(registration.waiting);
+  if (registration.installing) activateWhenInstalled(registration.installing);
+  registration.addEventListener('updatefound', () => activateWhenInstalled(registration.installing));
+}
+
+function activateWhenInstalled(worker) {
+  worker.addEventListener('statechange', () => {
+    if (worker.state === 'installed') activate(worker);
+  });
+}
+
+function activate(worker) {
+  worker.postMessage('activate');
 }
 
 function askVersion(worker) {

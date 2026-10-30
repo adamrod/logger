@@ -1,4 +1,4 @@
-const VERSION = 22;
+const VERSION = 23;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -37,7 +37,7 @@ const APP_SHELL = [
 
 self.addEventListener('install', (event) => {
   const freshShell = APP_SHELL.map((path) => `${path}?v=${VERSION}`);
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(freshShell)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(freshShell)));
 });
 
 self.addEventListener('activate', (event) => {
@@ -57,6 +57,7 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data === 'version') event.ports[0].postMessage(VERSION);
+  if (event.data === 'activate') self.skipWaiting();
 });
 
 async function fromThisVersion(request) {
