@@ -411,6 +411,9 @@ ul { padding: 0; list-style: none; }
 .set-actions { justify-self: end; display: flex; align-items: center; padding-left: 12px; }
 .set-actions .btn-text { height: 32px; padding: 0 10px; font-size: 14px; }
 .set-actions .btn-text:last-child { padding-right: 0; }
+.set-actions .is-icon { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; color: var(--muted); }
+.set-actions .is-icon:last-child { justify-items: end; }
+.icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .set-editing { font-size: 14px; color: var(--muted); }
 
 .settings {

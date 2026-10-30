@@ -1,6 +1,11 @@
 import { entryDate } from './entry-log.js';
 import { dayKey, escapeHtml, formatDay, formatTime } from './format.js';
 
+const ICONS = {
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  delete: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+};
+
 export function historyHtml(entries, view) {
   if (!entries.length) return `<p class="empty">${view.empty}</p>`;
   const newestFirst = entries.toReversed();
@@ -54,8 +59,11 @@ function actionsHtml(id, label, { editingId, confirmingId }) {
     return actionButton('cancel-delete', id, 'Cancel', 'Cancel delete')
       + actionButton('confirm-delete', id, 'Confirm', `Confirm delete ${label}`, 'is-strong');
   }
-  return actionButton('edit', id, 'Edit', `Edit ${label}`) + actionButton('delete', id, 'Delete', `Delete ${label}`);
+  return actionButton('edit', id, iconHtml('edit'), `Edit ${label}`, 'is-icon')
+    + actionButton('delete', id, iconHtml('delete'), `Delete ${label}`, 'is-icon');
 }
+
+const iconHtml = (name) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
 
 function actionButton(action, id, text, label, modifier = '') {
   return `<button type="button" class="btn-text ${modifier}" data-action="${action}" data-id="${escapeHtml(id)}"
