@@ -1,11 +1,14 @@
 import { initChart, renderChart } from './body-weight-chart.js';
+import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
-import { roundValue } from './format.js';
+import { formatDay, formatTime, roundValue } from './format.js';
 import { historyHtml } from './history.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
 
 const FIELD = { ...DECIMAL, step: 0.1, min: 0 };
+
+const describeWeight = ({ weight }) => String(roundValue(weight));
 
 const controls = document.getElementById('body-weight-controls');
 const input = document.getElementById('body-weight');
@@ -59,7 +62,9 @@ export function renderBodyWeight() {
   updateSaveButtons();
   renderChart();
   historyEl.innerHTML = historyHtml(bodyWeights.getEntries(), {
-    describe: ({ weight }) => String(roundValue(weight)),
+    lead: [(entry) => formatDay(entryDate(entry)), (entry) => formatTime(entryDate(entry))],
+    valueHtml: describeWeight,
+    describe: describeWeight,
     isUnsynced: bodyWeights.isUnsynced,
     flat: true,
     editingId,

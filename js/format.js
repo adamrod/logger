@@ -18,12 +18,20 @@ export function formatWhen(date) {
 export const formatShortDay = (date) => date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
 
 export function formatDay(date) {
-  const pad = (number) => String(number).padStart(2, '0');
-  const isoDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' });
-  return `${isoDate} ${weekday}`;
+  return `${formatIsoDate(date)} ${weekday}`;
+}
+
+export function formatShortWhen(date) {
+  const isToday = dayKey(date) === dayKey(new Date());
+  return isToday ? formatTime(date) : `${formatIsoDate(date)} ${formatTime(date)}`;
 }
 
 export const dayKey = (date) => startOfDay(date).getTime();
 
 const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+function formatIsoDate(date) {
+  const pad = (number) => String(number).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}

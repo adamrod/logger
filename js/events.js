@@ -1,8 +1,19 @@
-const listeners = [];
+function createSignal() {
+  const listeners = [];
+  return {
+    listen: (listener) => listeners.push(listener),
+    notify: () => listeners.forEach((listener) => listener()),
+  };
+}
 
-export const onChange = (listener) => listeners.push(listener);
+const changes = createSignal();
+const edits = createSignal();
 
-export const notifyChange = () => listeners.forEach((listener) => listener());
+export const onChange = changes.listen;
+export const notifyChange = changes.notify;
+
+export const onEdit = edits.listen;
+export const notifyEdit = edits.notify;
 
 export function onAction(containers, actions) {
   containers.forEach((container) => container.addEventListener('click', (event) => {

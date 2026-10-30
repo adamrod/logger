@@ -74,6 +74,8 @@ export function renderLog() {
   editActions.hidden = editingId === null;
   updateSaveButtons();
   historyEl.innerHTML = historyHtml(sets.getEntries().filter((entry) => entry.exercise === exercise), {
+    lead: [variantOf],
+    valueHtml: ({ reps, weight }) => `<span class="set-reps">${reps}</span> × ${roundValue(weight)}`,
     describe: describeSet,
     isUnsynced: sets.isUnsynced,
     editingId,

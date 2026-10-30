@@ -4,9 +4,10 @@ import { dayKey, escapeHtml, formatDay, formatTime } from './format.js';
 export function historyHtml(entries, view) {
   if (!entries.length) return `<p class="empty">${view.empty}</p>`;
   const newestFirst = entries.toReversed();
+  const columns = `style="--lead-columns: ${view.lead.length}"`;
   return view.flat
-    ? `<ul class="entries">${entriesHtml(newestFirst, view)}</ul>`
-    : groupByDay(newestFirst).map((day) => dayHtml(day, view)).join('');
+    ? `<ul class="entries is-flat" ${columns}>${entriesHtml(newestFirst, view)}</ul>`
+    : `<div class="entries" ${columns}>${groupByDay(newestFirst).map((day) => dayHtml(day, view)).join('')}</div>`;
 }
 
 function groupByDay(entries) {
@@ -25,15 +26,13 @@ function dayHtml(entries, view) {
 const entriesHtml = (entries, view) => entries.map((entry) => entryHtml(entry, view)).join('');
 
 function entryHtml(entry, view) {
-  const text = escapeHtml(view.describe(entry));
   const date = entryDate(entry);
-  const day = formatDay(date);
-  const time = formatTime(date);
-  const whenHtml = view.flat ? `<span class="set-time">${day}</span><span class="set-time">${time}</span>` : '';
+  const label = `${escapeHtml(view.describe(entry))}, ${formatDay(date)} ${formatTime(date)}`;
+  const leadHtml = view.lead.map((cell) => `<span class="set-lead">${escapeHtml(cell(entry))}</span>`).join('');
   return `
     <li class="set">
-      ${whenHtml}<span class="set-info"><span class="set-text">${text}</span>${unsyncedHtml(entry, view)}</span>
-      <span class="set-actions">${actionsHtml(entry.timestamp, `${text}, ${day} ${time}`, view)}</span>
+      ${leadHtml}<span class="set-info"><span class="set-text">${view.valueHtml(entry)}</span>${unsyncedHtml(entry, view)}</span>
+      <span class="set-actions">${actionsHtml(entry.timestamp, label, view)}</span>
     </li>`;
 }
 

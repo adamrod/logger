@@ -1,19 +1,50 @@
 import { parseCsv, toCsv } from './csv.js';
-import { notifyChange } from './events.js';
+import { notifyChange, onEdit } from './events.js';
 import { readFile, writeFile } from './github.js';
 import { getSettings, isSyncConfigured } from './settings.js';
 import { entryLogs } from './store.js';
 
-export const syncState = { running: false, error: null };
+const EDIT_DELAY = 3000;
+const RETRY_INTERVAL = 60000;
+
+export const syncState = { running: false, scheduled: false, error: null };
+
+let rerunRequested = false;
+let editTimer;
+
+export const hasUnsyncedChanges = () => entryLogs.some((log) => log.hasChanges());
+
+export function lastSyncAt() {
+  const times = entryLogs.map((log) => log.getSyncMeta().lastSyncAt);
+  return times.includes(null) ? null : times.toSorted()[0];
+}
+
+export function initAutoSync() {
+  sync();
+  onEdit(syncSoon);
+  window.addEventListener('online', sync);
+  window.addEventListener('offline', notifyChange);
+  document.addEventListener('visibilitychange', syncOnVisibilityChange);
+  setInterval(retryUnsynced, RETRY_INTERVAL);
+}
 
 export async function sync() {
-  if (syncState.running || !isSyncConfigured()) return;
-  setSyncState({ running: true, error: null });
+  if (!isSyncConfigured()) return;
+  if (syncState.running) {
+    rerunRequested = true;
+    return;
+  }
+  clearTimeout(editTimer);
+  setSyncState({ running: true, scheduled: false, error: null });
   try {
     await syncWithRepo();
     setSyncState({ running: false });
   } catch (error) {
     setSyncState({ running: false, error: error.message });
+  }
+  if (rerunRequested) {
+    rerunRequested = false;
+    sync();
   }
 }
 
@@ -26,6 +57,21 @@ export function mergeEntries(local, remote, { lastSyncAt, deletedIds, editedIds 
     .filter((entry) => !deletedHere.has(entry.timestamp))
     .map((entry) => editedHere.get(entry.timestamp) ?? entry);
   return [...remoteKept, ...local.filter(isNewHere)].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+}
+
+function syncSoon() {
+  if (!isSyncConfigured() || !navigator.onLine) return;
+  clearTimeout(editTimer);
+  editTimer = setTimeout(sync, EDIT_DELAY);
+  setSyncState({ scheduled: true });
+}
+
+function syncOnVisibilityChange() {
+  if (document.visibilityState === 'visible' || hasUnsyncedChanges()) sync();
+}
+
+function retryUnsynced() {
+  if (navigator.onLine && document.visibilityState === 'visible' && hasUnsyncedChanges()) sync();
 }
 
 async function syncWithRepo() {

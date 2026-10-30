@@ -3,8 +3,8 @@ import { initBodyWeight, renderBodyWeight } from './body-weight-screen.js';
 import { onChange } from './events.js';
 import { initLog, renderLog } from './log-screen.js';
 import { initSettings, renderSettings } from './settings-screen.js';
-import { sync } from './sync.js';
-import { initSyncButtons, renderSyncButtons } from './sync-buttons.js';
+import { initAutoSync } from './sync.js';
+import { initSyncStatus, renderSyncStatus } from './sync-status.js';
 
 const RENDERERS = {
   log: renderLog,
@@ -29,7 +29,7 @@ function route() {
 
 function render() {
   RENDERERS[current]();
-  renderSyncButtons();
+  renderSyncStatus();
 }
 
 function snapPageBackAfterKeyboard() {
@@ -39,17 +39,13 @@ function snapPageBackAfterKeyboard() {
 initLog();
 initBodyWeight();
 initSettings();
-initSyncButtons();
+initSyncStatus();
 onChange(render);
 window.addEventListener('hashchange', route);
 document.addEventListener('focusout', snapPageBackAfterKeyboard);
 route();
 
-sync();
-window.addEventListener('online', sync);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') sync();
-});
+initAutoSync();
 
 initAppVersion();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });

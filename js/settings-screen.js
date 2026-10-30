@@ -1,7 +1,7 @@
 import { formatWhen } from './format.js';
 import { getSettings, isSyncConfigured, updateSettings } from './settings.js';
 import { bodyWeights, sets } from './store.js';
-import { sync, syncState } from './sync.js';
+import { lastSyncAt, sync, syncState } from './sync.js';
 
 const settingInputs = document.querySelectorAll('[data-setting]');
 const statusEl = document.getElementById('sync-status');
@@ -28,11 +28,11 @@ export function renderSettings() {
 }
 
 function syncStatusText() {
-  const { lastSyncAt } = sets.getSyncMeta();
   if (syncState.running) return 'Syncing…';
   if (syncState.error) return syncState.error;
   if (!isSyncConfigured()) return 'Add a token to sync';
-  return lastSyncAt ? `Last synced ${formatWhen(new Date(lastSyncAt))}` : 'Not synced yet';
+  const at = lastSyncAt();
+  return at ? `Last synced ${formatWhen(new Date(at))}` : 'Not synced yet';
 }
 
 function exportCsv(log) {

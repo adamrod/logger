@@ -1,5 +1,5 @@
 import { parseCsv, toCsv } from './csv.js';
-import { notifyChange } from './events.js';
+import { notifyChange, notifyEdit } from './events.js';
 
 const EMPTY_SYNC = { lastSyncAt: null, deletedIds: [], editedIds: [] };
 
@@ -31,6 +31,11 @@ export function createEntryLog({ file, columns, numbers, keys }) {
     notifyChange();
   }
 
+  function saveEdit() {
+    save();
+    notifyEdit();
+  }
+
   return {
     file,
     columns,
@@ -43,21 +48,21 @@ export function createEntryLog({ file, columns, numbers, keys }) {
 
     add(entry) {
       entries = [...entries, { timestamp: nextUniqueTimestamp(), ...entry }];
-      save();
+      saveEdit();
     },
 
     update(timestamp, changes) {
       const entry = entries.find((e) => e.timestamp === timestamp);
       entries = entries.map((e) => (e === entry ? { ...e, ...changes } : e));
       if (entry && !isPending(entry)) track('editedIds', timestamp);
-      save();
+      saveEdit();
     },
 
     remove(timestamp) {
       const entry = entries.find((e) => e.timestamp === timestamp);
       entries = entries.filter((e) => e !== entry);
       if (entry && !isPending(entry)) track('deletedIds', timestamp);
-      save();
+      saveEdit();
     },
 
     applySync({ entries: synced, at }) {

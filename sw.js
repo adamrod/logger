@@ -1,4 +1,4 @@
-const VERSION = 14;
+const VERSION = 15;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -24,7 +24,7 @@ const APP_SHELL = [
   'js/settings.js',
   'js/store.js',
   'js/sync.js',
-  'js/sync-buttons.js',
+  'js/sync-status.js',
   'js/variant-picker.js',
   'icons/icon-180.png',
   'icons/icon-192.png',

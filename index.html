@@ -18,7 +18,7 @@
 <body>
 <div class="app">
   <nav class="tabs" aria-label="Sections">
-    <a class="tab" href="#log">Exercises</a>
+    <a class="tab" href="#log">Sets</a>
     <a class="tab" href="#body-weight">Body weight</a>
     <a class="tab" href="#settings">Settings</a>
   </nav>
@@ -60,11 +60,11 @@
 
       <div class="log-controls" id="log-controls">
         <div class="field">
-          <label class="label" for="reps">Reps</label>
+          <label class="label" for="reps">Repetitions</label>
           <div class="stepper">
-            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="-1" aria-label="Decrease reps">−</button>
+            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="-1" aria-label="Decrease repetitions">−</button>
             <input class="input step-value" id="reps" inputmode="numeric" enterkeyhint="done" autocomplete="off">
-            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="1" aria-label="Increase reps">+</button>
+            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="1" aria-label="Increase repetitions">+</button>
           </div>
         </div>
         <div class="field">
@@ -86,7 +86,10 @@
     <section class="history" aria-labelledby="history-heading">
       <div class="history-head">
         <h2 class="label" id="history-heading">History</h2>
-        <button type="button" class="btn-text sync-button">Sync</button>
+        <div class="history-sync" hidden>
+          <span class="sync-text"></span>
+          <button type="button" class="btn-text sync-button">Sync</button>
+        </div>
       </div>
       <div class="history-list" id="history-list"></div>
     </section>
@@ -132,7 +135,10 @@
     <section class="history" aria-labelledby="body-weight-history-heading">
       <div class="history-head">
         <h2 class="label" id="body-weight-history-heading">History</h2>
-        <button type="button" class="btn-text sync-button">Sync</button>
+        <div class="history-sync" hidden>
+          <span class="sync-text"></span>
+          <button type="button" class="btn-text sync-button">Sync</button>
+        </div>
       </div>
       <div class="history-list" id="body-weight-history"></div>
     </section>
