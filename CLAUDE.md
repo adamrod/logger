@@ -6,4 +6,4 @@
 - Keep data in .csv.
 - Keep code small and readable; obey clean code rules.
 - Do not add comments in code, it should be self-explanatory.
-- UI design: https://claude.ai/artifact/FTrGm5nAX9uh6nRGzRLWob (Claude Design canvas). Read it before UI work. It is a reference: translate it to vanilla HTML/CSS/JS, don't copy its runtime (support.js, DCLogic, <x-dc>, {{holes}}).
+- UI design: https://claude.ai/artifact/FTrGm5nAX9uh6nRGzRLWob (Claude Design canvas). Read it before UI work. It is a reference: translate it to vanilla HTML/CSS/JS, don't copy its runtime (support.js, DCLogic, <x-dc>, {{holes}}).- Commit and push directly to `main` (GitHub Pages serves it); no feature branches.
