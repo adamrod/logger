@@ -1,4 +1,4 @@
-const VERSION = 17;
+const VERSION = 18;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -36,7 +36,7 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  const freshShell = APP_SHELL.map((path) => new Request(path, { cache: 'reload' }));
+  const freshShell = APP_SHELL.map((path) => `${path}?v=${VERSION}`);
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(freshShell)).then(() => self.skipWaiting()));
 });
 
