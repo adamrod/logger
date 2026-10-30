@@ -87,7 +87,7 @@
     </div>
 
     <section class="history" aria-labelledby="history-heading">
-      <div class="history-head">
+      <div class="section-head">
         <h2 class="label" id="history-heading">History</h2>
         <div class="history-sync" hidden>
           <span class="sync-text"></span>
@@ -102,39 +102,42 @@
     <div class="analysis">
       <div class="analysis-nav">
         <a class="text-link" href="#log">‹ Sets</a>
-        <div class="ranges" id="analysis-ranges" role="group" aria-label="Analysis range">
-          <button type="button" class="btn-text range-button" data-action="range" data-range="1M">1M</button>
-          <button type="button" class="btn-text range-button" data-action="range" data-range="3M">3M</button>
-          <button type="button" class="btn-text range-button" data-action="range" data-range="1Y">1Y</button>
-          <button type="button" class="btn-text range-button" data-action="range" data-range="All">All</button>
+        <div class="toggles" id="analysis-ranges" role="group" aria-label="Analysis range">
+          <button type="button" class="btn-text toggle" data-action="range" data-range="1M">1M</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="3M">3M</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="1Y">1Y</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="All">All</button>
         </div>
       </div>
       <div class="analysis-head">
-        <h1 class="analysis-title" id="analysis-title"></h1>
+        <div class="analysis-title">
+          <h1 id="analysis-title"></h1>
+          <select id="analysis-exercise" aria-label="Exercise"></select>
+        </div>
         <p class="chart-meta" id="analysis-summary"></p>
       </div>
       <div class="chips analysis-variants" id="analysis-variants" role="group" aria-label="Variant"></div>
       <p class="empty analysis-empty" id="analysis-empty" hidden>No sets in this range.</p>
 
       <div id="analysis-charts">
-        <section class="analysis-section" aria-labelledby="day-heading">
-          <div class="history-head">
-            <h2 class="label" id="day-heading"></h2>
-            <div class="ranges" id="day-metrics" role="group" aria-label="Chart value">
-              <button type="button" class="btn-text range-button" data-action="metric" data-metric="weight">Weight</button>
-              <button type="button" class="btn-text range-button" data-action="metric" data-metric="reps">Reps</button>
-              <button type="button" class="btn-text range-button" data-action="metric" data-metric="volume">Volume</button>
+        <section class="analysis-section" aria-labelledby="daily-heading">
+          <div class="section-head">
+            <h2 class="label" id="daily-heading"></h2>
+            <div class="toggles" id="daily-metrics" role="group" aria-label="Chart value">
+              <button type="button" class="btn-text toggle" data-action="metric" data-metric="weight">Weight</button>
+              <button type="button" class="btn-text toggle" data-action="metric" data-metric="reps">Reps</button>
+              <button type="button" class="btn-text toggle" data-action="metric" data-metric="volume">Volume</button>
             </div>
           </div>
           <p class="chart-readout" aria-live="polite">
-            <span><span class="chart-value" id="day-value"></span> <span class="chart-meta" id="day-date"></span></span>
-            <span class="chart-meta" id="day-change"></span>
+            <span><span class="chart-value" id="daily-value"></span> <span class="chart-meta" id="daily-date"></span></span>
+            <span class="chart-meta" id="daily-change"></span>
           </p>
-          <svg class="chart-plot" id="day-plot" aria-hidden="true"></svg>
+          <svg class="chart-plot" id="daily-plot" aria-hidden="true"></svg>
         </section>
 
         <section class="analysis-section" aria-labelledby="rep-max-heading">
-          <div class="history-head">
+          <div class="section-head">
             <h2 class="label" id="rep-max-heading">Max reps by weight</h2>
           </div>
           <p class="chart-readout" aria-live="polite">
@@ -166,13 +169,13 @@
     </div>
 
     <section class="chart" id="chart" aria-labelledby="chart-heading" hidden>
-      <div class="history-head">
+      <div class="section-head">
         <h2 class="label" id="chart-heading">Chart</h2>
-        <div class="ranges" id="chart-ranges" role="group" aria-label="Chart range">
-          <button type="button" class="btn-text range-button" data-action="range" data-range="1M">1M</button>
-          <button type="button" class="btn-text range-button" data-action="range" data-range="3M">3M</button>
-          <button type="button" class="btn-text range-button" data-action="range" data-range="1Y">1Y</button>
-          <button type="button" class="btn-text range-button" data-action="range" data-range="All">All</button>
+        <div class="toggles" id="chart-ranges" role="group" aria-label="Chart range">
+          <button type="button" class="btn-text toggle" data-action="range" data-range="1M">1M</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="3M">3M</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="1Y">1Y</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="All">All</button>
         </div>
       </div>
       <p class="chart-readout" aria-live="polite">
@@ -184,7 +187,7 @@
     </section>
 
     <section class="history" aria-labelledby="body-weight-history-heading">
-      <div class="history-head">
+      <div class="section-head">
         <h2 class="label" id="body-weight-history-heading">History</h2>
         <div class="history-sync" hidden>
           <span class="sync-text"></span>

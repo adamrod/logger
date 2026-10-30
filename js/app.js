@@ -1,4 +1,4 @@
-import { initAnalysis, renderAnalysis } from './analysis-screen.js';
+import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
 import { initAppVersion } from './app-version.js';
 import { initBodyWeight, renderBodyWeight } from './body-weight-screen.js';
 import { onChange } from './events.js';
@@ -13,13 +13,16 @@ const RENDERERS = {
   'body-weight': renderBodyWeight,
   analysis: renderAnalysis,
 };
+const ENTER_HANDLERS = { analysis: enterAnalysis };
 const PARENT_TABS = { analysis: 'log' };
 
-let current = 'log';
+let current = null;
 
 function route() {
   const name = location.hash.slice(1);
-  current = name in RENDERERS ? name : 'log';
+  const next = name in RENDERERS ? name : 'log';
+  if (next !== current) ENTER_HANDLERS[next]?.();
+  current = next;
   const currentTab = PARENT_TABS[current] ?? current;
   document.querySelectorAll('.screen').forEach((screen) => {
     screen.hidden = screen.id !== `screen-${current}`;

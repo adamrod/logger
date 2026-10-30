@@ -6,7 +6,9 @@ export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) =>
 
 export const roundValue = (value) => Math.round(value * 100) / 100;
 
-export const describeSet = ({ variant, reps, weight }) => [variant, `${reps} × ${roundValue(weight)}`].filter(Boolean).join(' · ');
+export const formatSet = ({ reps, weight }) => `${reps} × ${roundValue(weight)}`;
+
+export const describeSet = (set) => [set.variant, formatSet(set)].filter(Boolean).join(' · ');
 
 export const formatTime = (date) => date.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
 

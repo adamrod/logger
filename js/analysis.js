@@ -12,7 +12,9 @@ const topSet = (day, metric) => day.reduce((top, set) => (COMPARE[metric](set, t
 
 const volume = (day) => roundValue(day.reduce((sum, set) => sum + set.reps * set.weight, 0));
 
-export const defaultMetric = (sets) => (sets.filter((set) => set.weight === 0).length * 2 > sets.length ? 'reps' : 'weight');
+const isMostlyUnweighted = (sets) => sets.filter((set) => set.weight === 0).length > sets.length / 2;
+
+export const defaultMetric = (sets) => (isMostlyUnweighted(sets) ? 'reps' : 'weight');
 
 export function dailySeries(sets, metric) {
   return byDay(sets).map((day) => {
