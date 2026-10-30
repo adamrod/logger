@@ -8,7 +8,7 @@ export function initAppVersion() {
   workers.addEventListener('controllerchange', async () => {
     const [current, latest] = await Promise.all([running, askVersion(workers.controller)]);
     if (current === null) showRunning(latest);
-    else if (latest !== current) showUpdateReady(current, latest);
+    else if (latest !== current) reloadWhenIdle();
   });
 }
 
@@ -24,7 +24,7 @@ function showRunning(version) {
   versionEl.textContent = `Version ${version}`;
 }
 
-function showUpdateReady(current, latest) {
-  versionEl.innerHTML = `Version ${current} · <button type="button" class="update-btn">Update to version ${latest}</button>`;
-  versionEl.querySelector('button').addEventListener('click', () => location.reload());
+function reloadWhenIdle() {
+  if (!document.activeElement?.matches('input, textarea, select')) return location.reload();
+  document.addEventListener('visibilitychange', () => location.reload(), { once: true });
 }

@@ -426,13 +426,3 @@ ul { padding: 0; list-style: none; }
 .sync-status { font-size: 14px; color: var(--muted); }
 
 .version { margin-top: auto; padding-top: 24px; text-align: center; font-size: 13px; color: var(--muted); }
-
-.update-btn {
-  min-height: 44px;
-  padding: 0 8px;
-  border: none;
-  background: none;
-  color: var(--text);
-  font-weight: 600;
-  text-decoration: underline;
-}
