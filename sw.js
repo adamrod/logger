@@ -1,14 +1,17 @@
-const VERSION = 15;
+const VERSION = 16;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
   'index.html',
   'style.css',
   'manifest.webmanifest',
+  'js/analysis.js',
+  'js/analysis-screen.js',
   'js/app-version.js',
   'js/app.js',
   'js/body-weight-chart.js',
   'js/body-weight-screen.js',
+  'js/chart-controls.js',
   'js/csv.js',
   'js/entry-log.js',
   'js/events.js',
@@ -17,6 +20,7 @@ const APP_SHELL = [
   'js/format.js',
   'js/github.js',
   'js/history.js',
+  'js/line-chart.js',
   'js/log-screen.js',
   'js/name-list.js',
   'js/number-field.js',

@@ -1,5 +1,6 @@
 const LOCALE = 'en-GB';
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const SIGNS = { '-1': '−', 0: '±', 1: '+' };
 
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 
@@ -16,6 +17,11 @@ export function formatWhen(date) {
 }
 
 export const formatShortDay = (date) => date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
+
+export function formatChange(delta, since) {
+  const rounded = roundValue(delta);
+  return `${SIGNS[Math.sign(rounded)]}${Math.abs(rounded)} since ${formatShortDay(since)}`;
+}
 
 export function formatDay(date) {
   const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' });

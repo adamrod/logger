@@ -10,6 +10,11 @@ export function historyHtml(entries, view) {
     : `<div class="entries" ${columns}>${groupByDay(newestFirst).map((day) => dayHtml(day, view)).join('')}</div>`;
 }
 
+export function revealNewest(list) {
+  list.scrollTo({ top: 0, behavior: 'smooth' });
+  list.querySelector('.set')?.classList.add('is-new');
+}
+
 function groupByDay(entries) {
   return [...Map.groupBy(entries, (entry) => dayKey(entryDate(entry))).values()];
 }

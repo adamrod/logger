@@ -2,7 +2,7 @@ import { initChart, renderChart } from './body-weight-chart.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { formatDay, formatTime, roundValue } from './format.js';
-import { historyHtml } from './history.js';
+import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
 
@@ -28,7 +28,9 @@ const actions = {
   log: () => {
     const weight = readWeight();
     confirmingId = null;
-    if (weight) bodyWeights.add({ weight });
+    if (!weight) return;
+    bodyWeights.add({ weight });
+    revealNewest(historyEl);
   },
   save: () => {
     const weight = readWeight();

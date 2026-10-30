@@ -3,7 +3,7 @@ import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
 import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
 import { onAction } from './events.js';
 import { describeSet, roundValue } from './format.js';
-import { historyHtml } from './history.js';
+import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { sets } from './store.js';
 
@@ -21,6 +21,7 @@ const logButton = document.getElementById('log-button');
 const saveButton = document.getElementById('save-button');
 const editActions = document.getElementById('edit-actions');
 const historyEl = document.getElementById('history-list');
+const analysisLink = document.getElementById('analysis-link');
 
 let selected = sets.getEntries().at(-1)?.exercise;
 let selectedVariant = variantOf(sets.getEntries().at(-1));
@@ -35,7 +36,9 @@ const actions = {
   log: () => {
     const set = readSet();
     confirmingId = null;
-    if (set) sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
+    if (!set) return;
+    sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
+    revealNewest(historyEl);
   },
   save: () => {
     const set = readSet();
@@ -73,7 +76,9 @@ export function renderLog() {
   logButton.hidden = editingId !== null;
   editActions.hidden = editingId === null;
   updateSaveButtons();
-  historyEl.innerHTML = historyHtml(sets.getEntries().filter((entry) => entry.exercise === exercise), {
+  const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
+  analysisLink.hidden = exerciseSets.length === 0;
+  historyEl.innerHTML = historyHtml(exerciseSets, {
     lead: [variantOf],
     valueHtml: ({ reps, weight }) => `<span class="set-reps">${reps}</span> × ${roundValue(weight)}`,
     describe: describeSet,
@@ -84,11 +89,11 @@ export function renderLog() {
   });
 }
 
-function currentExercise() {
+export function currentExercise() {
   return allExercises().includes(selected) ? selected : allExercises()[0];
 }
 
-function currentVariant() {
+export function currentVariant() {
   return allVariants(currentExercise()).includes(selectedVariant) ? selectedVariant : '';
 }
 
