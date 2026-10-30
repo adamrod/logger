@@ -1,9 +1,14 @@
-import { formatShortDay, roundValue } from './format.js';
+import { formatMonth, formatShortDay, roundValue } from './format.js';
 
 const HEIGHT = 160;
 const PLOT = { top: 8, right: 40, bottom: 20 };
 const NICE_STEPS = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
 const MAX_TICK_INTERVALS = 10;
+const DAY_STEPS = [1, 2, 7, 14];
+const MONTH_STEPS = [1, 2, 3, 6, 12, 24];
+const MIN_DATE_GAP = 56;
+const EDGE_ZONE = 24;
+const TICK_LENGTH = 4;
 
 export function createLineChart(plot, onSelect) {
   let points = [];
@@ -78,14 +83,61 @@ function gridHtml({ ticks, right, y }) {
   }).join('');
 }
 
-function dateLabelsHtml(points, { right }) {
-  const first = points[0];
-  if (points.length === 1) return axisDateHtml(first.x, first.date, 'middle');
-  return axisDateHtml(0, first.date, 'start') + axisDateHtml(right, points.at(-1).date, 'end');
+function dateLabelsHtml(points, scale) {
+  const ticks = dateTicks(points[0].date, points.at(-1).date, Math.floor(scale.right / MIN_DATE_GAP));
+  return ticks.length > 1 ? ticks.map((tick) => dateTickHtml(tick, scale)).join('') : edgeDatesHtml(points, scale);
 }
 
-function axisDateHtml(x, date, anchor) {
-  return `<text class="axis-label" x="${x}" y="${HEIGHT - 4}" text-anchor="${anchor}">${formatShortDay(date)}</text>`;
+function dateTicks(first, last, maxCount) {
+  const fitting = (ticksFor, steps) => steps.map(ticksFor).find((ticks) => ticks.length <= maxCount);
+  return fitting((step) => dayTicks(first, last, step), DAY_STEPS)
+    ?? fitting((step) => monthTicks(first, last, step), MONTH_STEPS)
+    ?? [];
+}
+
+function dayTicks(first, last, step) {
+  const ticks = [];
+  for (const date = nextMidnight(first); date <= last; date.setDate(date.getDate() + step)) {
+    ticks.push({ date: new Date(date), label: formatShortDay(date) });
+  }
+  return ticks;
+}
+
+function monthTicks(first, last, step) {
+  const ticks = [];
+  for (let index = first.getFullYear() * 12 + first.getMonth(); ; index += 1) {
+    const date = new Date(Math.floor(index / 12), index % 12, 1);
+    if (date > last) return ticks;
+    if (date >= first && index % step === 0) ticks.push({ date, label: formatMonth(date) });
+  }
+}
+
+function nextMidnight(date) {
+  const midnight = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  if (midnight < date) midnight.setDate(midnight.getDate() + 1);
+  return midnight;
+}
+
+function dateTickHtml({ date, label }, { right, x }) {
+  const left = round(x(date.getTime()));
+  const bottom = HEIGHT - PLOT.bottom;
+  return `<line class="date-tick" x1="${left}" x2="${left}" y1="${bottom}" y2="${bottom + TICK_LENGTH}"/>
+    ${axisDateHtml(left, label, anchorAt(left, right))}`;
+}
+
+function anchorAt(x, right) {
+  if (x < EDGE_ZONE) return 'start';
+  return x > right - EDGE_ZONE ? 'end' : 'middle';
+}
+
+function edgeDatesHtml(points, { right }) {
+  const first = points[0];
+  if (points.length === 1) return axisDateHtml(first.x, formatShortDay(first.date), 'middle');
+  return axisDateHtml(0, formatShortDay(first.date), 'start') + axisDateHtml(right, formatShortDay(points.at(-1).date), 'end');
+}
+
+function axisDateHtml(x, label, anchor) {
+  return `<text class="axis-label" x="${x}" y="${HEIGHT - 4}" text-anchor="${anchor}">${label}</text>`;
 }
 
 const selectionHtml = ({ x, y }) => `

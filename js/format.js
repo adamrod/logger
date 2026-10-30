@@ -20,6 +20,10 @@ export function formatWhen(date) {
 
 export const formatShortDay = (date) => date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
 
+export const formatMonth = (date) => (date.getMonth() === 0
+  ? String(date.getFullYear())
+  : date.toLocaleDateString(LOCALE, { month: 'short' }));
+
 export function formatChange(delta, since) {
   const rounded = roundValue(delta);
   return `${SIGNS[Math.sign(rounded)]}${Math.abs(rounded)} since ${formatShortDay(since)}`;
