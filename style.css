@@ -419,7 +419,7 @@ ul { padding: 0; list-style: none; }
 
 .set-reps { display: inline-block; min-width: 2ch; text-align: right; }
 
-.set-weight { display: inline-block; min-width: 4ch; }
+.set-weight { display: inline-block; min-width: 5ch; }
 :is(.set-delta, .set-days) { font-size: 13px; font-weight: 400; color: var(--muted); }
 .set-delta { display: inline-block; min-width: 5ch; margin-left: 8px; }
 
