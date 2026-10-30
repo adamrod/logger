@@ -1,3 +1,4 @@
+import { createEntryEditor } from './entry-editor.js';
 import { allExercises, allVariants } from './exercises.js';
 import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
 import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
@@ -7,7 +8,6 @@ import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { initRestTimer, renderRestTimer } from './rest-timer.js';
 import { sets } from './store.js';
-import { readWhen, showWhen } from './when-field.js';
 
 const FIELDS = {
   reps: { ...INTEGER, step: 1, min: 0 },
@@ -21,19 +21,22 @@ const controls = document.getElementById('log-controls');
 const inputs = { reps: document.getElementById('reps'), weight: document.getElementById('weight') };
 const logButton = document.getElementById('log-button');
 const saveButton = document.getElementById('save-button');
-const editActions = document.getElementById('edit-actions');
-const deleteActions = document.getElementById('delete-actions');
-const whenField = document.getElementById('set-when-field');
-const whenInput = document.getElementById('set-when');
 const historyEl = document.getElementById('history-list');
 const analysisLink = document.getElementById('analysis-link');
 
 let selected = sets.getEntries().at(-1)?.exercise;
 let selectedVariant = variantOf(sets.getEntries().at(-1));
-let editingId = null;
-let confirmingDelete = false;
+
+const editor = createEntryEditor(sets, {
+  logButton,
+  editActions: document.getElementById('edit-actions'),
+  deleteActions: document.getElementById('delete-actions'),
+  whenField: document.getElementById('set-when-field'),
+  whenInput: document.getElementById('set-when'),
+}, { read: readEditedSet, fill: fillEditedSet, render: renderLog });
 
 const actions = {
+  ...editor.actions,
   step: ({ field, dir }) => {
     stepInput(inputs[field], FIELDS[field], Number(dir));
     updateSaveButtons();
@@ -43,32 +46,6 @@ const actions = {
     if (!set) return;
     sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
     revealNewest(historyEl);
-  },
-  save: () => {
-    const set = readSet();
-    if (!set) return;
-    const id = editingId;
-    editingId = null;
-    confirmingDelete = false;
-    sets.update(id, { variant: selectedVariant, ...set, timestamp: readWhen(whenInput, id) });
-  },
-  'cancel-edit': () => { editingId = null; confirmingDelete = false; renderLog(); },
-  edit: ({ id }) => {
-    const entry = sets.getEntries().find((e) => e.timestamp === id);
-    editingId = id;
-    confirmingDelete = false;
-    selectedVariant = variantOf(entry);
-    fillForm(entry);
-    showWhen(whenInput, id);
-    renderLog();
-  },
-  delete: () => { confirmingDelete = true; renderLog(); },
-  'cancel-delete': () => { confirmingDelete = false; renderLog(); },
-  'confirm-delete': () => {
-    const id = editingId;
-    editingId = null;
-    confirmingDelete = false;
-    sets.remove(id);
   },
 };
 
@@ -85,10 +62,7 @@ export function renderLog() {
   const exercise = currentExercise();
   renderExercisePicker(exercise);
   renderVariantPicker(exercise, currentVariant());
-  logButton.hidden = editingId !== null;
-  editActions.hidden = editingId === null || confirmingDelete;
-  deleteActions.hidden = !confirmingDelete;
-  whenField.hidden = editingId === null;
+  editor.render();
   updateSaveButtons();
   renderRestTimer();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
@@ -98,7 +72,7 @@ export function renderLog() {
     valueHtml: ({ reps, weight }) => `<span class="set-reps">${reps}</span> × ${roundValue(weight)}`,
     describe: describeSet,
     isUnsynced: sets.isUnsynced,
-    editingId,
+    editingId: editor.editingId(),
     empty: 'No sets logged yet.',
   });
 }
@@ -114,8 +88,7 @@ export function currentVariant() {
 function selectExercise(exercise) {
   selected = exercise;
   selectedVariant = variantOf(lastSetOf(exercise));
-  editingId = null;
-  confirmingDelete = false;
+  editor.stopEditing();
   fillForm(lastSetOf(exercise) ?? EMPTY_SET);
   renderLog();
 }
@@ -123,7 +96,7 @@ function selectExercise(exercise) {
 function selectVariant(variant) {
   const last = lastSetOfVariant(currentExercise(), variant);
   selectedVariant = variant;
-  if (last && editingId === null) fillForm(last);
+  if (last && editor.editingId() === null) fillForm(last);
   renderLog();
 }
 
@@ -140,10 +113,20 @@ function fillForm({ reps, weight }) {
   inputs.weight.value = roundValue(weight);
 }
 
+function fillEditedSet(entry) {
+  selectedVariant = variantOf(entry);
+  fillForm(entry);
+}
+
 function readSet() {
   const reps = FIELDS.reps.parse(inputs.reps.value);
   const weight = FIELDS.weight.parse(inputs.weight.value);
   return reps > 0 && weight >= 0 ? { reps, weight } : null;
+}
+
+function readEditedSet() {
+  const set = readSet();
+  return set && { variant: selectedVariant, ...set };
 }
 
 function updateSaveButtons() {

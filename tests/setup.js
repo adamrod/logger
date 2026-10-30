@@ -1,8 +1,28 @@
 const storage = new Map();
+const elements = new Map();
 let fetchHandler = () => { throw new Error('Unexpected fetch'); };
 
 export function handleFetch(handler) {
   fetchHandler = handler;
+}
+
+function createElement() {
+  const listeners = [];
+  let value = '';
+  return {
+    get value() { return value; },
+    set value(text) { value = String(text); },
+    addEventListener: (type, listener) => listeners.push({ type, listener }),
+    dispatch: (type, event) => listeners.filter((entry) => entry.type === type).forEach(({ listener }) => listener(event)),
+    setAttribute: () => {},
+    querySelectorAll: () => [],
+    focus: () => {},
+  };
+}
+
+export function element(id) {
+  if (!elements.has(id)) elements.set(id, createElement());
+  return elements.get(id);
 }
 
 globalThis.localStorage = {
@@ -27,6 +47,6 @@ globalThis.setInterval = () => 0;
 globalThis.clearTimeout = () => {};
 globalThis.navigator = { onLine: true };
 globalThis.window = { addEventListener: () => {} };
-globalThis.document = { getElementById: () => ({}), addEventListener: () => {}, visibilityState: 'visible' };
+globalThis.document = { getElementById: element, addEventListener: () => {}, visibilityState: 'visible' };
 
 localStorage.setItem('logger.settings', JSON.stringify({ owner: 'owner', repo: 'repo', token: 'token' }));

@@ -1,5 +1,5 @@
 import { parseCsv, toCsv } from './csv.js';
-import { byTimestamp } from './entry-log.js';
+import { byTimestamp, isAddedHere } from './entry-log.js';
 import { notifyChange, onEdit } from './events.js';
 import { readFile, writeFile } from './github.js';
 import { getSettings, isSyncConfigured } from './settings.js';
@@ -49,12 +49,11 @@ export async function sync() {
   }
 }
 
-export function mergeEntries(local, remote, { lastSyncAt, addedIds, deletedIds, editedIds }) {
+export function mergeEntries(local, remote, syncMeta) {
   const remoteIds = new Set(remote.map((entry) => entry.timestamp));
-  const deletedHere = new Set(deletedIds);
-  const editedHere = new Map(local.filter((entry) => editedIds.includes(entry.timestamp)).map((entry) => [entry.timestamp, entry]));
-  const isAddedHere = (entry) => !lastSyncAt || entry.timestamp > lastSyncAt || addedIds.includes(entry.timestamp);
-  const isNewHere = (entry) => !remoteIds.has(entry.timestamp) && isAddedHere(entry);
+  const deletedHere = new Set(syncMeta.deletedIds);
+  const editedHere = new Map(local.filter((entry) => syncMeta.editedIds.includes(entry.timestamp)).map((entry) => [entry.timestamp, entry]));
+  const isNewHere = (entry) => !remoteIds.has(entry.timestamp) && isAddedHere(syncMeta, entry);
   const remoteKept = remote
     .filter((entry) => !deletedHere.has(entry.timestamp))
     .map((entry) => editedHere.get(entry.timestamp) ?? entry);

@@ -1,11 +1,11 @@
 import { initChart, renderChart } from './body-weight-chart.js';
+import { createEntryEditor } from './entry-editor.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { daysBetween, formatDay, formatDelta, formatTime, roundValue } from './format.js';
 import { historyHtml, revealNewest } from './history.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
-import { readWhen, showWhen } from './when-field.js';
 
 const FIELD = { ...DECIMAL, step: 0.1, min: 0 };
 
@@ -15,49 +15,27 @@ const controls = document.getElementById('body-weight-controls');
 const input = document.getElementById('body-weight');
 const logButton = document.getElementById('body-weight-log');
 const saveButton = document.getElementById('body-weight-save');
-const editActions = document.getElementById('body-weight-edit-actions');
-const deleteActions = document.getElementById('body-weight-delete-actions');
-const whenField = document.getElementById('body-weight-when-field');
-const whenInput = document.getElementById('body-weight-when');
 const historyEl = document.getElementById('body-weight-history');
 
-let editingId = null;
-let confirmingDelete = false;
+const editor = createEntryEditor(bodyWeights, {
+  logButton,
+  editActions: document.getElementById('body-weight-edit-actions'),
+  deleteActions: document.getElementById('body-weight-delete-actions'),
+  whenField: document.getElementById('body-weight-when-field'),
+  whenInput: document.getElementById('body-weight-when'),
+}, { read: readEntry, fill: fillForm, render: renderBodyWeight });
 
 const actions = {
+  ...editor.actions,
   step: ({ dir }) => {
     stepInput(input, FIELD, Number(dir));
     updateSaveButtons();
   },
   log: () => {
-    const weight = readWeight();
-    if (!weight) return;
-    bodyWeights.add({ weight });
+    const entry = readEntry();
+    if (!entry) return;
+    bodyWeights.add(entry);
     revealNewest(historyEl);
-  },
-  save: () => {
-    const weight = readWeight();
-    if (!weight) return;
-    const id = editingId;
-    editingId = null;
-    confirmingDelete = false;
-    bodyWeights.update(id, { weight, timestamp: readWhen(whenInput, id) });
-  },
-  'cancel-edit': () => { editingId = null; confirmingDelete = false; renderBodyWeight(); },
-  edit: ({ id }) => {
-    editingId = id;
-    confirmingDelete = false;
-    fillForm(bodyWeights.getEntries().find((e) => e.timestamp === id));
-    showWhen(whenInput, id);
-    renderBodyWeight();
-  },
-  delete: () => { confirmingDelete = true; renderBodyWeight(); },
-  'cancel-delete': () => { confirmingDelete = false; renderBodyWeight(); },
-  'confirm-delete': () => {
-    const id = editingId;
-    editingId = null;
-    confirmingDelete = false;
-    bodyWeights.remove(id);
   },
 };
 
@@ -69,10 +47,7 @@ export function initBodyWeight() {
 }
 
 export function renderBodyWeight() {
-  logButton.hidden = editingId !== null;
-  editActions.hidden = editingId === null || confirmingDelete;
-  deleteActions.hidden = !confirmingDelete;
-  whenField.hidden = editingId === null;
+  editor.render();
   updateSaveButtons();
   renderChart();
   const entries = bodyWeights.getEntries();
@@ -83,7 +58,7 @@ export function renderBodyWeight() {
     describe: describeWeight,
     isUnsynced: bodyWeights.isUnsynced,
     flat: true,
-    editingId,
+    editingId: editor.editingId(),
     empty: 'No weights logged yet.',
   });
 }
@@ -107,12 +82,12 @@ function fillForm(entry) {
   input.value = entry ? roundValue(entry.weight) : '';
 }
 
-function readWeight() {
+function readEntry() {
   const weight = FIELD.parse(input.value);
-  return weight > 0 ? weight : null;
+  return weight > 0 ? { weight } : null;
 }
 
 function updateSaveButtons() {
-  saveButton.disabled = !readWeight();
-  logButton.disabled = !readWeight();
+  saveButton.disabled = !readEntry();
+  logButton.disabled = !readEntry();
 }

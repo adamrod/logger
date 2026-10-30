@@ -46,7 +46,6 @@ const actions = {
 export function initAnalysis() {
   onAction([screen], actions);
   exerciseSelect.addEventListener('change', () => { showExercise(exerciseSelect.value, ''); renderAnalysis(); });
-  window.addEventListener('resize', renderAnalysis);
 }
 
 export function enterAnalysis() {

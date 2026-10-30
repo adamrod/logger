@@ -17,7 +17,6 @@ let range = 'All';
 
 export function initChart() {
   onAction([rangeGroup], { range: ({ range: name }) => { range = name; renderChart(); } });
-  window.addEventListener('resize', renderChart);
 }
 
 export function renderChart() {

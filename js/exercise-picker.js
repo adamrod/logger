@@ -1,3 +1,4 @@
+import { onAction } from './events.js';
 import { addExercise, allExercises, isOtherExercise, removeExercise, renameExercise } from './exercises.js';
 import { escapeHtml } from './format.js';
 
@@ -29,9 +30,10 @@ const actions = {
   rename: ({ name }) => startNaming(name),
   remove: ({ name }) => { removing = name; render(); },
   'confirm-remove': ({ name }) => {
+    const wasCurrent = name === current;
     removing = null;
     removeExercise(name);
-    if (name === current) onPick(allExercises()[0]);
+    if (wasCurrent) onPick(allExercises()[0]);
   },
   'start-add': () => startNaming(null),
   'cancel-name': () => { isNaming = false; renaming = null; render(); },
@@ -39,10 +41,7 @@ const actions = {
 
 export function initExercisePicker(pickHandler) {
   onPick = pickHandler;
-  picker.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action]');
-    if (button) actions[button.dataset.action](button.dataset);
-  });
+  onAction([picker], actions);
   nameForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const name = nameInput.value.trim();
@@ -74,8 +73,9 @@ function startNaming(name) {
 }
 
 function finishRename(from, to) {
+  const wasCurrent = from === current;
   const renamed = renameExercise(from, to);
-  if (from === current) onPick(renamed);
+  if (wasCurrent) onPick(renamed);
   else render();
 }
 

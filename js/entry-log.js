@@ -7,6 +7,10 @@ export const entryDate = (entry) => new Date(entry.timestamp);
 
 export const byTimestamp = (a, b) => a.timestamp.localeCompare(b.timestamp);
 
+export const isAddedHere = ({ lastSyncAt, addedIds }, entry) => !lastSyncAt
+  || entry.timestamp > lastSyncAt
+  || addedIds.includes(entry.timestamp);
+
 const idsOf = (entries) => entries.map((entry) => entry.timestamp);
 
 export function createEntryLog({ file, columns, numbers, keys }) {
@@ -14,9 +18,7 @@ export function createEntryLog({ file, columns, numbers, keys }) {
   let syncMeta = { ...EMPTY_SYNC, ...JSON.parse(localStorage.getItem(keys.sync) ?? '{}') };
   let changedDuringSync = new Set();
 
-  const isPending = (entry) => !syncMeta.lastSyncAt
-    || entry.timestamp > syncMeta.lastSyncAt
-    || syncMeta.addedIds.includes(entry.timestamp);
+  const isPending = (entry) => isAddedHere(syncMeta, entry);
 
   const isSynced = (entry) => !isPending(entry);
 

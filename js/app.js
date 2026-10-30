@@ -50,6 +50,7 @@ initSettings();
 initSyncStatus();
 onChange(render);
 window.addEventListener('hashchange', route);
+window.addEventListener('resize', render);
 document.addEventListener('focusout', snapPageBackAfterKeyboard);
 route();
 

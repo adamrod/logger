@@ -1,3 +1,4 @@
+import { onAction } from './events.js';
 import { addVariant, allVariants, removeVariant } from './exercises.js';
 import { escapeHtml } from './format.js';
 
@@ -20,8 +21,9 @@ let onPick = () => {};
 const actions = {
   pick: ({ name }) => onPick(name === current ? '' : name),
   remove: ({ name }) => {
+    const wasCurrent = name === current;
     removeVariant(exercise, name);
-    if (name === current) onPick('');
+    if (wasCurrent) onPick('');
   },
   'toggle-edit': () => { isEditing = !isEditing; render(); },
   'start-add': () => { isEditing = false; isAdding = true; nameInput.value = ''; render(); nameInput.focus(); },
@@ -30,10 +32,7 @@ const actions = {
 
 export function initVariantPicker(pickHandler) {
   onPick = pickHandler;
-  picker.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-action]');
-    if (button) actions[button.dataset.action](button.dataset);
-  });
+  onAction([picker], actions);
   addForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const name = nameInput.value.trim();
