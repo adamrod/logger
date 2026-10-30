@@ -95,8 +95,7 @@ const changeFrom = (previous, entry) => ({
 function weightHtml(entry, change) {
   const weight = `<span class="set-weight">${describeWeight(entry)}</span>`;
   if (!change) return weight;
-  const gap = change.days > 1 ? ` · ${change.days}d` : '';
-  return `${weight}<span class="set-change">${formatDelta(change.delta)}${gap}</span>`;
+  return `${weight}<span class="set-delta">${formatDelta(change.delta)}</span><span class="set-days">${change.days}d</span>`;
 }
 
 function fillForm(entry) {
