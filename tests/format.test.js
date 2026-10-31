@@ -1,9 +1,14 @@
-import { formatDateTimeValue, formatDuration, parseDateTimeValue } from '../js/format.js';
+import { formatDateTimeValue, formatDay, formatDuration, parseDateTimeValue } from '../js/format.js';
 import { restSince } from '../js/rest-timer.js';
 import { readWhen, showWhen } from '../js/when-field.js';
 import { assertEqual, test } from './harness.js';
 
 const MINUTE = 60000;
+
+test('days show the date with a two-letter weekday', () => {
+  assertEqual(formatDay(new Date(2026, 9, 30)), '2026-10-30 Fr');
+  assertEqual(formatDay(new Date(2026, 10, 1)), '2026-11-01 Su');
+});
 
 test('durations show minutes and padded seconds', () => {
   assertEqual(formatDuration(0), '0:00');

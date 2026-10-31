@@ -35,7 +35,7 @@ export function formatDelta(delta) {
 export const formatChange = (delta, since) => `${formatDelta(delta)} since ${formatShortDay(since)}`;
 
 export function formatDay(date) {
-  const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' });
+  const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' }).slice(0, 2);
   return `${formatIsoDate(date)} ${weekday}`;
 }
 

@@ -4,12 +4,16 @@ import { editAttributes, unsyncedHtml } from './history.js';
 
 const variantOf = (entry) => entry.variant ?? '';
 
+const toDay = (dayEntries) => ({
+  date: entryDate(dayEntries[0]),
+  rows: [...Map.groupBy(dayEntries, variantOf)].map(([variant, sets]) => ({ variant, sets })),
+});
+
+const gapSince = (previous, day) => (previous ? daysBetween(previous.date, day.date) : null);
+
 export function historyDays(entries) {
-  const days = [...Map.groupBy(entries, (entry) => dayKey(entryDate(entry))).values()].map((dayEntries) => ({
-    date: entryDate(dayEntries[0]),
-    rows: [...Map.groupBy(dayEntries, variantOf)].map(([variant, sets]) => ({ variant, sets })),
-  }));
-  return days.map((day, i) => ({ ...day, gap: i === 0 ? null : daysBetween(days[i - 1].date, day.date) })).toReversed();
+  const days = [...Map.groupBy(entries, (entry) => dayKey(entryDate(entry))).values()].map(toDay);
+  return days.map((day, i) => ({ ...day, gap: gapSince(days[i - 1], day) })).toReversed();
 }
 
 export function setChipText({ reps, weight }) {
@@ -26,8 +30,8 @@ function dayHtml({ date, gap, rows }, view) {
   return `
     <section class="history-day">
       <span class="history-date">${formatDay(date)}</span>
-      <span class="set-days history-gap">${gap === null ? '' : `${gap}d`}</span>
       ${rows.map((row) => rowHtml(row, view)).join('')}
+      ${gap === null ? '' : `<span class="history-gap">${gap}d</span>`}
     </section>`;
 }
 
