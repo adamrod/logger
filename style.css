@@ -311,7 +311,7 @@ li:first-child > .option-new { border-top: none; }
   display: inline-block;
   width: 8px;
   height: 8px;
-  margin: 0 4px 5px 12px;
+  margin: 0 4px 5px 10px;
   border: solid var(--muted);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);

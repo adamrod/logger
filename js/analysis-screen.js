@@ -27,7 +27,7 @@ const recordValue = document.getElementById('rep-max-value');
 const recordDate = document.getElementById('rep-max-date');
 const dailyChart = createLineChart(document.getElementById('daily-plot'), showDaily);
 const exerciseMenu = createPickerMenu('analysis-exercise', {
-  names: () => loggedExercises(),
+  names: loggedExercises,
   onPick: (name) => { showExercise(name, ''); renderAnalysis(); },
 });
 
@@ -121,7 +121,9 @@ function chipHtml(name) {
     aria-pressed="${name === variant}">${value || 'All'}</button>`;
 }
 
-const loggedExercises = () => allExercises().filter((name) => name === exercise || sets.getEntries().some((set) => set.exercise === name));
+function loggedExercises() {
+  return allExercises().filter((name) => name === exercise || sets.getEntries().some((set) => set.exercise === name));
+}
 
 const setText = (set) => (variant ? formatSet(set) : describeSet(set));
 

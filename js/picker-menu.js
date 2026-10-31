@@ -4,10 +4,12 @@ import { escapeHtml } from './format.js';
 const NO_MATCHES = '<li class="option-empty">No matches</li>';
 const SCREEN_EDGE_GAP = 8;
 
-export const matchingNames = (names, query) => names.filter((name) => name.toLowerCase().includes(query.trim().toLowerCase()));
+const normalized = (text) => text.trim().toLowerCase();
 
-export const isNewName = (names, query) => query.trim() !== ''
-  && !names.some((name) => name.toLowerCase() === query.trim().toLowerCase());
+export const matchingNames = (names, query) => names.filter((name) => normalized(name).includes(normalized(query)));
+
+export const isNewName = (names, query) => normalized(query) !== ''
+  && !names.some((name) => normalized(name) === normalized(query));
 
 export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}, extrasHtml = () => '', onClose = () => {} }) {
   const picker = document.getElementById(`${id}-picker`);
@@ -22,7 +24,7 @@ export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}
 
   onAction([picker], {
     ...actions,
-    toggle: () => (isOpen ? dismiss() : open()),
+    toggle: () => (isOpen ? closeAndRender() : open()),
     pick: ({ name }) => choose(onPick, name),
     add: ({ name }) => choose(onAdd, name),
   });
@@ -30,13 +32,13 @@ export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}
   searchForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const query = queryInput.value.trim();
-    const [first] = matchingNames(names(), query);
     if (!query) return;
+    const [first] = matchingNames(names(), query);
     if (first) choose(onPick, first);
     else if (onAdd) choose(onAdd, query);
   });
   document.addEventListener('click', (event) => {
-    if (isOpen && !event.composedPath().includes(picker)) dismiss();
+    if (isOpen && !event.composedPath().includes(picker)) closeAndRender();
   });
   window.visualViewport?.addEventListener('resize', fitAboveKeyboard);
 
@@ -51,7 +53,7 @@ export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}
     queryInput.focus();
   }
 
-  function dismiss() {
+  function closeAndRender() {
     close();
     render();
   }
@@ -81,9 +83,10 @@ export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}
 
   function renderOptions() {
     const query = queryInput.value;
-    const matches = matchingNames(names(), query);
-    const addHtml = onAdd && isNewName(names(), query) ? addOptionHtml(query.trim()) : '';
-    optionsEl.innerHTML = (matches.length || addHtml ? matches.map(optionHtml).join('') : NO_MATCHES) + addHtml;
+    const all = names();
+    const addHtml = onAdd && isNewName(all, query) ? addOptionHtml(query.trim()) : '';
+    const rows = matchingNames(all, query).map(optionHtml).join('') + addHtml;
+    optionsEl.innerHTML = rows || NO_MATCHES;
   }
 
   function optionHtml(name) {
