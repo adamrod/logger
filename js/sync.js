@@ -1,12 +1,13 @@
 import { parseCsv, toCsv } from './csv.js';
 import { byTimestamp, isAddedHere } from './entry-log.js';
 import { notifyChange, onEdit } from './events.js';
-import { readFile, writeFile } from './github.js';
+import { isConflict, readFile, writeFile } from './github.js';
 import { getSettings, isSyncConfigured } from './settings.js';
 import { entryLogs } from './store.js';
 
 const EDIT_DELAY = 3000;
 const RETRY_INTERVAL = 60000;
+const CONFLICT_RETRIES = 2;
 
 export const syncState = { running: false, scheduled: false, error: null };
 
@@ -80,15 +81,30 @@ async function syncWithRepo() {
   for (const log of entryLogs) await syncLog(repo, log);
 }
 
-async function syncLog(repo, log) {
+async function syncLog(repo, log, retriesLeft = CONFLICT_RETRIES) {
+  try {
+    await mergeWithRepo(repo, log);
+  } catch (error) {
+    if (retriesLeft === 0 || !isConflict(error)) throw error;
+    await syncLog(repo, log, retriesLeft - 1);
+  }
+}
+
+async function mergeWithRepo(repo, log) {
   const remote = await readFile(repo, log.file);
   const remoteEntries = parseCsv(remote?.text ?? '', log.numbers).filter((entry) => entry.timestamp);
-  const at = new Date().toISOString();
   const local = log.beginSync();
   const entries = mergeEntries(local.entries, remoteEntries, local.syncMeta);
+  const at = syncedAt(entries);
   const text = toCsv(entries, log.columns);
   if (text !== remote?.text) await writeFile(repo, log.file, text, remote?.sha);
   log.applySync({ entries, at });
+}
+
+function syncedAt(entries) {
+  const now = new Date().toISOString();
+  const newest = entries.at(-1)?.timestamp ?? now;
+  return newest > now ? newest : now;
 }
 
 function setSyncState(changes) {

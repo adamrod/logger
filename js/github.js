@@ -1,4 +1,6 @@
 const API = 'https://api.github.com';
+const TIMEOUT_MS = 20000;
+const CONFLICTS = [409, 422];
 const ERRORS = {
   401: 'The access token was rejected.',
   403: 'The token has no access to this repository.',
@@ -6,6 +8,8 @@ const ERRORS = {
   409: 'The repository changed during sync. Try again.',
   422: 'GitHub rejected the update. Try again.',
 };
+
+export const isConflict = (error) => CONFLICTS.includes(error.status);
 
 export async function readFile(repo, path) {
   const file = await request(repo, path);
@@ -21,11 +25,16 @@ async function request({ owner, repo, token }, path, options = {}) {
   const response = await fetch(`${API}/repos/${owner}/${repo}/contents/${path}`, {
     ...options,
     cache: 'no-store',
+    signal: AbortSignal.timeout(TIMEOUT_MS),
     headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}` },
   }).catch(() => { throw new Error('Can’t reach GitHub. Check your connection.'); });
   if (response.status === 404 && !options.method) return null;
-  if (!response.ok) throw new Error(ERRORS[response.status] ?? `GitHub error ${response.status}.`);
+  if (!response.ok) throw gitHubError(response.status);
   return response.json();
+}
+
+function gitHubError(status) {
+  return Object.assign(new Error(ERRORS[status] ?? `GitHub error ${status}.`), { status });
 }
 
 function encodeBase64(text) {

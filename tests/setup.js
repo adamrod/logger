@@ -43,6 +43,7 @@ globalThis.TextDecoder = class {
 };
 
 globalThis.fetch = (...args) => fetchHandler(...args);
+globalThis.AbortSignal = { timeout: (ms) => ({ timeoutMs: ms }) };
 globalThis.setInterval = () => 0;
 globalThis.clearTimeout = () => {};
 globalThis.navigator = { onLine: true };

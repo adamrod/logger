@@ -1,19 +1,23 @@
 import { parseCsv } from '../js/csv.js';
 import { bodyWeights, sets } from '../js/store.js';
-import { mergeEntries, sync } from '../js/sync.js';
+import { mergeEntries, sync, syncState } from '../js/sync.js';
 import { assertEqual, test } from './harness.js';
 import { handleFetch } from './setup.js';
 
 const files = {};
 let onWrite = () => {};
+let rejectWrite = () => false;
+const signals = [];
 
 const response = (status, body) => ({ status, ok: status < 300, json: async () => body });
 
 const toBase64 = (text) => btoa(String.fromCharCode(...new TextEncoder().encode(text)));
 const fromBase64 = (base64) => new TextDecoder().decode(Uint8Array.from(atob(base64), (char) => char.charCodeAt(0)));
 
-handleFetch(async (url, { method = 'GET', body } = {}) => {
+handleFetch(async (url, { method = 'GET', body, signal } = {}) => {
   const path = url.split('/contents/')[1];
+  signals.push(signal);
+  if (method === 'PUT' && rejectWrite(path)) return response(409, {});
   if (method === 'PUT') {
     files[path] = fromBase64(JSON.parse(body).content);
     onWrite(path);
@@ -89,4 +93,30 @@ test('a backdated entry is pushed in date order', async () => {
   await sync();
   assertEqual(remoteWeights(), [65, 71, 72]);
   assertEqual(bodyWeights.hasChanges(), false);
+});
+
+test('every GitHub request gives up after a timeout, so a stalled one cannot block syncing', async () => {
+  signals.length = 0;
+  bodyWeights.add({ weight: 73 });
+  await sync();
+  assertEqual(signals.length > 0 && signals.every((signal) => signal?.timeoutMs > 0), true);
+});
+
+test('a write rejected because another device synced first is merged and retried', async () => {
+  let conflicts = 1;
+  rejectWrite = (path) => path === 'bodyweight.csv' && conflicts-- > 0;
+  bodyWeights.add({ weight: 74 });
+  await sync();
+  rejectWrite = () => false;
+  assertEqual(syncState.error, null, 'error');
+  assertEqual(remoteWeights().at(-1), 74, 'pushed weight');
+  assertEqual(bodyWeights.hasChanges(), false, 'unsynced changes');
+});
+
+test('a set from a device whose clock runs ahead counts as synced after sync', async () => {
+  const ahead = new Date(Date.now() + 5000).toISOString();
+  files['bodyweight.csv'] += `${ahead},75\n`;
+  await sync();
+  assertEqual(bodyWeights.getEntries().at(-1).timestamp, ahead, 'pulled');
+  assertEqual(bodyWeights.hasChanges(), false, 'unsynced changes');
 });
