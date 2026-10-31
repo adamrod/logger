@@ -16,8 +16,10 @@ function createElement() {
     dispatch: (type, event) => listeners.filter((entry) => entry.type === type).forEach(({ listener }) => listener(event)),
     setAttribute: () => {},
     querySelectorAll: () => [],
-    focus: () => {},
-    blur: () => {},
+    getBoundingClientRect: () => ({ top: 0 }),
+    style: {},
+    focus() { document.activeElement = this; },
+    blur() { if (document.activeElement === this) document.activeElement = null; },
   };
 }
 
@@ -48,7 +50,7 @@ globalThis.AbortSignal = { timeout: (ms) => ({ timeoutMs: ms }) };
 globalThis.setInterval = () => 0;
 globalThis.clearTimeout = () => {};
 globalThis.navigator = { onLine: true };
-globalThis.window = { addEventListener: () => {} };
+globalThis.window = { addEventListener: () => {}, innerHeight: 844 };
 globalThis.document = { getElementById: element, addEventListener: () => {}, visibilityState: 'visible' };
 
 localStorage.setItem('logger.settings', JSON.stringify({ owner: 'owner', repo: 'repo', token: 'token' }));

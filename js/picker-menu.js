@@ -22,7 +22,7 @@ export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}
 
   onAction([picker], {
     ...actions,
-    toggle: () => { if (isOpen) close(); else isOpen = true; render(); },
+    toggle: () => (isOpen ? dismiss() : open()),
     pick: ({ name }) => choose(onPick, name),
     add: ({ name }) => choose(onAdd, name),
   });
@@ -36,13 +36,24 @@ export function createPickerMenu(id, { names, onPick, onAdd = null, actions = {}
     else if (onAdd) choose(onAdd, query);
   });
   document.addEventListener('click', (event) => {
-    if (isOpen && !event.composedPath().includes(picker)) { close(); render(); }
+    if (isOpen && !event.composedPath().includes(picker)) dismiss();
   });
   window.visualViewport?.addEventListener('resize', fitAboveKeyboard);
 
   function choose(handler, name) {
     close();
     handler(name);
+  }
+
+  function open() {
+    isOpen = true;
+    render();
+    queryInput.focus();
+  }
+
+  function dismiss() {
+    close();
+    render();
   }
 
   function close() {

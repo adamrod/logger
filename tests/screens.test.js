@@ -50,6 +50,14 @@ test('removing the chosen exercise picks the first one and shows its last set', 
   assertEqual(shownSet(), [String(last.reps), String(roundValue(last.weight))]);
 });
 
+test('opening the exercise menu puts the cursor in the search, closing it takes it out', () => {
+  openScreens();
+  click('exercise-picker', { action: 'toggle' });
+  assertEqual(document.activeElement === element('exercise-query'), true, 'search focused when open');
+  click('exercise-picker', { action: 'toggle' });
+  assertEqual(document.activeElement === element('exercise-query'), false, 'search focused when closed');
+});
+
 test('adding an exercise from the search picks it', () => {
   openScreens();
   click('exercise-picker', { action: 'add', name: 'Hip thrust' });
