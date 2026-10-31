@@ -413,6 +413,7 @@ li:first-child > .option-new { border-top: none; }
 .history-day + .history-day { border-top: 1px solid var(--row-divider); }
 .history-row { grid-column: 2 / -1; display: grid; grid-template-columns: subgrid; align-items: start; }
 .history-date { grid-column: 1; padding-right: 14px; font-size: 14px; line-height: 32px; color: var(--muted); white-space: nowrap; }
+.history-since { position: relative; grid-column: 1 / -1; height: 8px; border-bottom: 1px solid var(--row-divider); }
 .history-gap { position: absolute; bottom: -9px; left: 0; z-index: 1; padding-right: 6px; background: var(--bg); font-size: 12px; line-height: 14px; color: var(--muted); }
 .history-row .set-lead { font-size: 13px; line-height: 32px; }
 

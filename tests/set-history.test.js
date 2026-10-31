@@ -1,4 +1,4 @@
-import { historyDays, setChipText } from '../js/set-history.js';
+import { daysSinceLast, historyDays, setChipText } from '../js/set-history.js';
 import { assertEqual, test } from './harness.js';
 
 const at = (day, hour) => new Date(2026, 9, day, hour).toISOString();
@@ -22,6 +22,13 @@ test('set history gives each variant of a day its own row, in the order first do
 test('each day shows how many days passed since the previous day with sets', () => {
   const days = historyDays([set(at(25, 18), '', 5), set(at(29, 18), 'Left', 5), set(at(30, 7), 'Right', 6)]);
   assertEqual(days.map(({ gap }) => gap), [1, 4, null]);
+});
+
+test('the newest day shows how many days passed until today', () => {
+  const days = historyDays([set(at(25, 18), '', 5), set(at(28, 18), '', 5)]);
+  assertEqual(daysSinceLast(days, new Date(2026, 9, 31, 7)), 3);
+  assertEqual(daysSinceLast(days, new Date(2026, 9, 28, 23)), 0);
+  assertEqual(daysSinceLast(days, new Date(2026, 9, 27, 9)), 0);
 });
 
 test('a set without weight shows only its reps', () => {

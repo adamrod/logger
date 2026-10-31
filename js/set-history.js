@@ -16,6 +16,8 @@ export function historyDays(entries) {
   return days.map((day, i) => ({ ...day, gap: gapSince(days[i - 1], day) })).toReversed();
 }
 
+export const daysSinceLast = (days, today) => Math.max(0, daysBetween(days[0].date, today));
+
 export function setChipText({ reps, weight }) {
   const rounded = roundValue(weight);
   return rounded === 0 ? String(reps) : `${reps}<span class="set-times">×</span>${rounded}`;
@@ -23,8 +25,11 @@ export function setChipText({ reps, weight }) {
 
 export function setHistoryHtml(entries, view) {
   if (!entries.length) return '<p class="empty">No sets logged yet.</p>';
-  return `<div class="set-history">${historyDays(entries).map((day) => dayHtml(day, view)).join('')}</div>`;
+  const days = historyDays(entries);
+  return `<div class="set-history">${sinceLastHtml(daysSinceLast(days, new Date()))}${days.map((day) => dayHtml(day, view)).join('')}</div>`;
 }
+
+const sinceLastHtml = (days) => (days === 0 ? '' : `<div class="history-since"><span class="history-gap">${days}d</span></div>`);
 
 function dayHtml({ date, gap, rows }, view) {
   return `
