@@ -3,10 +3,11 @@ import { allExercises, allVariants } from './exercises.js';
 import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
 import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
 import { onAction } from './events.js';
-import { describeSet, roundValue } from './format.js';
-import { historyHtml, revealNewest } from './history.js';
+import { roundValue } from './format.js';
+import { revealNewest } from './history.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { initRestTimer, renderRestTimer } from './rest-timer.js';
+import { setHistoryHtml } from './set-history.js';
 import { sets } from './store.js';
 
 const FIELDS = {
@@ -45,7 +46,7 @@ const actions = {
     const set = readSet();
     if (!set) return;
     sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
-    revealNewest(historyEl);
+    revealNewest(historyEl, sets.getEntries().at(-1));
   },
 };
 
@@ -67,14 +68,7 @@ export function renderLog() {
   renderRestTimer();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
   analysisLink.hidden = exerciseSets.length === 0;
-  historyEl.innerHTML = historyHtml(exerciseSets, {
-    lead: [variantOf],
-    valueHtml: ({ reps, weight }) => `<span class="set-reps">${reps}</span> × ${roundValue(weight)}`,
-    describe: describeSet,
-    isUnsynced: sets.isUnsynced,
-    editingId: editor.editingId(),
-    empty: 'No sets logged yet.',
-  });
+  historyEl.innerHTML = setHistoryHtml(exerciseSets, { isUnsynced: sets.isUnsynced, editingId: editor.editingId() });
 }
 
 export function currentExercise() {

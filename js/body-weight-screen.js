@@ -35,7 +35,7 @@ const actions = {
     const entry = readEntry();
     if (!entry) return;
     bodyWeights.add(entry);
-    revealNewest(historyEl);
+    revealNewest(historyEl, bodyWeights.getEntries().at(-1));
   },
 };
 
@@ -57,7 +57,6 @@ export function renderBodyWeight() {
     valueHtml: (entry) => weightHtml(entry, changes.get(entry.timestamp)),
     describe: describeWeight,
     isUnsynced: bodyWeights.isUnsynced,
-    flat: true,
     editingId: editor.editingId(),
     empty: 'No weights logged yet.',
   });

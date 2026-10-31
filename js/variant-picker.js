@@ -5,8 +5,6 @@ import { escapeHtml } from './format.js';
 const NEW_CHIP = '<button type="button" class="chip chip-new" data-action="start-add" aria-label="New variant">+</button>';
 
 const picker = document.getElementById('variant-picker');
-const labelRow = document.getElementById('variant-label-row');
-const editButton = document.getElementById('variant-edit');
 const chipsEl = document.getElementById('variant-chips');
 const addForm = document.getElementById('variant-add');
 const nameInput = document.getElementById('variant-name');
@@ -32,7 +30,7 @@ const actions = {
 
 export function initVariantPicker(pickHandler) {
   onPick = pickHandler;
-  onAction([picker], actions);
+  onAction([picker, newButton], actions);
   addForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const name = nameInput.value.trim();
@@ -56,15 +54,16 @@ function render() {
   const variants = allVariants(exercise);
   const hasChips = !isAdding && variants.length > 0;
   isEditing &&= hasChips;
-  picker.hidden = exercise === undefined;
-  labelRow.hidden = !isAdding && !hasChips;
-  newButton.hidden = isAdding || hasChips;
-  editButton.hidden = !hasChips;
-  editButton.textContent = isEditing ? 'Done' : 'Edit';
-  editButton.setAttribute('aria-label', isEditing ? 'Done editing variants' : 'Edit variants');
+  picker.hidden = exercise === undefined || (!isAdding && !hasChips);
+  newButton.hidden = exercise === undefined || isAdding || hasChips;
   chipsEl.hidden = !hasChips;
-  chipsEl.innerHTML = variants.map(chipHtml).join('') + (isEditing ? '' : NEW_CHIP);
+  chipsEl.innerHTML = variants.map(chipHtml).join('') + (isEditing ? '' : NEW_CHIP) + editButtonHtml();
   addForm.hidden = !isAdding;
+}
+
+function editButtonHtml() {
+  const [text, label] = isEditing ? ['Done', 'Done editing variants'] : ['Edit', 'Edit variants'];
+  return `<button type="button" class="btn-text chips-edit" data-action="toggle-edit" aria-label="${label}">${text}</button>`;
 }
 
 function chipHtml(variant) {

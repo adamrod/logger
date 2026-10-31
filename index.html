@@ -25,60 +25,64 @@
 
   <section class="screen" id="screen-log" hidden>
     <div class="log-form">
-      <div class="field" id="exercise-picker">
+      <div class="field">
         <div class="label-row">
           <span class="label" id="exercise-label">Exercise</span>
-          <a class="text-link" id="analysis-link" href="#analysis">Analysis</a>
-        </div>
-        <div class="picker" id="exercise-select">
-          <button type="button" class="picker-button" id="exercise-button" data-action="toggle"
-            aria-labelledby="exercise-label exercise-button" aria-controls="exercise-menu" aria-expanded="false"></button>
-          <div class="picker-menu" id="exercise-menu" hidden>
-            <ul id="exercise-options"></ul>
-            <button type="button" class="option-new" data-action="start-add">+ New exercise</button>
+          <div class="label-actions">
+            <button type="button" class="btn-text" id="variant-new" data-action="start-add">+ Variant</button>
+            <a class="text-link" id="analysis-link" href="#analysis">Analysis</a>
           </div>
         </div>
-        <form class="add-form" id="exercise-form" hidden>
-          <input class="input" id="exercise-name" aria-labelledby="exercise-label" placeholder="Exercise name"
-            autocomplete="off" enterkeyhint="done">
-          <button class="btn btn-primary" id="exercise-submit">Add</button>
-          <button type="button" class="btn-text" id="exercise-cancel" data-action="cancel-name">Cancel</button>
-        </form>
+        <div id="exercise-picker">
+          <div class="picker" id="exercise-select">
+            <button type="button" class="picker-button" id="exercise-button" data-action="toggle"
+              aria-labelledby="exercise-label exercise-button" aria-controls="exercise-menu" aria-expanded="false"></button>
+            <div class="picker-menu" id="exercise-menu" hidden>
+              <ul id="exercise-options"></ul>
+              <button type="button" class="option-new" data-action="start-add">+ New exercise</button>
+            </div>
+          </div>
+          <form class="add-form" id="exercise-form" hidden>
+            <input class="input" id="exercise-name" aria-labelledby="exercise-label" placeholder="Exercise name"
+              autocomplete="off" enterkeyhint="done">
+            <button class="btn btn-primary" id="exercise-submit">Add</button>
+            <button type="button" class="btn-text" id="exercise-cancel" data-action="cancel-name">Cancel</button>
+          </form>
+        </div>
       </div>
 
       <div class="field" id="variant-picker">
-        <div class="label-row" id="variant-label-row">
-          <span class="label" id="variant-label">Variant</span>
-          <button type="button" class="btn-text" id="variant-edit" data-action="toggle-edit">Edit</button>
-        </div>
-        <div class="chips" id="variant-chips" role="group" aria-labelledby="variant-label"></div>
+        <div class="chips" id="variant-chips" role="group" aria-label="Variant"></div>
         <form class="add-form" id="variant-add" hidden>
-          <input class="input" id="variant-name" aria-labelledby="variant-label" placeholder="Variant, e.g. Left"
+          <input class="input" id="variant-name" aria-label="Variant" placeholder="Variant, e.g. Left"
             autocomplete="off" enterkeyhint="done">
           <button class="btn btn-primary">Add</button>
           <button type="button" class="btn-text" data-action="cancel-add">Cancel</button>
         </form>
-        <button type="button" class="btn-text variant-new" id="variant-new" data-action="start-add">+ Variant</button>
       </div>
 
       <div class="log-controls" id="log-controls">
-        <div class="field">
-          <div class="label-row">
-            <label class="label" for="reps">Repetitions</label>
-            <span class="rest-timer" id="rest-timer" role="timer" hidden></span>
+        <div class="set-fields">
+          <div class="field">
+            <div class="label-row">
+              <label class="label" for="reps">Reps</label>
+              <span class="rest-timer" id="rest-timer" role="timer" hidden></span>
+            </div>
+            <div class="stepper">
+              <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="-1" aria-label="Decrease repetitions">−</button>
+              <input class="input step-value" id="reps" inputmode="numeric" enterkeyhint="done" autocomplete="off">
+              <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="1" aria-label="Increase repetitions">+</button>
+            </div>
           </div>
-          <div class="stepper">
-            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="-1" aria-label="Decrease repetitions">−</button>
-            <input class="input step-value" id="reps" inputmode="numeric" enterkeyhint="done" autocomplete="off">
-            <button type="button" class="step-btn" data-action="step" data-field="reps" data-dir="1" aria-label="Increase repetitions">+</button>
-          </div>
-        </div>
-        <div class="field">
-          <label class="label" for="weight">Weight</label>
-          <div class="stepper">
-            <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="-1" aria-label="Decrease weight">−</button>
-            <input class="input step-value" id="weight" inputmode="decimal" enterkeyhint="done" autocomplete="off">
-            <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="1" aria-label="Increase weight">+</button>
+          <div class="field">
+            <div class="label-row">
+              <label class="label" for="weight">Weight</label>
+            </div>
+            <div class="stepper">
+              <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="-1" aria-label="Decrease weight">−</button>
+              <input class="input step-value" id="weight" inputmode="decimal" enterkeyhint="done" autocomplete="off">
+              <button type="button" class="step-btn" data-action="step" data-field="weight" data-dir="1" aria-label="Increase weight">+</button>
+            </div>
           </div>
         </div>
         <div class="field" id="set-when-field" hidden>
