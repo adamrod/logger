@@ -6,14 +6,12 @@ import { allExercises, allVariants } from './exercises.js';
 import { describeSet, escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
 import { currentExercise, currentVariant } from './log-screen.js';
+import { createPickerMenu } from './picker-menu.js';
 import { sets } from './store.js';
 
 const HEADINGS = { weight: 'Max weight', reps: 'Max reps', volume: 'Volume' };
 const MIN_STEPS = { weight: 0, reps: 1, volume: 1 };
 
-const screen = document.getElementById('screen-analysis');
-const titleEl = document.getElementById('analysis-title');
-const exerciseSelect = document.getElementById('analysis-exercise');
 const summaryEl = document.getElementById('analysis-summary');
 const rangeGroup = document.getElementById('analysis-ranges');
 const variantsEl = document.getElementById('analysis-variants');
@@ -28,6 +26,10 @@ const barsEl = document.getElementById('rep-max-bars');
 const recordValue = document.getElementById('rep-max-value');
 const recordDate = document.getElementById('rep-max-date');
 const dailyChart = createLineChart(document.getElementById('daily-plot'), showDaily);
+const exerciseMenu = createPickerMenu('analysis-exercise', {
+  names: () => loggedExercises(),
+  onPick: (name) => { showExercise(name, ''); renderAnalysis(); },
+});
 
 let range = 'All';
 let exercise;
@@ -44,8 +46,7 @@ const actions = {
 };
 
 export function initAnalysis() {
-  onAction([screen], actions);
-  exerciseSelect.addEventListener('change', () => { showExercise(exerciseSelect.value, ''); renderAnalysis(); });
+  onAction([rangeGroup, variantsEl, metricGroup, barsEl], actions);
 }
 
 export function enterAnalysis() {
@@ -58,8 +59,7 @@ export function renderAnalysis() {
   const shownSets = entriesInRange(exerciseSets, range);
   const metric = chosenMetric ?? defaultMetric(shownSets);
   const daily = dailySeries(shownSets, metric);
-  titleEl.textContent = exercise ?? '';
-  exerciseSelect.innerHTML = loggedExercises().map(optionHtml).join('');
+  exerciseMenu.render(exercise);
   summaryEl.textContent = `${countText(daily.length, 'day')} · ${countText(shownSets.length, 'set')}`;
   markPressed(rangeGroup, 'range', range);
   variantsEl.hidden = variants.length === 0;
@@ -113,11 +113,6 @@ function barHtml({ reps, weight }, index, mostReps) {
       style="--share: ${reps / mostReps}">
       <span class="bar-reps">${reps}</span><span class="bar-fill"></span><span class="bar-weight">${shownWeight}</span>
     </button>`;
-}
-
-function optionHtml(name) {
-  const value = escapeHtml(name);
-  return `<option value="${value}"${name === exercise ? ' selected' : ''}>${value}</option>`;
 }
 
 function chipHtml(name) {

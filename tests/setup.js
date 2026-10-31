@@ -17,6 +17,7 @@ function createElement() {
     setAttribute: () => {},
     querySelectorAll: () => [],
     focus: () => {},
+    blur: () => {},
   };
 }
 

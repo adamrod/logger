@@ -23,6 +23,11 @@ function submitExerciseName(name) {
   element('exercise-form').dispatch('submit', { preventDefault: () => {} });
 }
 
+function submitSearch(query) {
+  element('exercise-query').value = query;
+  element('exercise-search').dispatch('submit', { preventDefault: () => {} });
+}
+
 const shownSet = () => [element('reps').value, element('weight').value];
 
 const lastSetOf = (exercise) => sets.getEntries().findLast((entry) => entry.exercise === exercise);
@@ -43,6 +48,21 @@ test('removing the chosen exercise picks the first one and shows its last set', 
   click('exercise-picker', { action: 'confirm-remove', name: 'Good mornings' });
   const last = lastSetOf(currentExercise());
   assertEqual(shownSet(), [String(last.reps), String(roundValue(last.weight))]);
+});
+
+test('adding an exercise from the search picks it', () => {
+  openScreens();
+  click('exercise-picker', { action: 'add', name: 'Hip thrust' });
+  assertEqual(currentExercise(), 'Hip thrust');
+});
+
+test('submitting the search picks the first match, or adds the name when nothing matches', () => {
+  openScreens();
+  sets.add({ exercise: 'Deadlift', reps: 3, weight: 120 });
+  submitSearch('dead');
+  assertEqual(currentExercise(), 'Deadlift', 'matching search');
+  submitSearch('Nordic curl');
+  assertEqual(currentExercise(), 'Nordic curl', 'new name');
 });
 
 test('removing the chosen variant clears it and shows the last set without one', () => {

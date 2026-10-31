@@ -1,47 +1,48 @@
-import { onAction } from './events.js';
 import { addExercise, allExercises, isOtherExercise, removeExercise, renameExercise } from './exercises.js';
 import { escapeHtml } from './format.js';
+import { createPickerMenu } from './picker-menu.js';
 
 const ICON_ACTIONS = {
   rename: { label: 'Rename', icon: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>' },
   remove: { label: 'Remove', icon: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>' },
 };
 
-const picker = document.getElementById('exercise-picker');
 const select = document.getElementById('exercise-select');
-const toggleButton = document.getElementById('exercise-button');
-const menu = document.getElementById('exercise-menu');
-const optionsEl = document.getElementById('exercise-options');
 const nameForm = document.getElementById('exercise-form');
 const nameInput = document.getElementById('exercise-name');
 const submitButton = document.getElementById('exercise-submit');
 const cancelButton = document.getElementById('exercise-cancel');
 
 let current = null;
-let isOpen = false;
 let isNaming = false;
 let renaming = null;
 let removing = null;
 let onPick = () => {};
 
-const actions = {
-  toggle: () => { isOpen = !isOpen; removing = null; render(); },
-  pick: ({ name }) => { close(); onPick(name); },
-  rename: ({ name }) => startNaming(name),
-  remove: ({ name }) => { removing = name; render(); },
-  'confirm-remove': ({ name }) => {
-    const wasCurrent = name === current;
-    removing = null;
-    removeExercise(name);
-    if (wasCurrent) onPick(allExercises()[0]);
+const menu = createPickerMenu('exercise', {
+  names: allExercises,
+  onPick: (name) => onPick(name),
+  onAdd: (name) => onPick(addExercise(name)),
+  actions: {
+    rename: ({ name }) => startNaming(name),
+    remove: ({ name }) => { removing = name; render(); },
+    'confirm-remove': ({ name }) => {
+      const wasCurrent = name === current;
+      removing = null;
+      removeExercise(name);
+      if (wasCurrent) onPick(allExercises()[0]);
+    },
+    'cancel-name': () => { isNaming = false; renaming = null; render(); },
   },
-  'start-add': () => startNaming(null),
-  'cancel-name': () => { isNaming = false; renaming = null; render(); },
-};
+  extrasHtml: (exercise) => {
+    const name = escapeHtml(exercise);
+    return exercise === removing ? confirmRemoveHtml(name) : iconButtonHtml('rename', name) + iconButtonHtml('remove', name);
+  },
+  onClose: () => { removing = null; },
+});
 
 export function initExercisePicker(pickHandler) {
   onPick = pickHandler;
-  onAction([picker], actions);
   nameForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const name = nameInput.value.trim();
@@ -53,9 +54,6 @@ export function initExercisePicker(pickHandler) {
     else finishRename(from, name);
   });
   nameInput.addEventListener('input', renderSubmitButton);
-  document.addEventListener('click', (event) => {
-    if (isOpen && !event.composedPath().includes(picker)) { close(); render(); }
-  });
 }
 
 export function renderExercisePicker(exercise) {
@@ -64,10 +62,10 @@ export function renderExercisePicker(exercise) {
 }
 
 function startNaming(name) {
-  close();
+  menu.close();
   isNaming = true;
   renaming = name;
-  nameInput.value = name ?? '';
+  nameInput.value = name;
   render();
   nameInput.focus();
 }
@@ -79,20 +77,12 @@ function finishRename(from, to) {
   else render();
 }
 
-function close() {
-  isOpen = false;
-  removing = null;
-}
-
 function render() {
   const hasExercises = current !== undefined;
   select.hidden = isNaming || !hasExercises;
   nameForm.hidden = !isNaming && hasExercises;
   cancelButton.hidden = !hasExercises;
-  toggleButton.textContent = current ?? '';
-  toggleButton.setAttribute('aria-expanded', isOpen);
-  menu.hidden = !isOpen;
-  optionsEl.innerHTML = allExercises().map(optionHtml).join('');
+  menu.render(current);
   renderSubmitButton();
 }
 
@@ -103,16 +93,6 @@ function renderSubmitButton() {
 function submitText() {
   if (renaming === null) return 'Add';
   return isOtherExercise(nameInput.value.trim(), renaming) ? 'Merge' : 'Save';
-}
-
-function optionHtml(exercise) {
-  const name = escapeHtml(exercise);
-  return `
-    <li class="option">
-      <button type="button" class="option-pick" data-action="pick" data-name="${name}"
-        aria-current="${exercise === current}">${name}</button>
-      ${exercise === removing ? confirmRemoveHtml(name) : iconButtonHtml('rename', name) + iconButtonHtml('remove', name)}
-    </li>`;
 }
 
 const confirmRemoveHtml = (name) => `<button type="button" class="option-confirm" data-action="confirm-remove"

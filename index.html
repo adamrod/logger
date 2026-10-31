@@ -38,8 +38,11 @@
             <button type="button" class="picker-button" id="exercise-button" data-action="toggle"
               aria-labelledby="exercise-label exercise-button" aria-controls="exercise-menu" aria-expanded="false"></button>
             <div class="picker-menu" id="exercise-menu" hidden>
-              <ul id="exercise-options"></ul>
-              <button type="button" class="option-new" data-action="start-add">+ New exercise</button>
+              <form class="picker-search" id="exercise-search">
+                <input class="picker-query" id="exercise-query" type="search" aria-label="Search or add exercise"
+                  placeholder="Search or add" autocomplete="off" enterkeyhint="go">
+              </form>
+              <ul class="picker-options" id="exercise-options"></ul>
             </div>
           </div>
           <form class="add-form" id="exercise-form" hidden>
@@ -126,9 +129,18 @@
         </div>
       </div>
       <div class="analysis-head">
-        <div class="analysis-title">
-          <h1 id="analysis-title"></h1>
-          <select id="analysis-exercise" aria-label="Exercise"></select>
+        <div class="picker" id="analysis-exercise-picker">
+          <h1 class="analysis-title">
+            <button type="button" class="title-button" id="analysis-exercise-button" data-action="toggle"
+              aria-controls="analysis-exercise-menu" aria-expanded="false"></button>
+          </h1>
+          <div class="picker-menu" id="analysis-exercise-menu" hidden>
+            <form class="picker-search" id="analysis-exercise-search">
+              <input class="picker-query" id="analysis-exercise-query" type="search" aria-label="Search exercise"
+                placeholder="Search" autocomplete="off" enterkeyhint="go">
+            </form>
+            <ul class="picker-options" id="analysis-exercise-options"></ul>
+          </div>
         </div>
         <p class="chart-meta" id="analysis-summary"></p>
       </div>
