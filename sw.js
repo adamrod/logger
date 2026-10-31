@@ -1,4 +1,4 @@
-const VERSION = 34;
+const VERSION = 35;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -41,8 +41,7 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  const freshShell = APP_SHELL.map((path) => `${path}?v=${VERSION}`);
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(freshShell)));
+  event.waitUntil(cacheOneDeploy());
 });
 
 self.addEventListener('activate', (event) => {
@@ -64,6 +63,16 @@ self.addEventListener('message', (event) => {
   if (event.data === 'version') event.ports[0].postMessage(VERSION);
   if (event.data === 'activate') self.skipWaiting();
 });
+
+async function cacheOneDeploy() {
+  const [worker, ...shell] = await Promise.all(['sw.js', ...APP_SHELL].map((path) => fetch(path, { cache: 'reload' })));
+  const deployedAt = worker.headers.get('last-modified');
+  const isOneDeploy = shell.every((response) => response.ok && response.headers.get('last-modified') === deployedAt);
+  const isThisVersion = (await worker.text()).includes(`const VERSION = ${VERSION};`);
+  if (!isOneDeploy || !isThisVersion) throw new Error('The server mixed files from different deploys, retry later');
+  const cache = await caches.open(CACHE);
+  await Promise.all(APP_SHELL.map((path, index) => cache.put(path, shell[index])));
+}
 
 async function fromThisVersion(request) {
   const cache = await caches.open(CACHE);

@@ -1,6 +1,6 @@
 const versionEl = document.getElementById('app-version');
 
-export function initAppVersion() {
+function initAppVersion() {
   const workers = navigator.serviceWorker;
   if (!workers) return;
   const running = workers.controller ? askVersion(workers.controller) : Promise.resolve(null);
@@ -45,3 +45,5 @@ function reloadWhenIdle() {
   if (!document.activeElement?.matches('input, textarea, select')) return location.reload();
   document.addEventListener('visibilitychange', () => location.reload(), { once: true });
 }
+
+initAppVersion();

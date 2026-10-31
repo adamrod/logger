@@ -1,5 +1,4 @@
 import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
-import { initAppVersion } from './app-version.js';
 import { initBodyWeight, renderBodyWeight } from './body-weight-screen.js';
 import { onChange } from './events.js';
 import { initLog, renderLog } from './log-screen.js';
@@ -55,5 +54,3 @@ document.addEventListener('focusout', snapPageBackAfterKeyboard);
 route();
 
 initAutoSync();
-
-initAppVersion();
