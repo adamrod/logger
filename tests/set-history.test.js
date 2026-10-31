@@ -19,6 +19,11 @@ test('set history gives each variant of a day its own row, in the order first do
   assertEqual(shown(days), [[['Left', [4, 5]], ['Right', [3, 2]]]]);
 });
 
+test('each day shows how many days passed since the previous day with sets', () => {
+  const days = historyDays([set(at(25, 18), '', 5), set(at(29, 18), 'Left', 5), set(at(30, 7), 'Right', 6)]);
+  assertEqual(days.map(({ gap }) => gap), [1, 4, null]);
+});
+
 test('a set without weight shows only its reps', () => {
   assertEqual(setChipText({ reps: 8, weight: 0 }), '8');
   assertEqual(setChipText({ reps: 5, weight: 77.504 }), '5<span class="set-times">×</span>77.5');

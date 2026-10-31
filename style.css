@@ -364,17 +364,6 @@ ul { padding: 0; list-style: none; }
 
 .empty { margin-top: 12px; font-size: 15px; color: var(--muted); }
 
-.day-label {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 8px 0 2px;
-  background: var(--bg);
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-}
-
 .entries { display: grid; grid-template-columns: repeat(var(--lead-columns), max-content) minmax(0, 1fr) max-content; }
 .entries :is(.set, .set-row) { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
 
@@ -391,13 +380,13 @@ ul { padding: 0; list-style: none; }
 }
 .set-row:active { opacity: 0.6; }
 
-.set-history { display: grid; grid-template-columns: fit-content(40%) minmax(0, 1fr); }
-.history-day, .history-row { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; }
-.history-day { padding-bottom: 4px; }
-.history-day .day-label { grid-column: 1 / -1; }
-.history-day + .history-day { border-top: 1px solid var(--border); }
-.history-row { align-items: start; }
-.history-row .set-lead { line-height: 36px; }
+.set-history { display: grid; grid-template-columns: max-content max-content fit-content(25%) minmax(0, 1fr); }
+.history-day { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: start; padding: 2px 0; }
+.history-day + .history-day { border-top: 1px solid var(--row-divider); }
+.history-row { grid-column: 3 / -1; display: grid; grid-template-columns: subgrid; align-items: start; }
+.history-date { grid-column: 1; padding-right: 10px; font-size: 14px; line-height: 36px; color: var(--muted); white-space: nowrap; }
+.history-gap { grid-column: 2; padding-right: 14px; line-height: 36px; text-align: right; white-space: nowrap; }
+.history-row .set-lead { font-size: 13px; line-height: 36px; }
 
 .set-chips { display: flex; flex-wrap: wrap; margin-left: -8px; }
 
@@ -409,7 +398,7 @@ ul { padding: 0; list-style: none; }
   border-radius: 8px;
   background: none;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
 }
 .set-chip[aria-current="true"] { background: var(--text); color: var(--bg); }

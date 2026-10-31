@@ -1,15 +1,15 @@
 import { entryDate } from './entry-log.js';
-import { dayKey, describeSet, escapeHtml, formatDay, roundValue } from './format.js';
+import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, roundValue } from './format.js';
 import { editAttributes, unsyncedHtml } from './history.js';
 
 const variantOf = (entry) => entry.variant ?? '';
 
 export function historyDays(entries) {
-  const days = [...Map.groupBy(entries, (entry) => dayKey(entryDate(entry))).values()];
-  return days.toReversed().map((dayEntries) => ({
+  const days = [...Map.groupBy(entries, (entry) => dayKey(entryDate(entry))).values()].map((dayEntries) => ({
     date: entryDate(dayEntries[0]),
     rows: [...Map.groupBy(dayEntries, variantOf)].map(([variant, sets]) => ({ variant, sets })),
   }));
+  return days.map((day, i) => ({ ...day, gap: i === 0 ? null : daysBetween(days[i - 1].date, day.date) })).toReversed();
 }
 
 export function setChipText({ reps, weight }) {
@@ -22,11 +22,11 @@ export function setHistoryHtml(entries, view) {
   return `<div class="set-history">${historyDays(entries).map((day) => dayHtml(day, view)).join('')}</div>`;
 }
 
-function dayHtml({ date, rows }, view) {
-  const day = formatDay(date);
+function dayHtml({ date, gap, rows }, view) {
   return `
-    <section class="history-day" aria-label="${day}">
-      <h3 class="day-label">${day}</h3>
+    <section class="history-day">
+      <span class="history-date">${formatDay(date)}</span>
+      <span class="set-days history-gap">${gap === null ? '' : `${gap}d`}</span>
       ${rows.map((row) => rowHtml(row, view)).join('')}
     </section>`;
 }
