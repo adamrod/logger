@@ -22,6 +22,7 @@ function createElement() {
         .forEach(({ listener }) => { if (!stopped) listener(dispatched); });
     },
     setAttribute: () => {},
+    querySelector: () => null,
     querySelectorAll: () => [],
     getBoundingClientRect: () => ({ top: 0 }),
     style: {},

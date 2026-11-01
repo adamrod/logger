@@ -24,8 +24,9 @@ export function setChipText({ reps, weight }) {
 }
 
 export function setHistoryHtml(entries, view) {
-  if (!entries.length) return '<p class="empty">No sets logged yet.</p>';
-  const days = historyDays(entries);
+  const shown = view.variant ? entries.filter((entry) => variantOf(entry) === view.variant) : entries;
+  if (!shown.length) return '<p class="empty">No sets logged yet.</p>';
+  const days = historyDays(shown);
   return `<div class="set-history">${sinceLastHtml(daysSinceLast(days, new Date()))}${days.map((day) => dayHtml(day, view)).join('')}</div>`;
 }
 
@@ -43,7 +44,7 @@ function dayHtml({ date, gap, rows }, view) {
 function rowHtml({ variant, sets }, view) {
   return `
     <div class="history-row">
-      <span class="set-lead">${escapeHtml(variant)}</span>
+      <span class="set-lead">${view.variant ? '' : escapeHtml(variant)}</span>
       <ul class="set-chips">${sets.map((set) => chipHtml(set, view)).join('')}</ul>
     </div>`;
 }

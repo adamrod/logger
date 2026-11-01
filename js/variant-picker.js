@@ -5,7 +5,9 @@ import { escapeHtml } from './format.js';
 const NEW_CHIP = '<button type="button" class="chip chip-new" data-action="start-add" aria-label="New variant">+</button>';
 
 const picker = document.getElementById('variant-picker');
+const bar = document.getElementById('variant-bar');
 const chipsEl = document.getElementById('variant-chips');
+const editButton = document.getElementById('variant-edit');
 const addForm = document.getElementById('variant-add');
 const nameInput = document.getElementById('variant-name');
 const newButton = document.getElementById('variant-new');
@@ -41,13 +43,16 @@ export function initVariantPicker(pickHandler) {
 }
 
 export function renderVariantPicker(selectedExercise, variant) {
-  if (selectedExercise !== exercise) {
+  const isOtherExercise = selectedExercise !== exercise;
+  const isPicked = isOtherExercise || variant !== current;
+  if (isOtherExercise) {
     isEditing = false;
     isAdding = false;
   }
   exercise = selectedExercise;
   current = variant;
   render();
+  if (isPicked) revealCurrent();
 }
 
 function render() {
@@ -56,14 +61,20 @@ function render() {
   isEditing &&= hasChips;
   picker.hidden = exercise === undefined || (!isAdding && !hasChips);
   newButton.hidden = exercise === undefined || isAdding || hasChips;
-  chipsEl.hidden = !hasChips;
-  chipsEl.innerHTML = variants.map(chipHtml).join('') + (isEditing ? '' : NEW_CHIP) + editButtonHtml();
+  bar.hidden = !hasChips;
+  chipsEl.innerHTML = (isEditing ? NEW_CHIP : '') + variants.map(chipHtml).join('');
+  renderEditButton();
   addForm.hidden = !isAdding;
 }
 
-function editButtonHtml() {
+function renderEditButton() {
   const [text, label] = isEditing ? ['Done', 'Done editing variants'] : ['Edit', 'Edit variants'];
-  return `<button type="button" class="btn-text chips-edit" data-action="toggle-edit" aria-label="${label}">${text}</button>`;
+  editButton.textContent = text;
+  editButton.setAttribute('aria-label', label);
+}
+
+function revealCurrent() {
+  chipsEl.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function chipHtml(variant) {

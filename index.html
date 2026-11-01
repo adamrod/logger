@@ -61,7 +61,10 @@
       </div>
 
       <div class="field" id="variant-picker">
-        <div class="chips" id="variant-chips" role="group" aria-label="Variant"></div>
+        <div class="variant-bar" id="variant-bar">
+          <div class="chips variant-chips" id="variant-chips" role="group" aria-label="Variant"></div>
+          <button type="button" class="btn-text chips-edit" id="variant-edit" data-action="toggle-edit"></button>
+        </div>
         <form class="add-form" id="variant-add" hidden>
           <input class="input" id="variant-name" aria-label="Variant" placeholder="Variant, e.g. Left"
             autocomplete="off" enterkeyhint="done">

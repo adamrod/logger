@@ -1,4 +1,4 @@
-import { daysSinceLast, historyDays, setChipText } from '../js/set-history.js';
+import { daysSinceLast, historyDays, setChipText, setHistoryHtml } from '../js/set-history.js';
 import { assertEqual, test } from './harness.js';
 
 const at = (day, hour) => new Date(2026, 9, day, hour).toISOString();
@@ -29,6 +29,25 @@ test('the newest day shows how many days passed until today', () => {
   assertEqual(daysSinceLast(days, new Date(2026, 9, 31, 7)), 3);
   assertEqual(daysSinceLast(days, new Date(2026, 9, 28, 23)), 0);
   assertEqual(daysSinceLast(days, new Date(2026, 9, 27, 9)), 0);
+});
+
+const historyOf = (entries, variant) => setHistoryHtml(entries, { variant, isUnsynced: () => false, editingId: null });
+
+const variantShown = (html, variant) => html.includes(`class="set-lead">${variant}<`);
+
+test('a chosen variant shows only its sets, without naming the variant on each day', () => {
+  const left = set(at(30, 7), 'Left', 4);
+  const right = set(at(30, 8), 'Right', 3);
+  const html = historyOf([left, right], 'Left');
+  assertEqual([html.includes(left.timestamp), html.includes(right.timestamp), variantShown(html, 'Left')], [true, false, false]);
+});
+
+test('without a chosen variant every set shows under its variant', () => {
+  const left = set(at(30, 7), 'Left', 4);
+  const right = set(at(30, 8), 'Right', 3);
+  const html = historyOf([left, right], '');
+  assertEqual([html.includes(left.timestamp), html.includes(right.timestamp)], [true, true], 'sets');
+  assertEqual([variantShown(html, 'Left'), variantShown(html, 'Right')], [true, true], 'variants');
 });
 
 test('a set without weight shows only its reps', () => {

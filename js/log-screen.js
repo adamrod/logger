@@ -29,6 +29,9 @@ const analysisLink = document.getElementById('analysis-link');
 
 let selected = sets.getEntries().at(-1)?.exercise;
 let selectedVariant = variantOf(sets.getEntries().at(-1));
+let editedVariant = '';
+
+const isEditing = () => editor.editingId() !== null;
 
 const editor = createEntryEditor(sets, {
   logButton,
@@ -67,13 +70,17 @@ export function renderLog() {
   const exercise = currentExercise();
   renderExercisePicker(exercise);
   renderExerciseNote(exercise);
-  renderVariantPicker(exercise, currentVariant());
+  renderVariantPicker(exercise, isEditing() ? editedVariant : currentVariant());
   editor.render();
   updateSaveButtons();
   renderRestTimer();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
   analysisLink.hidden = exerciseSets.length === 0;
-  historyEl.innerHTML = setHistoryHtml(exerciseSets, { isUnsynced: sets.isUnsynced, editingId: editor.editingId() });
+  historyEl.innerHTML = setHistoryHtml(exerciseSets, {
+    variant: currentVariant(),
+    isUnsynced: sets.isUnsynced,
+    editingId: editor.editingId(),
+  });
 }
 
 export function currentExercise() {
@@ -93,9 +100,12 @@ function selectExercise(exercise) {
 }
 
 function selectVariant(variant) {
-  const last = lastSetOfVariant(currentExercise(), variant);
-  selectedVariant = variant;
-  if (last && editor.editingId() === null) fillForm(last);
+  if (isEditing()) editedVariant = variant;
+  else {
+    selectedVariant = variant;
+    const last = lastSetOfVariant(currentExercise(), variant);
+    if (last) fillForm(last);
+  }
   renderLog();
 }
 
@@ -113,7 +123,7 @@ function fillForm({ reps, weight }) {
 }
 
 function fillEditedSet(entry) {
-  selectedVariant = variantOf(entry);
+  editedVariant = variantOf(entry);
   fillForm(entry);
 }
 
@@ -125,7 +135,7 @@ function readSet() {
 
 function readEditedSet() {
   const set = readSet();
-  return set && { variant: selectedVariant, ...set };
+  return set && { variant: editedVariant, ...set };
 }
 
 function updateSaveButtons() {

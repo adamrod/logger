@@ -2,7 +2,7 @@ import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
 import { onChange } from '../js/events.js';
 import { noteOf } from '../js/exercises.js';
 import { roundValue } from '../js/format.js';
-import { currentExercise, initLog, renderLog } from '../js/log-screen.js';
+import { currentExercise, currentVariant, initLog, renderLog } from '../js/log-screen.js';
 import { bodyWeights, sets } from '../js/store.js';
 import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
@@ -139,6 +139,23 @@ test('saving an edited set updates it and leaves edit mode', () => {
   click('log-controls', { action: 'save' });
   assertEqual(sets.getEntries().at(-1).reps, 15);
   assertEqual(element('log-button').hidden, false, 'log button after saving');
+});
+
+test('moving an edited set to another variant keeps the history on the variant being logged', () => {
+  openScreens();
+  sets.add({ exercise: 'Split squat', variant: 'Left', reps: 8, weight: 20 });
+  sets.add({ exercise: 'Split squat', variant: 'Left', reps: 9, weight: 20 });
+  sets.add({ exercise: 'Split squat', variant: 'Right', reps: 7, weight: 20 });
+  const { timestamp } = sets.getEntries().at(-3);
+  const isShown = () => element('history-list').innerHTML.includes(timestamp);
+  click('exercise-picker', { action: 'pick', name: 'Split squat' });
+  click('variant-picker', { action: 'pick', name: 'Left' });
+  click('history-list', { action: 'edit', id: timestamp });
+  click('variant-picker', { action: 'pick', name: 'Right' });
+  assertEqual([currentVariant(), isShown()], ['Left', true], 'while editing');
+  click('log-controls', { action: 'save' });
+  const edited = sets.getEntries().find((entry) => entry.timestamp === timestamp);
+  assertEqual([edited.variant, currentVariant(), isShown()], ['Right', 'Left', false], 'after saving');
 });
 
 test('a set deleted from edit mode is gone', () => {
