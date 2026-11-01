@@ -4,7 +4,7 @@ import { revealPressedChip } from './chip-row.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { allVariants } from './exercises.js';
-import { describeSet, escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
+import { escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
 import { currentExercise, currentVariant } from './log-screen.js';
 import { sets } from './store.js';
@@ -84,8 +84,8 @@ function renderDaily(daily, metric) {
 }
 
 function showDaily(point) {
-  dailyValue.textContent = point ? (point.set ? setText(point.set) : point.value) : '';
-  dailyDate.textContent = point ? formatDay(point.date) : '';
+  dailyValue.textContent = point ? (point.set ? formatSet(point.set) : point.value) : '';
+  dailyDate.textContent = point ? whenText(point.date, point.set) : '';
 }
 
 function renderRecords(shownSets) {
@@ -99,8 +99,8 @@ function showRecord(index) {
   const record = records[index];
   selectedWeight = record.weight;
   barsEl.querySelectorAll('.bar').forEach((bar, i) => bar.setAttribute('aria-pressed', i === index));
-  recordValue.textContent = setText(record);
-  recordDate.textContent = formatDay(entryDate(record));
+  recordValue.textContent = formatSet(record);
+  recordDate.textContent = whenText(entryDate(record), record);
 }
 
 function barHtml({ reps, weight }, index, mostReps) {
@@ -118,6 +118,6 @@ function chipHtml(name) {
     aria-pressed="${name === variant}">${value || 'All'}</button>`;
 }
 
-const setText = (set) => (variant ? formatSet(set) : describeSet(set));
+const whenText = (date, set) => [formatDay(date), !variant && set?.variant].filter(Boolean).join(' · ');
 
 const countText = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`;

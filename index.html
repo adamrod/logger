@@ -154,8 +154,8 @@
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="volume">Volume</button>
             </div>
           </div>
-          <p class="chart-readout" aria-live="polite">
-            <span><span class="chart-value" id="daily-value"></span> <span class="chart-meta" id="daily-date"></span></span>
+          <p class="chart-readout readout-stacked" aria-live="polite">
+            <span class="readout-text"><span class="chart-value" id="daily-value"></span> <span class="chart-meta readout-when" id="daily-date"></span></span>
             <span class="chart-meta" id="daily-change"></span>
           </p>
           <svg class="chart-plot" id="daily-plot" aria-hidden="true"></svg>
@@ -165,8 +165,8 @@
           <div class="section-head">
             <h2 class="label" id="rep-max-heading">Max reps by weight</h2>
           </div>
-          <p class="chart-readout" aria-live="polite">
-            <span><span class="chart-value" id="rep-max-value"></span> <span class="chart-meta" id="rep-max-date"></span></span>
+          <p class="chart-readout readout-stacked" aria-live="polite">
+            <span class="readout-text"><span class="chart-value" id="rep-max-value"></span> <span class="chart-meta readout-when" id="rep-max-date"></span></span>
           </p>
           <div class="bars" id="rep-max-bars" role="group" aria-labelledby="rep-max-heading"></div>
         </section>

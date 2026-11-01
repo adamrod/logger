@@ -296,6 +296,10 @@ li:first-child > .option-new { border-top: none; }
 .toggle[aria-pressed="true"] { font-weight: 700; color: var(--text); }
 
 .chart-readout { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.readout-stacked { white-space: nowrap; }
+.readout-stacked > .chart-meta { flex: none; }
+.readout-text { display: flex; flex-direction: column; min-width: 0; }
+.readout-when { overflow: hidden; text-overflow: ellipsis; }
 .chart-value { font-size: 24px; font-weight: 600; }
 .chart-meta { font-size: 14px; color: var(--muted); }
 .chart-extremes { margin-top: 2px; }
