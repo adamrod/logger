@@ -3,6 +3,13 @@ const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'
 const DAY_MS = 86400000;
 const SIGNS = { '-1': '−', 0: '±', 1: '+' };
 
+const dateFormat = (options) => new Intl.DateTimeFormat(LOCALE, options);
+const TIME = dateFormat({ hour: '2-digit', minute: '2-digit' });
+const DAY_MONTH = dateFormat({ day: 'numeric', month: 'short' });
+const DAY_MONTH_YEAR = dateFormat({ day: 'numeric', month: 'short', year: 'numeric' });
+const MONTH = dateFormat({ month: 'short' });
+const WEEKDAY = dateFormat({ weekday: 'short' });
+
 const pad = (number) => String(number).padStart(2, '0');
 
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
@@ -13,19 +20,16 @@ export const formatSet = ({ reps, weight }) => `${reps} × ${roundValue(weight)}
 
 export const describeSet = (set) => [set.variant, formatSet(set)].filter(Boolean).join(' · ');
 
-export const formatTime = (date) => date.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
+export const formatTime = (date) => TIME.format(date);
 
 export function formatWhen(date) {
-  const year = date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric';
-  const day = date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short', year });
-  return `${day} · ${formatTime(date)}`;
+  const day = date.getFullYear() === new Date().getFullYear() ? DAY_MONTH : DAY_MONTH_YEAR;
+  return `${day.format(date)} · ${formatTime(date)}`;
 }
 
-export const formatShortDay = (date) => date.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
+export const formatShortDay = (date) => DAY_MONTH.format(date);
 
-export const formatMonth = (date) => (date.getMonth() === 0
-  ? String(date.getFullYear())
-  : date.toLocaleDateString(LOCALE, { month: 'short' }));
+export const formatMonth = (date) => (date.getMonth() === 0 ? String(date.getFullYear()) : MONTH.format(date));
 
 export function formatDelta(delta) {
   const rounded = roundValue(delta);
@@ -35,7 +39,7 @@ export function formatDelta(delta) {
 export const formatChange = (delta, since) => `${formatDelta(delta)} since ${formatShortDay(since)}`;
 
 export function formatDay(date) {
-  const weekday = date.toLocaleDateString(LOCALE, { weekday: 'short' }).slice(0, 2);
+  const weekday = WEEKDAY.format(date).slice(0, 2);
   return `${formatIsoDate(date)} ${weekday}`;
 }
 

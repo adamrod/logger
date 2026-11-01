@@ -90,26 +90,27 @@ function dateLabelsHtml(points, scale) {
 
 function dateTicks(first, last, maxCount) {
   const fitting = (ticksFor, steps) => steps.map(ticksFor).find((ticks) => ticks.length <= maxCount);
-  return fitting((step) => dayTicks(first, last, step), DAY_STEPS)
-    ?? fitting((step) => monthTicks(first, last, step), MONTH_STEPS)
+  return fitting((step) => dayTicks(first, last, step, maxCount), DAY_STEPS)
+    ?? fitting((step) => monthTicks(first, last, step, maxCount), MONTH_STEPS)
     ?? [];
 }
 
-function dayTicks(first, last, step) {
+function dayTicks(first, last, step, maxCount) {
   const ticks = [];
-  for (const date = nextMidnight(first); date <= last; date.setDate(date.getDate() + step)) {
+  for (const date = nextMidnight(first); date <= last && ticks.length <= maxCount; date.setDate(date.getDate() + step)) {
     ticks.push({ date: new Date(date), label: formatShortDay(date) });
   }
   return ticks;
 }
 
-function monthTicks(first, last, step) {
+function monthTicks(first, last, step, maxCount) {
   const ticks = [];
-  for (let index = first.getFullYear() * 12 + first.getMonth(); ; index += 1) {
+  for (let index = first.getFullYear() * 12 + first.getMonth(); ticks.length <= maxCount; index += 1) {
     const date = new Date(Math.floor(index / 12), index % 12, 1);
-    if (date > last) return ticks;
+    if (date > last) break;
     if (date >= first && index % step === 0) ticks.push({ date, label: formatMonth(date) });
   }
+  return ticks;
 }
 
 function nextMidnight(date) {
