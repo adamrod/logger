@@ -1,14 +1,13 @@
 import { personalRecords } from './analysis.js';
 import { entryDate } from './entry-log.js';
-import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, roundValue } from './format.js';
+import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, formatIsoDate, roundValue } from './format.js';
 import { currentDateAttribute, editAttributes, unsyncedHtml } from './history.js';
 
 const variantOf = (entry) => entry.variant ?? '';
 
-const toDay = (dayEntries) => ({
-  date: entryDate(dayEntries[0]),
-  rows: [...Map.groupBy(dayEntries, variantOf)].map(([variant, sets]) => ({ variant, sets })),
-});
+export const variantRows = (entries) => [...Map.groupBy(entries, variantOf)].map(([variant, sets]) => ({ variant, sets }));
+
+const toDay = (dayEntries) => ({ date: entryDate(dayEntries[0]), rows: variantRows(dayEntries) });
 
 const gapSince = (previous, day) => (previous ? daysBetween(previous.date, day.date) : null);
 
@@ -37,13 +36,13 @@ const sinceLastHtml = (days) => (days === 0 ? '' : `<div class="history-since"><
 function dayHtml({ date, gap, rows }, view) {
   return `
     <section class="history-day"${currentDateAttribute(date)}>
-      <span class="history-date">${formatDay(date)}</span>
-      ${rows.map((row) => rowHtml(row, view)).join('')}
+      <button type="button" class="history-date" data-action="day" data-day="${formatIsoDate(date)}">${formatDay(date)}</button>
+      ${rows.map((row) => setRowHtml(row, view)).join('')}
       ${gap === null ? '' : `<span class="history-gap">${gap}d</span>`}
     </section>`;
 }
 
-function rowHtml({ variant, sets }, view) {
+export function setRowHtml({ variant, sets }, view) {
   return `
     <div class="history-row">
       <span class="set-lead">${view.variant ? '' : escapeHtml(variant)}</span>

@@ -1,5 +1,6 @@
 import { enterAnalysis, initAnalysis } from '../js/analysis-screen.js';
 import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
+import { enterDay, initDay, renderDay } from '../js/day-screen.js';
 import { onChange } from '../js/events.js';
 import { noteOf } from '../js/exercises.js';
 import { formatIsoDate, roundValue } from '../js/format.js';
@@ -17,6 +18,7 @@ function openScreens() {
   initLog();
   initBodyWeight();
   initAnalysis();
+  initDay();
   onChange(() => { renderLog(); renderBodyWeight(); });
 }
 
@@ -322,4 +324,35 @@ test('undoing a note opens the notes', async () => {
   await revealSets(nextUndo());
   assertEqual([noteOf('Face pulls'), element('note-field').hidden], ['', false]);
   trackPlace(() => null);
+});
+
+test('tapping a date in the history opens that day, and tapping a set there edits it on Sets', () => {
+  openScreens();
+  sets.add({ exercise: 'Chin ups', reps: 7, weight: 10 });
+  sets.add({ exercise: 'Dips', reps: 12, weight: 0 });
+  const chinUp = lastSetOf('Chin ups');
+  const day = formatIsoDate(new Date(chinUp.timestamp));
+  click('exercise-picker', { action: 'pick', name: 'Dips' });
+  click('history-list', { action: 'day', day });
+  assertEqual(location.hash, `#day/${day}`, 'opened day');
+  enterDay(day);
+  renderDay();
+  assertEqual(element('day-exercises').innerHTML.includes(chinUp.timestamp), true, 'set shown on the day');
+  click('day-exercises', { action: 'edit', id: chinUp.timestamp });
+  assertEqual([location.hash, currentExercise(), element('log-button').hidden, ...shownSet()], ['#log', 'Chin ups', true, '7', '10']);
+  click('log-controls', { action: 'cancel-edit' });
+});
+
+test('the day arrows step to the previous and next days with something logged', () => {
+  openScreens();
+  const at = (year, month, date) => new Date(year, month, date, 9).toISOString();
+  [at(1990, 0, 6), at(1990, 0, 9)].forEach((timestamp) => sets.add({ timestamp, exercise: 'Old lift', reps: 5, weight: 50 }));
+  bodyWeights.add({ timestamp: at(1990, 0, 8), weight: 81 });
+  enterDay('1990-01-06');
+  renderDay();
+  assertEqual([element('day-summary').textContent, element('day-previous').disabled], ['1 exercise · 1 set', true], 'first day');
+  click('day-steps', { action: 'step', step: 'next' });
+  assertEqual([location.hash, element('day-summary').textContent], ['#day/1990-01-08', 'BW 81'], 'weight only');
+  click('day-steps', { action: 'step', step: 'next' });
+  assertEqual(location.hash, '#day/1990-01-09', 'next set day');
 });

@@ -205,6 +205,27 @@
     </div>
   </section>
 
+  <section class="screen" id="screen-day" hidden>
+    <div class="analysis">
+      <div class="analysis-nav">
+        <a class="text-link" href="#log">‹ Sets</a>
+        <div class="day-steps" id="day-steps">
+          <button type="button" class="icon-button" id="day-previous" data-action="step" data-step="previous" aria-label="Previous day">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <button type="button" class="icon-button" id="day-next" data-action="step" data-step="next" aria-label="Next day">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="analysis-head">
+        <h1 class="analysis-title" id="day-title"></h1>
+        <p class="chart-meta" id="day-summary"></p>
+      </div>
+      <div id="day-exercises"></div>
+    </div>
+  </section>
+
   <section class="screen" id="screen-body-weight" hidden>
     <div class="log-form">
       <div class="log-controls" id="body-weight-controls">

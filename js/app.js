@@ -1,5 +1,6 @@
 import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
 import { initBodyWeight, renderBodyWeight, revealWeights } from './body-weight-screen.js';
+import { enterDay, initDay, renderDay } from './day-screen.js';
 import { onChange } from './events.js';
 import { forgetLoggedNames } from './exercises.js';
 import { initKeepAwake } from './keep-awake.js';
@@ -15,18 +16,21 @@ const RENDERERS = {
   settings: renderSettings,
   'body-weight': renderBodyWeight,
   analysis: renderAnalysis,
+  day: renderDay,
 };
-const ENTER_HANDLERS = { analysis: enterAnalysis };
-const PARENT_TABS = { analysis: 'log' };
+const ENTER_HANDLERS = { analysis: enterAnalysis, day: enterDay };
+const PARENT_TABS = { analysis: 'log', day: 'log' };
 const REVEALERS = { log: revealSets, 'body-weight': revealWeights };
 
 let current = null;
+let enteredHash = null;
 
 function route() {
-  const name = location.hash.slice(1);
+  const [name, param] = location.hash.slice(1).split('/');
   const next = name in RENDERERS ? name : 'log';
-  if (next !== current) ENTER_HANDLERS[next]?.();
+  if (next !== current || location.hash !== enteredHash) ENTER_HANDLERS[next]?.(param);
   current = next;
+  enteredHash = location.hash;
   const currentTab = PARENT_TABS[current] ?? current;
   document.querySelectorAll('.screen').forEach((screen) => {
     screen.hidden = screen.id !== `screen-${current}`;
@@ -67,6 +71,7 @@ forgetLoggedNames();
 initLog();
 initBodyWeight();
 initAnalysis();
+initDay();
 initSettings();
 initSyncStatus();
 initUndoButtons(showReplayed);

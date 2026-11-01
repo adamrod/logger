@@ -70,7 +70,7 @@ ul { padding: 0; list-style: none; }
 .tabs { flex: 1; display: flex; }
 
 .undo-actions { flex: none; display: flex; margin: 0 -13px 0 4px; }
-.undo-button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: none; background: none; color: var(--muted); }
+.undo-button, .icon-button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: none; background: none; color: var(--muted); }
 
 .tab {
   flex: 1;
@@ -414,6 +414,28 @@ li:first-child > .option-new { border-top: none; }
 .bar[aria-pressed="true"] .bar-reps { color: var(--text); }
 .bar[aria-pressed="true"] .bar-fill { background: var(--text); }
 
+.day-steps { display: flex; margin-right: -12px; }
+
+.day-exercise { padding: 0 var(--gutter) 8px; border-top: 1px solid var(--divider); }
+.day-exercise-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.day-exercise-name .icon { flex: none; color: var(--muted); }
+.day-sets { display: grid; grid-template-columns: fit-content(30%) minmax(0, 1fr); }
+.day-sets .history-row { grid-column: 1 / -1; }
+
 .history {
   flex: 1;
   min-height: 0;
@@ -473,7 +495,7 @@ li:first-child > .option-new { border-top: none; }
 .history-day { position: relative; grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: start; padding: 2px 0; }
 .history-day + .history-day { border-top: 1px solid var(--row-divider); }
 .history-row { grid-column: 2 / -1; display: grid; grid-template-columns: subgrid; align-items: start; }
-.history-date { grid-column: 1; padding-right: 14px; font-size: 14px; line-height: 32px; color: var(--muted); white-space: nowrap; }
+.history-date { grid-column: 1; height: 32px; padding: 0 14px 0 0; border: none; background: none; font-size: 14px; line-height: 32px; color: var(--muted); text-align: left; white-space: nowrap; }
 .history-since { position: relative; grid-column: 1 / -1; height: 8px; border-bottom: 1px solid var(--row-divider); }
 .history-gap { position: absolute; bottom: -9px; left: 0; z-index: 1; padding-right: 6px; background: var(--bg); font-size: 12px; line-height: 14px; color: var(--muted); }
 .history-row .set-lead { font-size: 13px; line-height: 32px; }

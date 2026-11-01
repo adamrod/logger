@@ -63,6 +63,8 @@ globalThis.setInterval = () => 0;
 globalThis.clearTimeout = () => {};
 globalThis.navigator = { onLine: true };
 globalThis.window = { addEventListener: () => {}, innerHeight: 844 };
+globalThis.location = { hash: '' };
+globalThis.history = { replaceState: (state, title, url) => { location.hash = url; } };
 globalThis.document = { getElementById: element, addEventListener: () => {}, visibilityState: 'visible' };
 
 localStorage.setItem('logger.settings', JSON.stringify({ owner: 'owner', repo: 'repo', token: 'token' }));

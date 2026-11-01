@@ -1,4 +1,4 @@
-const VERSION = 73;
+const VERSION = 74;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -14,6 +14,8 @@ const APP_SHELL = [
   'js/chart-controls.js',
   'js/chip-row.js',
   'js/csv.js',
+  'js/day-screen.js',
+  'js/day-summary.js',
   'js/entry-editor.js',
   'js/entry-log.js',
   'js/events.js',

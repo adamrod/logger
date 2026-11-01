@@ -4,7 +4,7 @@ import { revealPressedChip } from './chip-row.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { allVariants } from './exercises.js';
-import { escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
+import { countText, escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
 import { currentExercise, currentVariant } from './log-screen.js';
 import { bodyWeights, sets } from './store.js';
@@ -140,5 +140,3 @@ function chipHtml(name) {
 }
 
 const whenText = (date, set) => [formatDay(date), !variant && set?.variant].filter(Boolean).join(' · ');
-
-const countText = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`;

@@ -9,6 +9,8 @@ const DAY_MONTH = dateFormat({ day: 'numeric', month: 'short' });
 const DAY_MONTH_YEAR = dateFormat({ day: 'numeric', month: 'short', year: 'numeric' });
 const MONTH = dateFormat({ month: 'short' });
 const WEEKDAY = dateFormat({ weekday: 'short' });
+const LONG_DAY = dateFormat({ weekday: 'long', day: 'numeric', month: 'long' });
+const LONG_DAY_YEAR = dateFormat({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 const pad = (number) => String(number).padStart(2, '0');
 
@@ -28,6 +30,10 @@ export function formatWhen(date) {
 }
 
 export const formatShortDay = (date) => DAY_MONTH.format(date);
+
+export const formatLongDay = (date) => (date.getFullYear() === new Date().getFullYear() ? LONG_DAY : LONG_DAY_YEAR).format(date);
+
+export const countText = (count, noun) => `${count} ${noun}${count === 1 ? '' : 's'}`;
 
 export const formatMonth = (date) => (date.getMonth() === 0 ? String(date.getFullYear()) : MONTH.format(date));
 

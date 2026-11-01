@@ -55,6 +55,7 @@ const actions = {
     onSetLogged();
     revealNewest(historyEl, sets.getEntries().at(-1));
   },
+  day: ({ day }) => { location.hash = `#day/${day}`; },
 };
 
 export function initLog() {
@@ -105,7 +106,14 @@ export function currentVariant() {
   return allVariants(currentExercise()).includes(selectedVariant) ? selectedVariant : '';
 }
 
-function showExercise(exercise) {
+export function editSet(id) {
+  const set = sets.getEntries().find((entry) => entry.timestamp === id);
+  selected = set.exercise;
+  selectedVariant = variantOf(set);
+  editor.actions.edit({ id });
+}
+
+export function showExercise(exercise) {
   if (exercise !== currentExercise()) selectExercise(exercise);
   else {
     editor.stopEditing();
