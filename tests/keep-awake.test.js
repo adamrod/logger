@@ -13,7 +13,8 @@ let isOpen = false;
 
 const heldLocks = () => sentinels.filter((sentinel) => !sentinel.released).length;
 const touch = () => pageListeners.pointerup();
-const releaseAllLocks = () => sentinels.forEach((sentinel) => sentinel.release());
+const leaveApp = () => sentinels.forEach((sentinel) => sentinel.release());
+const returnToApp = () => pageListeners.visibilitychange();
 
 async function settle() {
   for (let tick = 0; tick < 5; tick += 1) await null;
@@ -111,8 +112,8 @@ test('quick touches hold one wake lock', withOpenApp(async () => {
 test('coming back to the app keeps the screen awake again', withOpenApp(async () => {
   touch();
   await settle();
-  releaseAllLocks();
-  pageListeners.visibilitychange();
+  leaveApp();
+  returnToApp();
   await settle();
   assertEqual(heldLocks(), 1);
 }));

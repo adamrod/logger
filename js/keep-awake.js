@@ -1,6 +1,6 @@
 const AWAKE_FOR_MS = 7 * 60000;
 
-let wakeLock = null;
+let wakeLockRequest = null;
 let sleepTimer = null;
 
 export function initKeepAwake() {
@@ -17,20 +17,20 @@ function keepAwakeWhenVisible() {
 function keepAwake() {
   clearTimeout(sleepTimer);
   sleepTimer = setTimeout(letScreenSleep, AWAKE_FOR_MS);
-  wakeLock ??= requestWakeLock();
+  wakeLockRequest ??= requestWakeLock();
 }
 
 async function requestWakeLock() {
   try {
     const sentinel = await navigator.wakeLock.request('screen');
-    sentinel.addEventListener('release', () => { wakeLock = null; });
+    sentinel.addEventListener('release', () => { wakeLockRequest = null; });
     return sentinel;
   } catch {
-    wakeLock = null;
+    wakeLockRequest = null;
     return null;
   }
 }
 
 function letScreenSleep() {
-  wakeLock?.then((sentinel) => sentinel?.release());
+  wakeLockRequest?.then((sentinel) => sentinel?.release());
 }
