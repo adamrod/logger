@@ -7,10 +7,10 @@ import { allVariants } from './exercises.js';
 import { escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
 import { currentExercise, currentVariant } from './log-screen.js';
-import { sets } from './store.js';
+import { bodyWeights, sets } from './store.js';
 
-const HEADINGS = { weight: 'Max weight', reps: 'Max reps', volume: 'Volume' };
-const MIN_STEPS = { weight: 0, reps: 1, volume: 1 };
+const HEADINGS = { weight: 'Max weight', relative: 'Max %BW', reps: 'Max reps', volume: 'Volume' };
+const MIN_STEPS = { weight: 0, relative: 1, reps: 1, volume: 1 };
 
 const titleEl = document.getElementById('analysis-title');
 const summaryEl = document.getElementById('analysis-summary');
@@ -20,7 +20,9 @@ const emptyEl = document.getElementById('analysis-empty');
 const chartsEl = document.getElementById('analysis-charts');
 const dailyHeading = document.getElementById('daily-heading');
 const metricGroup = document.getElementById('daily-metrics');
+const relativeToggle = document.getElementById('relative-toggle');
 const dailyValue = document.getElementById('daily-value');
+const dailyDetail = document.getElementById('daily-detail');
 const dailyDate = document.getElementById('daily-date');
 const dailyChange = document.getElementById('daily-change');
 const barsEl = document.getElementById('rep-max-bars');
@@ -60,8 +62,9 @@ export function renderAnalysis() {
   const variants = allVariants(exercise);
   const exerciseSets = sets.getEntries().filter((set) => set.exercise === exercise && (!variant || set.variant === variant));
   const shownSets = entriesInRange(exerciseSets, range);
-  const metric = chosenMetric ?? defaultMetric(shownSets);
-  const daily = dailySeries(shownSets, metric);
+  const weighIns = bodyWeights.getEntries();
+  const metric = shownMetric(shownSets, weighIns);
+  const daily = dailySeries(shownSets, metric, weighIns);
   titleEl.textContent = exercise ?? '';
   summaryEl.textContent = `${countText(daily.length, 'day')} · ${countText(shownSets.length, 'set')}`;
   markPressed(rangeGroup, 'range', range);
@@ -71,9 +74,15 @@ export function renderAnalysis() {
   isVariantPicked = false;
   emptyEl.hidden = shownSets.length > 0;
   chartsEl.hidden = shownSets.length === 0;
+  relativeToggle.hidden = weighIns.length === 0;
   if (!shownSets.length) return;
   renderDaily(daily, metric);
   renderRecords(shownSets);
+}
+
+function shownMetric(shownSets, weighIns) {
+  if (!chosenMetric || (chosenMetric === 'relative' && !weighIns.length)) return defaultMetric(shownSets);
+  return chosenMetric;
 }
 
 function renderDaily(daily, metric) {
@@ -84,8 +93,14 @@ function renderDaily(daily, metric) {
 }
 
 function showDaily(point) {
-  dailyValue.textContent = point ? (point.set ? formatSet(point.set) : point.value) : '';
+  dailyValue.textContent = point ? valueText(point) : '';
+  dailyDetail.textContent = point?.bodyWeight ? `${formatSet(point.set)} · BW ${point.bodyWeight}` : '';
   dailyDate.textContent = point ? whenText(point.date, point.set) : '';
+}
+
+function valueText(point) {
+  if (point.bodyWeight) return `${point.value}%`;
+  return point.set ? formatSet(point.set) : point.value;
 }
 
 function renderRecords(shownSets) {

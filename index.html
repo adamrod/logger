@@ -162,12 +162,16 @@
             <h2 class="label" id="daily-heading"></h2>
             <div class="toggles" id="daily-metrics" role="group" aria-label="Chart value">
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="weight">Weight</button>
+              <button type="button" class="btn-text toggle" id="relative-toggle" data-action="metric" data-metric="relative">%BW</button>
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="reps">Reps</button>
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="volume">Volume</button>
             </div>
           </div>
           <p class="chart-readout readout-stacked" aria-live="polite">
-            <span class="readout-text"><span class="chart-value" id="daily-value"></span> <span class="chart-meta readout-when" id="daily-date"></span></span>
+            <span class="readout-text">
+              <span class="readout-main"><span class="chart-value" id="daily-value"></span> <span class="chart-meta" id="daily-detail"></span></span>
+              <span class="chart-meta readout-when" id="daily-date"></span>
+            </span>
             <span class="chart-meta" id="daily-change"></span>
           </p>
           <svg class="chart-plot" id="daily-plot" aria-hidden="true"></svg>

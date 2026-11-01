@@ -12,16 +12,37 @@ const topSet = (day, metric) => day.reduce((top, set) => (COMPARE[metric](set, t
 
 const volume = (day) => roundValue(day.reduce((sum, set) => sum + set.reps * set.weight, 0));
 
+const toTenth = (value) => Math.round(value * 10) / 10;
+
 const isMostlyUnweighted = (sets) => sets.filter((set) => set.weight === 0).length > sets.length / 2;
 
 export const defaultMetric = (sets) => (isMostlyUnweighted(sets) ? 'reps' : 'weight');
 
-export function dailySeries(sets, metric) {
+export function dailySeries(sets, metric, weighIns = []) {
   return byDay(sets).map((day) => {
     if (metric === 'volume') return { date: entryDate(day[0]), value: volume(day) };
+    if (metric === 'relative') return relativePoint(topSet(day, 'weight'), weighIns);
     const set = topSet(day, metric);
     return { set, date: entryDate(set), value: set[metric] };
   });
+}
+
+function relativePoint(set, weighIns) {
+  const date = entryDate(set);
+  const bodyWeight = toTenth(bodyWeightAt(weighIns, date));
+  return { set, date, bodyWeight, value: Math.round((set.weight / bodyWeight) * 100) };
+}
+
+export function bodyWeightAt(weighIns, date) {
+  const time = date.getTime();
+  const nextIndex = weighIns.findIndex((entry) => entryDate(entry).getTime() >= time);
+  if (nextIndex === -1) return weighIns.at(-1).weight;
+  if (nextIndex === 0) return weighIns[0].weight;
+  const before = weighIns[nextIndex - 1];
+  const after = weighIns[nextIndex];
+  const start = entryDate(before).getTime();
+  const share = (time - start) / (entryDate(after).getTime() - start);
+  return before.weight + share * (after.weight - before.weight);
 }
 
 export function repRecords(sets) {

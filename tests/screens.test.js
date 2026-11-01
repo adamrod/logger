@@ -1,3 +1,4 @@
+import { enterAnalysis, initAnalysis } from '../js/analysis-screen.js';
 import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
 import { onChange } from '../js/events.js';
 import { noteOf } from '../js/exercises.js';
@@ -14,6 +15,7 @@ function openScreens() {
   isOpen = true;
   initLog();
   initBodyWeight();
+  initAnalysis();
   onChange(() => { renderLog(); renderBodyWeight(); });
 }
 
@@ -241,4 +243,17 @@ test('one button starts and stops the stopwatch, and logging restarts it while r
   element('stopwatch-reset-on-log').dispatch('change', {});
   click('log-controls', { action: 'log' });
   assertEqual(isRunning(), false, 'after logging unticked');
+});
+
+test('the %BW chart shows the top set as a percent of body weight, beside the set and the body weight', () => {
+  openScreens();
+  bodyWeights.add({ weight: 80 });
+  const weighedAt = Date.parse(bodyWeights.getEntries().at(-1).timestamp);
+  sets.add({ timestamp: new Date(weighedAt + 60000).toISOString(), exercise: 'Weighted dips', reps: 3, weight: 40 });
+  click('exercise-picker', { action: 'pick', name: 'Weighted dips' });
+  element('daily-plot').clientWidth = 350;
+  enterAnalysis();
+  click('daily-metrics', { action: 'metric', metric: 'relative' });
+  const readout = ['daily-heading', 'daily-value', 'daily-detail'].map((id) => element(id).textContent);
+  assertEqual(readout, ['Max %BW', '50%', '3 × 40 · BW 80']);
 });
