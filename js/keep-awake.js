@@ -1,4 +1,6 @@
-const AWAKE_FOR_MS = 7 * 60000;
+import { getSettings } from './settings.js';
+
+const MINUTE_MS = 60000;
 
 let wakeLockRequest = null;
 let sleepTimer = null;
@@ -14,9 +16,11 @@ function keepAwakeWhenVisible() {
   if (document.visibilityState === 'visible') keepAwake();
 }
 
-function keepAwake() {
+export function keepAwake() {
   clearTimeout(sleepTimer);
-  sleepTimer = setTimeout(letScreenSleep, AWAKE_FOR_MS);
+  const minutes = getSettings().screenTimeout;
+  if (!navigator.wakeLock || !minutes) return letScreenSleep();
+  sleepTimer = setTimeout(letScreenSleep, minutes * MINUTE_MS);
   wakeLockRequest ??= requestWakeLock();
 }
 

@@ -30,7 +30,7 @@ html, body {
 
 body { position: fixed; inset: 0; }
 
-button, input, textarea { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 
 button {
   cursor: pointer;
@@ -537,6 +537,10 @@ li:first-child > .option-new { border-top: none; }
 .settings-section { display: flex; flex-direction: column; gap: 14px; }
 .settings-section + .settings-section { margin-top: 36px; }
 .settings-section > .btn-secondary { height: 52px; }
+
+.select { position: relative; }
+.select .input { width: 100%; padding-right: 48px; -webkit-appearance: none; appearance: none; }
+.select .icon { position: absolute; top: 17px; right: 16px; pointer-events: none; }
 
 .sync-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
 .sync-row .btn { flex: none; height: 48px; font-size: 16px; }

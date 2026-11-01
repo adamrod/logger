@@ -1,9 +1,11 @@
 import { formatWhen } from './format.js';
+import { keepAwake } from './keep-awake.js';
 import { getSettings, isSyncConfigured, updateSettings } from './settings.js';
 import { bodyWeights, sets } from './store.js';
 import { lastSyncAt, sync, syncState } from './sync.js';
 
 const settingInputs = document.querySelectorAll('[data-setting]');
+const screenTimeoutSelect = document.getElementById('setting-screen-timeout');
 const statusEl = document.getElementById('sync-status');
 const syncButton = document.getElementById('sync-now');
 const exportSetsButton = document.getElementById('export-sets');
@@ -13,6 +15,10 @@ export function initSettings() {
   settingInputs.forEach((input) => input.addEventListener('change', () => {
     updateSettings({ [input.dataset.setting]: input.value.trim() });
   }));
+  screenTimeoutSelect.addEventListener('change', () => {
+    updateSettings({ screenTimeout: Number(screenTimeoutSelect.value) });
+    keepAwake();
+  });
   syncButton.addEventListener('click', sync);
   exportSetsButton.addEventListener('click', () => exportCsv(sets));
   exportBodyWeightButton.addEventListener('click', () => exportCsv(bodyWeights));
@@ -23,6 +29,7 @@ export function renderSettings() {
   settingInputs.forEach((input) => {
     if (input !== document.activeElement) input.value = settings[input.dataset.setting];
   });
+  screenTimeoutSelect.value = settings.screenTimeout;
   statusEl.textContent = syncStatusText();
   syncButton.disabled = syncState.running || !isSyncConfigured();
 }
