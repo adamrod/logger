@@ -118,10 +118,9 @@
           <div class="stopwatch-body">
             <button type="button" class="stopwatch-button" data-action="stopwatch-reset" aria-label="Reset stopwatch"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4h4"/></svg></button>
             <span class="stopwatch-time" id="stopwatch-time" role="timer" aria-labelledby="stopwatch-label">0:00</span>
-            <div class="stopwatch-buttons">
-              <button type="button" class="stopwatch-button" id="stopwatch-stop" data-action="stopwatch-stop" aria-label="Stop stopwatch"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
-              <button type="button" class="stopwatch-button" id="stopwatch-start" data-action="stopwatch-start" aria-label="Start stopwatch"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></button>
-            </div>
+            <button type="button" class="stopwatch-button stopwatch-toggle" id="stopwatch-toggle" data-action="stopwatch-toggle" aria-label="Start stopwatch">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path id="stopwatch-icon" d="M8 5.5v13l10.5-6.5z"/></svg>
+            </button>
           </div>
         </div>
       </div>

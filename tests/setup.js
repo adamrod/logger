@@ -8,6 +8,7 @@ export function handleFetch(handler) {
 
 function createElement() {
   const listeners = [];
+  const attributes = new Map();
   let value = '';
   return {
     get value() { return value; },
@@ -21,7 +22,8 @@ function createElement() {
         .sort((a, b) => b.capture - a.capture)
         .forEach(({ listener }) => { if (!stopped) listener(dispatched); });
     },
-    setAttribute: () => {},
+    setAttribute: (name, text) => attributes.set(name, String(text)),
+    getAttribute: (name) => attributes.get(name) ?? null,
     querySelector: () => null,
     querySelectorAll: () => [],
     scrollTo: () => {},
