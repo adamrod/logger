@@ -6,7 +6,9 @@ const SCREEN_EDGE_GAP = 8;
 
 const normalized = (text) => text.trim().toLowerCase();
 
-export const matchingNames = (names, query) => names.filter((name) => normalized(name).includes(normalized(query)));
+const hasWordStarting = (name, query) => ` ${normalized(name)}`.includes(` ${normalized(query)}`);
+
+export const matchingNames = (names, query) => names.filter((name) => hasWordStarting(name, query));
 
 export const isNewName = (names, query) => normalized(query) !== ''
   && !names.some((name) => normalized(name) === normalized(query));

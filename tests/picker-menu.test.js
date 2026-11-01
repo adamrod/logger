@@ -3,10 +3,16 @@ import { assertEqual, test } from './harness.js';
 
 const NAMES = ['Bench press', 'Edge lifting 17 mm', 'Front squat', 'Squat'];
 
-test('search matches any part of a name, ignoring letter case and spaces around', () => {
+test('search matches names with a word starting with it, ignoring letter case and spaces around', () => {
   assertEqual(matchingNames(NAMES, ' SQU '), ['Front squat', 'Squat']);
   assertEqual(matchingNames(NAMES, '17'), ['Edge lifting 17 mm']);
+  assertEqual(matchingNames(NAMES, 'front sq'), ['Front squat']);
   assertEqual(matchingNames(NAMES, ''), NAMES);
+});
+
+test('search skips names that only contain it inside a word', () => {
+  assertEqual(matchingNames(['Barbell row', 'Bench press'], 'Be'), ['Bench press']);
+  assertEqual(matchingNames(NAMES, 'quat'), []);
 });
 
 test('a search is a new name only when no name equals it', () => {
