@@ -2,6 +2,7 @@ import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.j
 import { initBodyWeight, renderBodyWeight } from './body-weight-screen.js';
 import { onChange } from './events.js';
 import { forgetLoggedNames } from './exercises.js';
+import { initKeepAwake } from './keep-awake.js';
 import { initLog, renderLog } from './log-screen.js';
 import { initSettings, renderSettings } from './settings-screen.js';
 import { initAutoSync } from './sync.js';
@@ -59,3 +60,4 @@ document.addEventListener('touchstart', letIosShowPressedButtons, { passive: tru
 route();
 
 initAutoSync();
+initKeepAwake();

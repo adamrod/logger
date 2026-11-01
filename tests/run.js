@@ -8,6 +8,7 @@ import './history.test.js';
 import './line-chart.test.js';
 import './set-history.test.js';
 import './screens.test.js';
+import './keep-awake.test.js';
 import './sw.test.js';
 import { runTests } from './harness.js';
 
