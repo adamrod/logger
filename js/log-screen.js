@@ -10,7 +10,7 @@ import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { initRestTimer, renderRestTimer } from './rest-timer.js';
 import { setHistoryHtml } from './set-history.js';
-import { sets } from './store.js';
+import { getChosenVariant, saveChosenVariant, sets } from './store.js';
 
 const FIELDS = {
   reps: { ...INTEGER, step: 1, min: 0 },
@@ -28,7 +28,7 @@ const historyEl = document.getElementById('history-list');
 const analysisLink = document.getElementById('analysis-link');
 
 let selected = sets.getEntries().at(-1)?.exercise;
-let selectedVariant = variantOf(sets.getEntries().at(-1));
+let selectedVariant = variantFor(selected);
 let editedVariant = '';
 
 const isEditing = () => editor.editingId() !== null;
@@ -93,7 +93,7 @@ export function currentVariant() {
 
 function selectExercise(exercise) {
   selected = exercise;
-  selectedVariant = allVariants(exercise).includes(selectedVariant) ? selectedVariant : variantOf(lastSetOf(exercise));
+  selectedVariant = variantFor(exercise);
   editor.stopEditing();
   fillForm(lastSetOfVariant(exercise, selectedVariant) ?? lastSetOf(exercise) ?? EMPTY_SET);
   renderLog();
@@ -103,10 +103,16 @@ function selectVariant(variant) {
   if (isEditing()) editedVariant = variant;
   else {
     selectedVariant = variant;
+    saveChosenVariant(currentExercise(), variant);
     const last = lastSetOfVariant(currentExercise(), variant);
     if (last) fillForm(last);
   }
   renderLog();
+}
+
+function variantFor(exercise) {
+  const chosen = getChosenVariant(exercise);
+  return allVariants(exercise).includes(chosen) ? chosen : variantOf(lastSetOf(exercise));
 }
 
 function lastSetOf(exercise) {

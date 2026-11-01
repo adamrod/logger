@@ -2,7 +2,11 @@ import { createEntryLog } from './entry-log.js';
 import { notifyChange } from './events.js';
 import { mergeLists } from './name-list.js';
 
-const KEYS = { exercises: 'logger.v2.exercise-list', variants: 'logger.v2.variant-lists' };
+const KEYS = {
+  exercises: 'logger.v2.exercise-list',
+  variants: 'logger.v2.variant-lists',
+  chosenVariants: 'logger.v2.chosen-variants',
+};
 const EMPTY_LIST = { added: [], removed: [] };
 
 export const sets = createEntryLog({
@@ -30,6 +34,7 @@ export const entryLogs = [sets, bodyWeights, notes];
 
 let exerciseList = JSON.parse(localStorage.getItem(KEYS.exercises) ?? 'null') ?? EMPTY_LIST;
 let variantLists = JSON.parse(localStorage.getItem(KEYS.variants) ?? '{}');
+let chosenVariants = JSON.parse(localStorage.getItem(KEYS.chosenVariants) ?? '{}');
 
 export const getExerciseList = () => exerciseList;
 
@@ -46,6 +51,13 @@ export const saveVariantList = (exercise, list) => saveVariantLists({ ...variant
 export function moveVariantList(from, to) {
   const { [from]: moved = EMPTY_LIST, ...others } = variantLists;
   saveVariantLists({ ...others, [to]: mergeLists(others[to] ?? EMPTY_LIST, moved) });
+}
+
+export const getChosenVariant = (exercise) => chosenVariants[exercise];
+
+export function saveChosenVariant(exercise, variant) {
+  chosenVariants = { ...chosenVariants, [exercise]: variant };
+  localStorage.setItem(KEYS.chosenVariants, JSON.stringify(chosenVariants));
 }
 
 function saveVariantLists(lists) {
