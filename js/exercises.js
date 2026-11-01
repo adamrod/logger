@@ -1,4 +1,4 @@
-import { forgetName, visibleNames, withName, withoutName } from './name-list.js';
+import { forgetName, visibleNames, withName, withoutLogged, withoutName } from './name-list.js';
 import { getExerciseList, getVariantList, moveVariantList, saveExerciseList, saveVariantList, notes, sets } from './store.js';
 
 const loggedExercises = () => sets.getEntries().map((entry) => entry.exercise);
@@ -42,6 +42,20 @@ export function addVariant(exercise, name) {
 }
 
 export const removeVariant = (exercise, name) => saveVariantList(exercise, withoutName(getVariantList(exercise), name));
+
+function forgetLogged(list, logged, save) {
+  const kept = withoutLogged(list, logged);
+  if (kept.added.length < list.added.length) save(kept);
+}
+
+export function forgetLoggedNames() {
+  forgetLogged(getExerciseList(), loggedExercises(), saveExerciseList);
+  allExercises().forEach((exercise) => forgetLogged(
+    getVariantList(exercise),
+    loggedVariants(exercise),
+    (list) => saveVariantList(exercise, list),
+  ));
+}
 
 export const noteOf = (exercise) => noteEntryOf(exercise)?.note ?? '';
 

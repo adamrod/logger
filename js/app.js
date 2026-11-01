@@ -1,9 +1,9 @@
 import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
 import { initBodyWeight, renderBodyWeight } from './body-weight-screen.js';
 import { onChange } from './events.js';
+import { forgetLoggedNames } from './exercises.js';
 import { initLog, renderLog } from './log-screen.js';
 import { initSettings, renderSettings } from './settings-screen.js';
-import { moveListsToNames } from './store.js';
 import { initAutoSync } from './sync.js';
 import { initSyncStatus, renderSyncStatus } from './sync-status.js';
 
@@ -45,7 +45,7 @@ function snapPageBackAfterKeyboard() {
   window.scrollTo(0, 0);
 }
 
-moveListsToNames();
+forgetLoggedNames();
 initLog();
 initBodyWeight();
 initAnalysis();

@@ -1,10 +1,6 @@
-import { addExercise, addVariant, allExercises, allVariants, isOtherExercise, noteOf, removeExercise, removeVariant, renameExercise, saveNote } from '../js/exercises.js';
-import { moveListsToNames, names, notes, sets } from '../js/store.js';
+import { addExercise, addVariant, allExercises, allVariants, forgetLoggedNames, isOtherExercise, noteOf, renameExercise, saveNote } from '../js/exercises.js';
+import { getExerciseList, getVariantList, notes, sets } from '../js/store.js';
 import { assertEqual, test } from './harness.js';
-
-const namesRowsOf = (exercise) => names.getEntries()
-  .filter((row) => row.exercise === exercise)
-  .map(({ variant = '', state }) => `${variant}:${state}`);
 
 const exercisesOf = (names) => sets.getEntries().filter((entry) => names.includes(entry.exercise)).map((entry) => entry.exercise);
 
@@ -63,53 +59,15 @@ test('renaming moves the note to the new name', () => {
   assertEqual(noteOf('Bench'), '');
 });
 
-test('an exercise added by hand is stored as a names row until it is removed', () => {
-  addExercise('Plank');
-  assertEqual(namesRowsOf('Plank'), [':added'], 'added');
-  assertEqual(allExercises().includes('Plank'), true);
-  removeExercise('Plank');
-  assertEqual(namesRowsOf('Plank'), [':removed'], 'removed');
-  assertEqual(allExercises().includes('Plank'), false);
-  addExercise('plank');
-  assertEqual(namesRowsOf('Plank'), [':added'], 'added back');
-});
-
-test('adding an already shown exercise stores nothing', () => {
-  sets.add({ exercise: 'Hip thrusts', reps: 8, weight: 100 });
-  addExercise('hip thrusts');
-  assertEqual(namesRowsOf('Hip thrusts'), []);
-});
-
-test('variants added and removed by hand are stored per exercise', () => {
-  addVariant('Lunge', 'Walking');
-  addVariant('Lunge', 'Reverse');
-  removeVariant('Lunge', 'Walking');
-  assertEqual(namesRowsOf('Lunge'), ['Walking:removed', 'Reverse:added']);
-  assertEqual(allVariants('Lunge'), ['Reverse']);
-});
-
-test('the same name stored twice by two devices shows once and is removed once', () => {
-  names.add({ exercise: 'Farmer walk', state: 'added' });
-  names.add({ exercise: 'Farmer walk', state: 'added' });
-  assertEqual(allExercises().filter((name) => name === 'Farmer walk'), ['Farmer walk']);
-  removeExercise('Farmer walk');
-  assertEqual(namesRowsOf('Farmer walk'), [':removed', ':removed']);
-});
-
-test('renaming moves the variant rows to the new name', () => {
-  addVariant('Rows', 'Pendlay');
-  sets.add({ exercise: 'Rows', reps: 5, weight: 80 });
-  renameExercise('Rows', 'Barbell row');
-  assertEqual(namesRowsOf('Rows'), []);
-  assertEqual(namesRowsOf('Barbell row').filter((row) => row.startsWith('Pendlay')), ['Pendlay:added']);
-});
-
-test('lists kept in local storage by earlier versions move into names', () => {
-  localStorage.setItem('logger.v2.exercise-list', JSON.stringify({ added: ['Sled push'], removed: ['Old press'] }));
-  localStorage.setItem('logger.v2.variant-lists', JSON.stringify({ 'Sled push': { added: ['Heavy'], removed: [] } }));
-  moveListsToNames();
-  assertEqual(namesRowsOf('Sled push'), [':added', 'Heavy:added']);
-  assertEqual(namesRowsOf('Old press'), [':removed']);
-  assertEqual(localStorage.getItem('logger.v2.exercise-list'), null);
-  assertEqual(localStorage.getItem('logger.v2.variant-lists'), null);
+test('names added by hand are forgotten once they have sets, so renaming the sets leaves nothing behind', () => {
+  addExercise('Zercher squat');
+  addVariant('Zercher squat', 'Pause');
+  addExercise('Farmer walk');
+  sets.add({ exercise: 'Zercher squat', variant: 'Pause', reps: 5, weight: 60 });
+  forgetLoggedNames();
+  assertEqual(getExerciseList().added.includes('Zercher squat'), false, 'exercise forgotten');
+  assertEqual(getVariantList('Zercher squat').added, [], 'variant forgotten');
+  assertEqual(getExerciseList().added.includes('Farmer walk'), true, 'unlogged name kept');
+  sets.updateWhere((entry) => entry.exercise === 'Zercher squat', { exercise: 'Squat', variant: 'Zercher' });
+  assertEqual(allExercises().includes('Zercher squat'), false, 'old name gone');
 });

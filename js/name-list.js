@@ -26,3 +26,5 @@ export function mergeLists(target, source) {
   const removed = [...new Set([...target.removed, ...source.removed])].filter((name) => !added.includes(name));
   return { added, removed };
 }
+
+export const withoutLogged = ({ added, removed }, logged) => ({ added: added.filter((name) => !logged.includes(name)), removed });

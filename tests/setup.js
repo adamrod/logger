@@ -38,7 +38,6 @@ export function element(id) {
 globalThis.localStorage = {
   getItem: (key) => storage.get(key) ?? null,
   setItem: (key, value) => storage.set(key, String(value)),
-  removeItem: (key) => storage.delete(key),
 };
 
 globalThis.TextEncoder = class {
