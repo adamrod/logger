@@ -50,6 +50,12 @@ test('without a chosen variant every set shows under its variant', () => {
   assertEqual([variantShown(html, 'Left'), variantShown(html, 'Right')], [true, true], 'variants');
 });
 
+test('the set history marks today as the current date', () => {
+  const daysAgo = (days) => new Date(Date.now() - days * 86400000).toISOString();
+  const isMarked = (timestamp) => historyOf([set(timestamp, '', 5)], '').includes('aria-current="date"');
+  assertEqual([isMarked(daysAgo(0)), isMarked(daysAgo(1))], [true, false]);
+});
+
 test('a set without weight shows only its reps', () => {
   assertEqual(setChipText({ reps: 8, weight: 0 }), '8');
   assertEqual(setChipText({ reps: 5, weight: 77.504 }), '5<span class="set-times">×</span>77.5');

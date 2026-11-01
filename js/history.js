@@ -1,5 +1,5 @@
 import { entryDate } from './entry-log.js';
-import { escapeHtml, formatDay, formatTime } from './format.js';
+import { escapeHtml, formatDay, formatTime, isToday } from './format.js';
 
 export function historyHtml(entries, view) {
   if (!entries.length) return `<p class="empty">${view.empty}</p>`;
@@ -22,11 +22,13 @@ export const unsyncedHtml = (entry, isUnsynced) => (isUnsynced(entry)
   ? '<span class="set-unsynced" role="img" aria-label="Not synced"></span>'
   : '');
 
+export const currentDateAttribute = (date) => (isToday(date) ? ' aria-current="date"' : '');
+
 function entryHtml(entry, view) {
   const leadHtml = view.lead.map((cell) => `<span class="set-lead">${escapeHtml(cell(entry))}</span>`).join('');
   const isEditing = entry.timestamp === view.editingId;
   return `
-    <li class="set">
+    <li class="set"${currentDateAttribute(entryDate(entry))}>
       <button type="button" class="set-row" ${editAttributes(entry, view.describe(entry), view.editingId)}>
         ${leadHtml}<span class="set-info"><span class="set-text">${view.valueHtml(entry)}</span>${unsyncedHtml(entry, view.isUnsynced)}</span>
         <span class="set-editing">${isEditing ? 'Editing' : ''}</span>

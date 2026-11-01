@@ -40,11 +40,12 @@ export function formatDay(date) {
 }
 
 export function formatShortWhen(date) {
-  const isToday = dayKey(date) === dayKey(new Date());
-  return isToday ? formatTime(date) : `${formatIsoDate(date)} ${formatTime(date)}`;
+  return isToday(date) ? formatTime(date) : `${formatIsoDate(date)} ${formatTime(date)}`;
 }
 
 export const dayKey = (date) => startOfDay(date).getTime();
+
+export const isToday = (date) => dayKey(date) === dayKey(new Date());
 
 export const daysBetween = (from, to) => Math.round((dayKey(to) - dayKey(from)) / DAY_MS);
 

@@ -1,6 +1,6 @@
 import { entryDate } from './entry-log.js';
 import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, roundValue } from './format.js';
-import { editAttributes, unsyncedHtml } from './history.js';
+import { currentDateAttribute, editAttributes, unsyncedHtml } from './history.js';
 
 const variantOf = (entry) => entry.variant ?? '';
 
@@ -34,7 +34,7 @@ const sinceLastHtml = (days) => (days === 0 ? '' : `<div class="history-since"><
 
 function dayHtml({ date, gap, rows }, view) {
   return `
-    <section class="history-day">
+    <section class="history-day"${currentDateAttribute(date)}>
       <span class="history-date">${formatDay(date)}</span>
       ${rows.map((row) => rowHtml(row, view)).join('')}
       ${gap === null ? '' : `<span class="history-gap">${gap}d</span>`}

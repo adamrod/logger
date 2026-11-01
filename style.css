@@ -424,6 +424,8 @@ li:first-child > .option-new { border-top: none; }
 .history-since { position: relative; grid-column: 1 / -1; height: 8px; border-bottom: 1px solid var(--row-divider); }
 .history-gap { position: absolute; bottom: -9px; left: 0; z-index: 1; padding-right: 6px; background: var(--bg); font-size: 12px; line-height: 14px; color: var(--muted); }
 .history-row .set-lead { font-size: 13px; line-height: 32px; }
+.history-day[aria-current="date"] .history-date,
+.set[aria-current="date"] .set-lead:first-child { font-weight: 600; color: var(--text); }
 
 .set-chips { display: flex; flex-wrap: wrap; gap: 0 2px; margin-left: -6px; }
 
