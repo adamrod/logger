@@ -1,4 +1,4 @@
-import { dailySeries, defaultMetric, repRecords } from './analysis.js';
+import { bestDayIndex, dailySeries, defaultMetric, repRecords } from './analysis.js';
 import { entriesInRange, markPressed } from './chart-controls.js';
 import { revealPressedChip } from './chip-row.js';
 import { entryDate } from './entry-log.js';
@@ -25,6 +25,8 @@ const dailyValue = document.getElementById('daily-value');
 const dailyDetail = document.getElementById('daily-detail');
 const dailyDate = document.getElementById('daily-date');
 const dailyChange = document.getElementById('daily-change');
+const dailyMax = document.getElementById('daily-max');
+const dailyMaxValue = document.getElementById('daily-max-value');
 const barsEl = document.getElementById('rep-max-bars');
 const recordValue = document.getElementById('rep-max-value');
 const recordDate = document.getElementById('rep-max-date');
@@ -35,6 +37,7 @@ let exercise;
 let variant = '';
 let chosenMetric = null;
 let records = [];
+let bestDay = 0;
 let selectedWeight = null;
 let isVariantPicked = false;
 
@@ -43,10 +46,11 @@ const actions = {
   variant: ({ name }) => { variant = name; isVariantPicked = true; renderAnalysis(); },
   metric: ({ metric: name }) => { chosenMetric = name; renderAnalysis(); },
   bar: ({ index }) => showRecord(Number(index)),
+  max: () => dailyChart.selectAt(bestDay),
 };
 
 export function initAnalysis() {
-  onAction([rangeGroup, variantsEl, metricGroup, barsEl], actions);
+  onAction([rangeGroup, variantsEl, metricGroup, dailyMax, barsEl], actions);
 }
 
 export function enterAnalysis() {
@@ -89,6 +93,9 @@ function renderDaily(daily, metric) {
   markPressed(metricGroup, 'metric', metric);
   dailyHeading.textContent = HEADINGS[metric];
   dailyChange.textContent = daily.length < 2 ? '' : formatChange(daily.at(-1).value - daily[0].value, daily[0].date);
+  bestDay = bestDayIndex(daily, metric);
+  dailyMax.hidden = daily.length < 2;
+  dailyMaxValue.textContent = valueText(daily[bestDay]);
   dailyChart.draw(daily, { minStep: MIN_STEPS[metric] });
 }
 

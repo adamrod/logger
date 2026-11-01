@@ -167,12 +167,11 @@
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="volume">Volume</button>
             </div>
           </div>
-          <p class="chart-readout readout-stacked" aria-live="polite">
-            <span class="readout-text">
-              <span class="readout-main"><span class="chart-value" id="daily-value"></span> <span class="chart-meta" id="daily-detail"></span></span>
-              <span class="chart-meta readout-when" id="daily-date"></span>
-            </span>
+          <p class="chart-readout readout-grid" aria-live="polite">
+            <span class="readout-main"><span class="chart-value" id="daily-value"></span> <span class="chart-meta" id="daily-detail"></span></span>
             <span class="chart-meta" id="daily-change"></span>
+            <span class="chart-meta readout-when" id="daily-date"></span>
+            <button type="button" class="btn-text readout-max" id="daily-max" data-action="max">Max <span class="readout-max-value" id="daily-max-value"></span></button>
           </p>
           <svg class="chart-plot" id="daily-plot" aria-hidden="true"></svg>
         </section>

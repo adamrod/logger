@@ -257,3 +257,19 @@ test('the %BW chart shows the top set as a percent of body weight, beside the se
   const readout = ['daily-heading', 'daily-value', 'daily-detail'].map((id) => element(id).textContent);
   assertEqual(readout, ['Max %BW', '50%', '3 × 40 · BW 80']);
 });
+
+test('tapping Max moves the readout from the latest day to the best day in the range', () => {
+  openScreens();
+  const lastAt = Date.parse(sets.getEntries().at(-1).timestamp);
+  const daysLater = (days) => new Date(lastAt + days * 86400000).toISOString();
+  sets.add({ timestamp: daysLater(1), exercise: 'Muscle ups', reps: 2, weight: 10 });
+  sets.add({ timestamp: daysLater(2), exercise: 'Muscle ups', reps: 3, weight: 5 });
+  click('exercise-picker', { action: 'pick', name: 'Muscle ups' });
+  element('daily-plot').clientWidth = 350;
+  enterAnalysis();
+  click('daily-metrics', { action: 'metric', metric: 'weight' });
+  const shown = () => [element('daily-value').textContent, element('daily-max-value').textContent];
+  assertEqual(shown(), ['3 × 5', '2 × 10'], 'latest day');
+  click('daily-max', { action: 'max' });
+  assertEqual(shown(), ['2 × 10', '2 × 10'], 'best day');
+});

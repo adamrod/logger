@@ -1,4 +1,4 @@
-import { bodyWeightAt, dailySeries } from '../js/analysis.js';
+import { bestDayIndex, bodyWeightAt, dailySeries } from '../js/analysis.js';
 import { assertEqual, test } from './harness.js';
 
 const weighIns = [
@@ -33,4 +33,15 @@ test('the relative series shows each day\'s heaviest set as a whole percent of b
 test('the relative series rounds body weight to a tenth and takes the percent from that', () => {
   const [point] = dailySeries([{ timestamp: '2026-01-06T17:00:00.000Z', reps: 1, weight: 30 }], 'relative', weighIns);
   assertEqual([point.bodyWeight, point.value], [65.4, 46]);
+});
+
+test('the best day is the heaviest set, more reps breaking a tie, or the first of equal values', () => {
+  const sets = [
+    { timestamp: '2026-01-02T17:00:00.000Z', reps: 1, weight: 55 },
+    { timestamp: '2026-01-03T17:00:00.000Z', reps: 3, weight: 55 },
+    { timestamp: '2026-01-04T17:00:00.000Z', reps: 3, weight: 55 },
+    { timestamp: '2026-01-05T17:00:00.000Z', reps: 8, weight: 40 },
+  ];
+  const best = (metric) => bestDayIndex(dailySeries(sets, metric, weighIns), metric);
+  assertEqual([best('weight'), best('reps'), best('relative'), best('volume')], [1, 3, 0, 3]);
 });

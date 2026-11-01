@@ -332,6 +332,10 @@ li:first-child > .option-new { border-top: none; }
 .readout-stacked > .chart-meta { flex: none; }
 .readout-text { display: flex; flex-direction: column; min-width: 0; }
 .readout-main, .readout-when { overflow: hidden; text-overflow: ellipsis; }
+.readout-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; white-space: nowrap; }
+.readout-grid > :nth-child(even) { justify-self: end; }
+.readout-max { height: auto; margin: -14px -10px; padding: 14px 10px; font-size: 14px; color: var(--muted); }
+.readout-max-value { font-weight: 600; color: var(--text); }
 .chart-value { font-size: 24px; font-weight: 600; }
 .chart-meta { font-size: 14px; color: var(--muted); }
 .chart-extremes { margin-top: 2px; }

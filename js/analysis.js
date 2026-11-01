@@ -27,6 +27,11 @@ export function dailySeries(sets, metric, weighIns = []) {
   });
 }
 
+export function bestDayIndex(daily, metric) {
+  const compare = COMPARE[metric] ? (a, b) => COMPARE[metric](a.set, b.set) : (a, b) => a.value - b.value;
+  return daily.reduce((best, day, index) => (compare(day, daily[best]) > 0 ? index : best), 0);
+}
+
 function relativePoint(set, weighIns) {
   const date = entryDate(set);
   const bodyWeight = toTenth(bodyWeightAt(weighIns, date));

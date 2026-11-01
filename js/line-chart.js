@@ -37,7 +37,7 @@ export function createLineChart(plot, onSelect) {
 
   plot.addEventListener('pointerdown', selectNearest);
   plot.addEventListener('pointermove', selectNearest);
-  return { draw };
+  return { draw, selectAt: (index) => select(points[index]) };
 }
 
 function createScale(series, width, minStep) {
