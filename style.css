@@ -448,17 +448,16 @@ li:first-child > .option-new { border-top: none; }
 .section-head { display: flex; align-items: center; justify-content: space-between; height: 34px; padding: 12px 0 4px; }
 .history-sync .btn-text { margin-right: -12px; }
 .history-filter { position: relative; display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 13px; color: var(--muted); }
-.history-filter::before { content: ''; width: 16px; height: 16px; box-sizing: border-box; border: 1.5px solid currentColor; border-radius: 4px; }
-.history-filter[aria-pressed="true"] { color: var(--text); }
+.history-filter::before { content: ''; width: 18px; height: 18px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); }
 .history-filter[aria-pressed="true"]::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 17.5px;
+  left: 18.25px;
   width: 4px;
   height: 8px;
-  margin-top: -6.5px;
-  border: solid currentColor;
+  margin-top: -5.75px;
+  border: solid var(--muted);
   border-width: 0 1.5px 1.5px 0;
   transform: rotate(45deg);
 }
