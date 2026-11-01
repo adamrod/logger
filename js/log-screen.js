@@ -93,9 +93,9 @@ export function currentVariant() {
 
 function selectExercise(exercise) {
   selected = exercise;
-  selectedVariant = variantOf(lastSetOf(exercise));
+  selectedVariant = allVariants(exercise).includes(selectedVariant) ? selectedVariant : variantOf(lastSetOf(exercise));
   editor.stopEditing();
-  fillForm(lastSetOf(exercise) ?? EMPTY_SET);
+  fillForm(lastSetOfVariant(exercise, selectedVariant) ?? lastSetOf(exercise) ?? EMPTY_SET);
   renderLog();
 }
 

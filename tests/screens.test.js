@@ -86,6 +86,30 @@ test('removing the chosen variant clears it and shows the last set without one',
   assertEqual(shownSet(), ['12', '0'], 'without variant');
 });
 
+test('another exercise keeps the chosen variant when it has one, otherwise takes the last logged one', () => {
+  openScreens();
+  sets.add({ exercise: 'Edge lift', variant: 'Left', reps: 5, weight: 30 });
+  sets.add({ exercise: 'Edge lift', variant: 'Right', reps: 5, weight: 32 });
+  sets.add({ exercise: 'Edge curl', variant: 'Left', reps: 6, weight: 20 });
+  sets.add({ exercise: 'Edge curl', variant: 'Right', reps: 6, weight: 22 });
+  sets.add({ exercise: 'Press', variant: 'Barbell', reps: 5, weight: 40 });
+  click('exercise-picker', { action: 'pick', name: 'Edge lift' });
+  click('variant-picker', { action: 'pick', name: 'Left' });
+  click('exercise-picker', { action: 'pick', name: 'Edge curl' });
+  assertEqual([currentVariant(), ...shownSet()], ['Left', '6', '20'], 'same variant');
+  click('exercise-picker', { action: 'pick', name: 'Press' });
+  assertEqual([currentVariant(), ...shownSet()], ['Barbell', '5', '40'], 'last logged variant');
+});
+
+test('editing variants scrolls the chips back to the start, where the add button is', () => {
+  openScreens();
+  sets.add({ exercise: 'Cable row', variant: 'Wide', reps: 10, weight: 50 });
+  click('exercise-picker', { action: 'pick', name: 'Cable row' });
+  element('variant-chips').scrollLeft = 120;
+  click('variant-picker', { action: 'toggle-edit' });
+  assertEqual(element('variant-chips').scrollLeft, 0);
+});
+
 test('step buttons move reps and weight by one without going below zero', () => {
   openScreens();
   element('reps').value = '1';

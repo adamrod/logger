@@ -26,7 +26,12 @@ const actions = {
     removeVariant(exercise, name);
     if (wasCurrent) onPick('');
   },
-  'toggle-edit': () => { isEditing = !isEditing; render(); },
+  'toggle-edit': () => {
+    isEditing = !isEditing;
+    render();
+    if (isEditing) chipsEl.scrollLeft = 0;
+    else revealPressedChip(chipsEl);
+  },
   'start-add': () => { isEditing = false; isAdding = true; nameInput.value = ''; render(); nameInput.focus(); },
   'cancel-add': () => { isAdding = false; render(); },
 };
