@@ -295,6 +295,7 @@ li:first-child > .option-new { border-top: none; }
 
 .analysis-head { display: flex; flex-direction: column; gap: 2px; padding: 4px var(--gutter) 16px; }
 .analysis-title { font-size: 24px; line-height: 30px; font-weight: 700; overflow-wrap: anywhere; }
+
 .analysis-variants { padding: 0 var(--gutter) 16px; }
 
 .analysis-empty { margin-top: 0; padding: 12px var(--gutter) 0; border-top: 1px solid var(--divider); }
