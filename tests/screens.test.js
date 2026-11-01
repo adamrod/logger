@@ -1,5 +1,6 @@
 import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
 import { onChange } from '../js/events.js';
+import { noteOf } from '../js/exercises.js';
 import { roundValue } from '../js/format.js';
 import { currentExercise, initLog, renderLog } from '../js/log-screen.js';
 import { bodyWeights, sets } from '../js/store.js';
@@ -162,4 +163,22 @@ test('saving an edited body weight updates it', () => {
   click('body-weight-controls', { action: 'save' });
   assertEqual(bodyWeights.getEntries().at(-1).weight, 79.5);
   assertEqual(element('body-weight-log').hidden, false, 'log button after saving');
+});
+
+test('the note stays closed until asked for and closes when another exercise is picked', () => {
+  openScreens();
+  sets.add({ exercise: 'Leg press', reps: 10, weight: 100 });
+  sets.add({ exercise: 'Calf raise', reps: 15, weight: 60 });
+  click('exercise-picker', { action: 'pick', name: 'Leg press' });
+  assertEqual(element('note-field').hidden, true, 'before opening');
+  element('note-toggle').dispatch('click');
+  assertEqual(element('note-field').hidden, false, 'open');
+  assertEqual(document.activeElement === element('note'), true, 'empty note focused');
+  element('note').value = 'Seat 4';
+  element('note').dispatch('input');
+  element('note-toggle').dispatch('click');
+  assertEqual([element('note-field').hidden, noteOf('Leg press')], [true, 'Seat 4'], 'closed after typing');
+  element('note-toggle').dispatch('click');
+  click('exercise-picker', { action: 'pick', name: 'Calf raise' });
+  assertEqual([element('note-field').hidden, element('note').value], [true, ''], 'other exercise');
 });

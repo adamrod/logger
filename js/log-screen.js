@@ -1,5 +1,6 @@
 import { createEntryEditor } from './entry-editor.js';
 import { allExercises, allVariants } from './exercises.js';
+import { initExerciseNote, renderExerciseNote } from './exercise-note.js';
 import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
 import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
 import { onAction } from './events.js';
@@ -54,6 +55,7 @@ const actions = {
 export function initLog() {
   initExercisePicker(selectExercise);
   initVariantPicker(selectVariant);
+  initExerciseNote();
   fillForm(lastSetOf(currentExercise()) ?? EMPTY_SET);
   onAction([controls, historyEl], actions);
   onHoldStep(controls, actions.step);
@@ -64,6 +66,7 @@ export function initLog() {
 export function renderLog() {
   const exercise = currentExercise();
   renderExercisePicker(exercise);
+  renderExerciseNote(exercise);
   renderVariantPicker(exercise, currentVariant());
   editor.render();
   updateSaveButtons();

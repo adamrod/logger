@@ -31,6 +31,7 @@
           <span class="label" id="exercise-label">Exercise</span>
           <div class="label-actions">
             <button type="button" class="btn-text" id="variant-new" data-action="start-add">+ Variant</button>
+            <button type="button" class="btn-text" id="note-toggle" aria-controls="note-field" aria-expanded="false">Note</button>
             <a class="text-link" id="analysis-link" href="#analysis">Analysis</a>
           </div>
         </div>
@@ -53,6 +54,11 @@
             <button type="button" class="btn-text" id="exercise-cancel" data-action="cancel-name">Cancel</button>
           </form>
         </div>
+      </div>
+
+      <div class="field" id="note-field" hidden>
+        <textarea class="input note-input" id="note" aria-label="Note" rows="3"
+          placeholder="Setup, e.g. Gym A rack: bar 22, safety 9"></textarea>
       </div>
 
       <div class="field" id="variant-picker">

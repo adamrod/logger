@@ -1,5 +1,5 @@
-import { addVariant, allExercises, allVariants, isOtherExercise, renameExercise } from '../js/exercises.js';
-import { sets } from '../js/store.js';
+import { addVariant, allExercises, allVariants, isOtherExercise, noteOf, renameExercise, saveNote } from '../js/exercises.js';
+import { notes, sets } from '../js/store.js';
 import { assertEqual, test } from './harness.js';
 
 const exercisesOf = (names) => sets.getEntries().filter((entry) => names.includes(entry.exercise)).map((entry) => entry.exercise);
@@ -38,4 +38,23 @@ test('another exercise with the typed name counts as a merge target', () => {
   assertEqual(isOtherExercise('dips', 'Chin ups'), true);
   assertEqual(isOtherExercise('Dips', 'Dips'), false);
   assertEqual(isOtherExercise('Ring dips', 'Dips'), false);
+});
+
+test('a note is added, changed and removed by saving its text', () => {
+  saveNote('Back squat', 'Bar 22\nSafety 9');
+  assertEqual(noteOf('Back squat'), 'Bar 22\nSafety 9', 'added');
+  saveNote('Back squat', 'Bar 21\nSafety 9');
+  assertEqual(noteOf('Back squat'), 'Bar 21\nSafety 9', 'changed');
+  assertEqual(notes.getEntries().filter((entry) => entry.exercise === 'Back squat').length, 1, 'rows');
+  saveNote('Back squat', '  ');
+  assertEqual(noteOf('Back squat'), '', 'removed');
+  assertEqual(notes.getEntries().some((entry) => entry.exercise === 'Back squat'), false, 'row removed');
+});
+
+test('renaming moves the note to the new name', () => {
+  sets.add({ exercise: 'Bench', reps: 5, weight: 80 });
+  saveNote('Bench', 'Eleiko: bar 10, safety 7');
+  renameExercise('Bench', 'Bench press');
+  assertEqual(noteOf('Bench press'), 'Eleiko: bar 10, safety 7');
+  assertEqual(noteOf('Bench'), '');
 });

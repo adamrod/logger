@@ -1,5 +1,5 @@
 import { parseCsv } from '../js/csv.js';
-import { bodyWeights, sets } from '../js/store.js';
+import { bodyWeights, notes, sets } from '../js/store.js';
 import { mergeEntries, sync, syncState } from '../js/sync.js';
 import { assertEqual, test } from './harness.js';
 import { handleFetch } from './setup.js';
@@ -119,4 +119,11 @@ test('a set from a device whose clock runs ahead counts as synced after sync', a
   await sync();
   assertEqual(bodyWeights.getEntries().at(-1).timestamp, ahead, 'pulled');
   assertEqual(bodyWeights.hasChanges(), false, 'unsynced changes');
+});
+
+test('a note spanning several lines reaches notes.csv intact', async () => {
+  notes.add({ exercise: 'Bench press', note: 'Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9' });
+  await sync();
+  assertEqual(parseCsv(files['notes.csv']).map((entry) => entry.note), ['Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9']);
+  assertEqual(notes.hasChanges(), false);
 });

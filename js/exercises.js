@@ -1,7 +1,9 @@
 import { forgetName, visibleNames, withName, withoutName } from './name-list.js';
-import { getExerciseList, getVariantList, moveVariantList, saveExerciseList, saveVariantList, sets } from './store.js';
+import { getExerciseList, getVariantList, moveVariantList, saveExerciseList, saveVariantList, notes, sets } from './store.js';
 
 const loggedExercises = () => sets.getEntries().map((entry) => entry.exercise);
+
+const noteEntryOf = (exercise) => notes.getEntries().findLast((entry) => entry.exercise === exercise);
 
 const loggedVariants = (exercise) => sets.getEntries()
   .filter((entry) => entry.exercise === exercise && entry.variant)
@@ -26,6 +28,7 @@ export function renameExercise(from, to) {
   saveExerciseList(list);
   moveVariantList(from, known);
   sets.updateWhere((entry) => entry.exercise === from, { exercise: known });
+  notes.updateWhere((entry) => entry.exercise === from, { exercise: known });
   return known;
 }
 
@@ -39,3 +42,13 @@ export function addVariant(exercise, name) {
 }
 
 export const removeVariant = (exercise, name) => saveVariantList(exercise, withoutName(getVariantList(exercise), name));
+
+export const noteOf = (exercise) => noteEntryOf(exercise)?.note ?? '';
+
+export function saveNote(exercise, text) {
+  const entry = noteEntryOf(exercise);
+  const hasText = text.trim() !== '';
+  if (!entry && hasText) notes.add({ exercise, note: text });
+  else if (entry && !hasText) notes.remove(entry.timestamp);
+  else if (entry && entry.note !== text) notes.update(entry.timestamp, { note: text });
+}

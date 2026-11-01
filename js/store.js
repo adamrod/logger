@@ -19,7 +19,14 @@ export const bodyWeights = createEntryLog({
   keys: { entries: 'logger.v2.bodyweight.csv', sync: 'logger.v2.bodyweight-sync' },
 });
 
-export const entryLogs = [sets, bodyWeights];
+export const notes = createEntryLog({
+  file: 'notes.csv',
+  columns: ['timestamp', 'exercise', 'note'],
+  numbers: [],
+  keys: { entries: 'logger.v2.notes.csv', sync: 'logger.v2.notes-sync' },
+});
+
+export const entryLogs = [sets, bodyWeights, notes];
 
 let exerciseList = JSON.parse(localStorage.getItem(KEYS.exercises) ?? 'null') ?? EMPTY_LIST;
 let variantLists = JSON.parse(localStorage.getItem(KEYS.variants) ?? '{}');
