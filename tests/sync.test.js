@@ -1,4 +1,5 @@
 import { parseCsv } from '../js/csv.js';
+import { allVariants } from '../js/exercises.js';
 import { bodyWeights, notes, sets } from '../js/store.js';
 import { mergeEntries, sync, syncState } from '../js/sync.js';
 import { assertEqual, test } from './harness.js';
@@ -126,4 +127,10 @@ test('a note spanning several lines reaches notes.csv intact', async () => {
   await sync();
   assertEqual(parseCsv(files['notes.csv']).map((entry) => entry.note), ['Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9']);
   assertEqual(notes.hasChanges(), false);
+});
+
+test('variants added on another device show after a sync', async () => {
+  files['names.csv'] = 'timestamp,exercise,variant,state\n2026-10-01T07:00:00.000Z,Squat,Box,added\n';
+  await sync();
+  assertEqual(allVariants('Squat'), ['Box']);
 });
