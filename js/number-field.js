@@ -11,8 +11,8 @@ export function bindNumberInput(input, { invalidChars }, onInput) {
   input.addEventListener('keydown', (event) => { if (event.key === 'Enter') input.blur(); });
 }
 
-export function stepInput(input, { parse, step, min }, direction) {
+export function stepInput(input, { parse, step, min }, steps) {
   const value = parse(input.value);
-  const next = Number.isNaN(value) ? min : roundValue(value + direction * step);
+  const next = Number.isNaN(value) ? min : roundValue(value + steps * step);
   input.value = Math.max(min, next);
 }

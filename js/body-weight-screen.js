@@ -4,6 +4,7 @@ import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { daysBetween, formatDay, formatDelta, formatTime, roundValue } from './format.js';
 import { historyHtml, revealNewest } from './history.js';
+import { onHoldStep } from './hold-step.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
 
@@ -27,8 +28,8 @@ const editor = createEntryEditor(bodyWeights, {
 
 const actions = {
   ...editor.actions,
-  step: ({ dir }) => {
-    stepInput(input, FIELD, Number(dir));
+  step: ({ steps }, size = 1) => {
+    stepInput(input, FIELD, Number(steps) * size);
     updateSaveButtons();
   },
   log: () => {
@@ -42,6 +43,7 @@ const actions = {
 export function initBodyWeight() {
   fillForm(bodyWeights.getEntries().at(-1));
   onAction([controls, historyEl], actions);
+  onHoldStep(controls, actions.step);
   bindNumberInput(input, FIELD, updateSaveButtons);
   initChart();
 }

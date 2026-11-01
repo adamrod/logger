@@ -5,6 +5,7 @@ import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
 import { onAction } from './events.js';
 import { roundValue } from './format.js';
 import { revealNewest } from './history.js';
+import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { initRestTimer, renderRestTimer } from './rest-timer.js';
 import { setHistoryHtml } from './set-history.js';
@@ -38,8 +39,8 @@ const editor = createEntryEditor(sets, {
 
 const actions = {
   ...editor.actions,
-  step: ({ field, dir }) => {
-    stepInput(inputs[field], FIELDS[field], Number(dir));
+  step: ({ field, steps }, size = 1) => {
+    stepInput(inputs[field], FIELDS[field], Number(steps) * size);
     updateSaveButtons();
   },
   log: () => {
@@ -55,6 +56,7 @@ export function initLog() {
   initVariantPicker(selectVariant);
   fillForm(lastSetOf(currentExercise()) ?? EMPTY_SET);
   onAction([controls, historyEl], actions);
+  onHoldStep(controls, actions.step);
   Object.entries(inputs).forEach(([key, input]) => bindNumberInput(input, FIELDS[key], updateSaveButtons));
   initRestTimer();
 }

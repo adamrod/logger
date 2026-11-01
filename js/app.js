@@ -38,6 +38,8 @@ function render() {
   renderSyncStatus();
 }
 
+function letIosShowPressedButtons() {}
+
 function snapPageBackAfterKeyboard() {
   window.scrollTo(0, 0);
 }
@@ -51,6 +53,7 @@ onChange(render);
 window.addEventListener('hashchange', route);
 window.addEventListener('resize', render);
 document.addEventListener('focusout', snapPageBackAfterKeyboard);
+document.addEventListener('touchstart', letIosShowPressedButtons, { passive: true });
 route();
 
 initAutoSync();

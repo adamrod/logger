@@ -85,6 +85,49 @@ test('removing the chosen variant clears it and shows the last set without one',
   assertEqual(shownSet(), ['12', '0'], 'without variant');
 });
 
+test('step buttons move reps and weight by one without going below zero', () => {
+  openScreens();
+  element('reps').value = '1';
+  element('weight').value = '42.5';
+  click('log-controls', { action: 'step', field: 'weight', steps: '1' });
+  click('log-controls', { action: 'step', field: 'reps', steps: '-1' });
+  click('log-controls', { action: 'step', field: 'reps', steps: '-1' });
+  assertEqual(shownSet(), ['0', '43.5']);
+});
+
+function withFakeTimers(run) {
+  const realSetTimeout = globalThis.setTimeout;
+  const timers = [];
+  globalThis.setTimeout = (callback, delay) => timers.push({ callback, delay });
+  try {
+    run(timers);
+  } finally {
+    globalThis.setTimeout = realSetTimeout;
+  }
+}
+
+function stepButtonEvent(field, steps) {
+  const button = { dataset: { action: 'step', field, steps } };
+  return { target: { closest: () => button } };
+}
+
+test('holding a step button repeats faster, then in fives, and letting go adds nothing', () => withFakeTimers((timers) => {
+  openScreens();
+  const hold = stepButtonEvent('weight', '1');
+  element('weight').value = '60';
+  element('log-controls').dispatch('pointerdown', hold);
+  const delays = Array.from({ length: 22 }, () => {
+    const { callback, delay } = timers.shift();
+    callback();
+    return delay;
+  });
+  element('log-controls').dispatch('pointerup', hold);
+  element('log-controls').dispatch('click', hold);
+  assertEqual(element('weight').value, '90', 'weight');
+  assertEqual(delays.slice(0, 3).map(Math.round), [400, 200, 170], 'first delays');
+  assertEqual(delays.at(-1), 100, 'fastest delay');
+}));
+
 test('saving an edited set updates it and leaves edit mode', () => {
   openScreens();
   sets.add({ exercise: 'Lunges', reps: 12, weight: 0 });

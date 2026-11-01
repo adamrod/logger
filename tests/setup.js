@@ -12,8 +12,15 @@ function createElement() {
   return {
     get value() { return value; },
     set value(text) { value = String(text); },
-    addEventListener: (type, listener) => listeners.push({ type, listener }),
-    dispatch: (type, event) => listeners.filter((entry) => entry.type === type).forEach(({ listener }) => listener(event)),
+    addEventListener: (type, listener, capture = false) => listeners.push({ type, listener, capture }),
+    dispatch: (type, event) => {
+      let stopped = false;
+      const dispatched = { stopPropagation: () => { stopped = true; }, ...event };
+      listeners
+        .filter((entry) => entry.type === type)
+        .sort((a, b) => b.capture - a.capture)
+        .forEach(({ listener }) => { if (!stopped) listener(dispatched); });
+    },
     setAttribute: () => {},
     querySelectorAll: () => [],
     getBoundingClientRect: () => ({ top: 0 }),
