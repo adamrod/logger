@@ -1,4 +1,4 @@
-import { formatDateTimeValue, formatDay, formatDuration, parseDateTimeValue } from '../js/format.js';
+import { formatDateTimeValue, formatDay, formatDuration, formatIsoDate, parseDateTimeValue, parseDateValue } from '../js/format.js';
 import { readWhen, showWhen } from '../js/when-field.js';
 import { assertEqual, test } from './harness.js';
 
@@ -35,4 +35,8 @@ test('a changed date field gives the chosen local time, never the future', () =>
   input.value = '2999-01-01T00:00';
   const read = Date.parse(readWhen(input, '2026-10-30T06:04:31.123Z'));
   assertEqual(Math.abs(read - Date.now()) < MINUTE, true);
+});
+
+test('a date input value reads back as that local day', () => {
+  assertEqual(formatIsoDate(parseDateValue('2026-03-09')), '2026-03-09');
 });

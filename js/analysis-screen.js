@@ -1,5 +1,5 @@
 import { bestDayIndex, dailySeries, defaultMetric, repRecords } from './analysis.js';
-import { entriesInRange, markPressed } from './chart-controls.js';
+import { createRangePicker, markPressed } from './chart-controls.js';
 import { revealPressedChip } from './chip-row.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
@@ -14,7 +14,6 @@ const MIN_STEPS = { weight: 0, relative: 1, reps: 1, volume: 1 };
 
 const titleEl = document.getElementById('analysis-title');
 const summaryEl = document.getElementById('analysis-summary');
-const rangeGroup = document.getElementById('analysis-ranges');
 const variantsEl = document.getElementById('analysis-variants');
 const emptyEl = document.getElementById('analysis-empty');
 const chartsEl = document.getElementById('analysis-charts');
@@ -32,7 +31,7 @@ const recordValue = document.getElementById('rep-max-value');
 const recordDate = document.getElementById('rep-max-date');
 const dailyChart = createLineChart(document.getElementById('daily-plot'), showDaily);
 
-let range = 'All';
+let rangePicker;
 let exercise;
 let variant = '';
 let chosenMetric = null;
@@ -42,7 +41,6 @@ let selectedWeight = null;
 let isVariantPicked = false;
 
 const actions = {
-  range: ({ range: name }) => { range = name; renderAnalysis(); },
   variant: ({ name }) => { variant = name; isVariantPicked = true; renderAnalysis(); },
   metric: ({ metric: name }) => { chosenMetric = name; renderAnalysis(); },
   bar: ({ index }) => showRecord(Number(index)),
@@ -50,7 +48,8 @@ const actions = {
 };
 
 export function initAnalysis() {
-  onAction([rangeGroup, variantsEl, metricGroup, dailyMax, barsEl], actions);
+  rangePicker = createRangePicker('analysis', renderAnalysis);
+  onAction([variantsEl, metricGroup, dailyMax, barsEl], actions);
 }
 
 export function enterAnalysis() {
@@ -65,13 +64,13 @@ export function enterAnalysis() {
 export function renderAnalysis() {
   const variants = allVariants(exercise);
   const exerciseSets = sets.getEntries().filter((set) => set.exercise === exercise && (!variant || set.variant === variant));
-  const shownSets = entriesInRange(exerciseSets, range);
+  const shownSets = rangePicker.filter(exerciseSets);
   const weighIns = bodyWeights.getEntries();
   const metric = shownMetric(shownSets, weighIns);
   const daily = dailySeries(shownSets, metric, weighIns);
   titleEl.textContent = exercise ?? '';
   summaryEl.textContent = `${countText(daily.length, 'day')} · ${countText(shownSets.length, 'set')}`;
-  markPressed(rangeGroup, 'range', range);
+  rangePicker.show();
   variantsEl.hidden = variants.length === 0;
   variantsEl.innerHTML = ['', ...variants].map(chipHtml).join('');
   if (isVariantPicked) revealPressedChip(variantsEl);

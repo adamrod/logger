@@ -60,6 +60,11 @@ export function formatDuration(ms) {
   return `${Math.floor(seconds / 60)}:${pad(seconds % 60)}`;
 }
 
+export function parseDateValue(value) {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export const formatDateTimeValue = (date) => `${formatIsoDate(date)}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
 export function parseDateTimeValue(value) {
@@ -67,6 +72,6 @@ export function parseDateTimeValue(value) {
   return new Date(year, month - 1, day, hours, minutes);
 }
 
-function formatIsoDate(date) {
+export function formatIsoDate(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }

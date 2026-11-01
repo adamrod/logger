@@ -147,7 +147,13 @@
           <button type="button" class="btn-text toggle" data-action="range" data-range="3M">3M</button>
           <button type="button" class="btn-text toggle" data-action="range" data-range="1Y">1Y</button>
           <button type="button" class="btn-text toggle" data-action="range" data-range="All">All</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="Custom">Custom</button>
         </div>
+      </div>
+      <div class="range-custom" id="analysis-custom" hidden>
+        <input class="input date-input" id="analysis-from" type="date" aria-label="From">
+        <span class="range-dash" aria-hidden="true">–</span>
+        <input class="input date-input" id="analysis-to" type="date" aria-label="To">
       </div>
       <div class="analysis-head">
         <h1 class="analysis-title" id="analysis-title"></h1>
@@ -225,7 +231,13 @@
           <button type="button" class="btn-text toggle" data-action="range" data-range="3M">3M</button>
           <button type="button" class="btn-text toggle" data-action="range" data-range="1Y">1Y</button>
           <button type="button" class="btn-text toggle" data-action="range" data-range="All">All</button>
+          <button type="button" class="btn-text toggle" data-action="range" data-range="Custom">Custom</button>
         </div>
+      </div>
+      <div class="range-custom" id="chart-custom" hidden>
+        <input class="input date-input" id="chart-from" type="date" aria-label="From">
+        <span class="range-dash" aria-hidden="true">–</span>
+        <input class="input date-input" id="chart-to" type="date" aria-label="To">
       </div>
       <p class="chart-readout" aria-live="polite">
         <span><span class="chart-value" id="chart-value"></span> <span class="chart-meta" id="chart-date"></span></span>

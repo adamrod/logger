@@ -1,29 +1,27 @@
-import { entriesInRange, markPressed } from './chart-controls.js';
+import { createRangePicker } from './chart-controls.js';
 import { entryDate } from './entry-log.js';
-import { onAction } from './events.js';
 import { formatChange, formatDay, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
 import { bodyWeights } from './store.js';
 
 const section = document.getElementById('chart');
-const rangeGroup = document.getElementById('chart-ranges');
 const valueEl = document.getElementById('chart-value');
 const dateEl = document.getElementById('chart-date');
 const changeEl = document.getElementById('chart-change');
 const extremesEl = document.getElementById('chart-extremes');
 const chart = createLineChart(document.getElementById('chart-plot'), showPoint);
 
-let range = 'All';
+let rangePicker;
 
 export function initChart() {
-  onAction([rangeGroup], { range: ({ range: name }) => { range = name; renderChart(); } });
+  rangePicker = createRangePicker('chart', renderChart);
 }
 
 export function renderChart() {
   const all = bodyWeights.getEntries();
   section.hidden = all.length === 0;
-  markPressed(rangeGroup, 'range', range);
-  const entries = entriesInRange(all, range);
+  rangePicker.show();
+  const entries = rangePicker.filter(all);
   changeEl.textContent = changeText(entries);
   extremesEl.textContent = extremesText(entries);
   chart.draw(entries.map((entry) => ({ date: entryDate(entry), value: entry.weight })));

@@ -2,7 +2,7 @@ import { enterAnalysis, initAnalysis } from '../js/analysis-screen.js';
 import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
 import { onChange } from '../js/events.js';
 import { noteOf } from '../js/exercises.js';
-import { roundValue } from '../js/format.js';
+import { formatIsoDate, roundValue } from '../js/format.js';
 import { currentExercise, currentVariant, initLog, renderLog } from '../js/log-screen.js';
 import { bodyWeights, sets } from '../js/store.js';
 import { assertEqual, test } from './harness.js';
@@ -272,4 +272,22 @@ test('tapping Max moves the readout from the latest day to the best day in the r
   assertEqual(shown(), ['3 × 5', '2 × 10'], 'latest day');
   click('daily-max', { action: 'max' });
   assertEqual(shown(), ['2 × 10', '2 × 10'], 'best day');
+});
+
+test('a custom range starts from the first shown set and narrows to the chosen days', () => {
+  openScreens();
+  const daysAgo = (days) => new Date(Date.now() - days * 86400000);
+  [40, 20, 5].forEach((days) => sets.add({ timestamp: daysAgo(days).toISOString(), exercise: 'Front levers', reps: 5, weight: 0 }));
+  click('exercise-picker', { action: 'pick', name: 'Front levers' });
+  enterAnalysis();
+  click('analysis-ranges', { action: 'range', range: 'All' });
+  click('analysis-ranges', { action: 'range', range: 'Custom' });
+  const summary = () => element('analysis-summary').textContent;
+  assertEqual([element('analysis-from').value, summary()], [formatIsoDate(daysAgo(40)), '3 days · 3 sets'], 'starts with all shown');
+  element('analysis-from').value = formatIsoDate(daysAgo(25));
+  element('analysis-from').dispatch('change');
+  assertEqual(summary(), '2 days · 2 sets', 'from moved');
+  element('analysis-to').value = formatIsoDate(daysAgo(10));
+  element('analysis-to').dispatch('change');
+  assertEqual(summary(), '1 day · 1 set', 'to moved');
 });
