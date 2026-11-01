@@ -20,7 +20,7 @@
 <div class="app">
   <nav class="tabs" aria-label="Sections">
     <a class="tab" href="#log">Sets</a>
-    <a class="tab" href="#body-weight">Body weight</a>
+    <a class="tab" href="#body-weight">Weight</a>
     <a class="tab" href="#settings">Settings</a>
   </nav>
 
@@ -78,7 +78,6 @@
           <div class="field">
             <div class="label-row">
               <label class="label" for="reps">Reps</label>
-              <span class="rest-timer" id="rest-timer" role="timer" hidden></span>
             </div>
             <div class="stepper">
               <button type="button" class="step-btn" data-action="step" data-field="reps" data-steps="-1" aria-label="Decrease repetitions">−</button>
@@ -98,10 +97,10 @@
           </div>
         </div>
         <div class="field" id="set-when-field" hidden>
-          <label class="label" for="set-when">Date and time</label>
+          <label class="label" for="set-when">Time</label>
           <input class="input when-input" id="set-when" type="datetime-local">
         </div>
-        <button type="button" class="btn btn-primary" id="log-button" data-action="log">Log set</button>
+        <button type="button" class="btn btn-primary" id="log-button" data-action="log">Log</button>
         <div class="edit-actions" id="edit-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>
           <button type="button" class="btn btn-secondary" data-action="delete">Delete</button>
@@ -109,8 +108,9 @@
         </div>
         <div class="edit-actions" id="delete-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-delete">Keep</button>
-          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete set</button>
+          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete</button>
         </div>
+        <p class="rest-timer" id="rest-timer" role="timer" hidden><span class="label">Rest</span> <span class="rest-time" id="rest-time"></span></p>
       </div>
     </div>
 
@@ -186,10 +186,10 @@
           </div>
         </div>
         <div class="field" id="body-weight-when-field" hidden>
-          <label class="label" for="body-weight-when">Date and time</label>
+          <label class="label" for="body-weight-when">Time</label>
           <input class="input when-input" id="body-weight-when" type="datetime-local">
         </div>
-        <button type="button" class="btn btn-primary" id="body-weight-log" data-action="log">Log weight</button>
+        <button type="button" class="btn btn-primary" id="body-weight-log" data-action="log">Log</button>
         <div class="edit-actions" id="body-weight-edit-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>
           <button type="button" class="btn btn-secondary" data-action="delete">Delete</button>
@@ -197,7 +197,7 @@
         </div>
         <div class="edit-actions" id="body-weight-delete-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-delete">Keep</button>
-          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete weight</button>
+          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete</button>
         </div>
       </div>
     </div>
@@ -235,7 +235,7 @@
   <section class="screen" id="screen-settings" hidden>
     <main class="settings">
       <section class="settings-section" aria-labelledby="sync-heading">
-        <h2 class="label" id="sync-heading">Sync with GitHub</h2>
+        <h2 class="label" id="sync-heading">Sync</h2>
         <div class="field">
           <label class="field-name" for="setting-owner">Owner</label>
           <input class="input" id="setting-owner" data-setting="owner" placeholder="your-username"
@@ -247,7 +247,7 @@
             autocomplete="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="field">
-          <label class="field-name" for="setting-token">Access token</label>
+          <label class="field-name" for="setting-token">Token</label>
           <input class="input" id="setting-token" data-setting="token" type="password" placeholder="github_pat_…"
             autocomplete="off" spellcheck="false">
         </div>
@@ -259,8 +259,8 @@
 
       <section class="settings-section" aria-labelledby="data-heading">
         <h2 class="label" id="data-heading">Data</h2>
-        <button type="button" class="btn btn-secondary" id="export-sets">Export sets CSV</button>
-        <button type="button" class="btn btn-secondary" id="export-body-weight">Export body weight CSV</button>
+        <button type="button" class="btn btn-secondary" id="export-sets">Export sets</button>
+        <button type="button" class="btn btn-secondary" id="export-body-weight">Export weights</button>
       </section>
 
       <p class="version" id="app-version"></p>
