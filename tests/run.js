@@ -3,7 +3,7 @@ import './entry-log.test.js';
 import './sync.test.js';
 import './exercises.test.js';
 import './format.test.js';
-import './timer.test.js';
+import './stopwatch.test.js';
 import './picker-menu.test.js';
 import './history.test.js';
 import './line-chart.test.js';

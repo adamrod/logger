@@ -10,7 +10,7 @@ import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { setHistoryHtml } from './set-history.js';
 import { getChosenVariant, saveChosenVariant, sets } from './store.js';
-import { initTimer, onSetLogged, timerActions } from './timer.js';
+import { initStopwatch, onSetLogged, stopwatchActions } from './stopwatch.js';
 
 const FIELDS = {
   reps: { ...INTEGER, step: 1, min: 0 },
@@ -43,7 +43,7 @@ const editor = createEntryEditor(sets, {
 
 const actions = {
   ...editor.actions,
-  ...timerActions,
+  ...stopwatchActions,
   step: ({ field, steps }, size = 1) => {
     stepInput(inputs[field], FIELDS[field], Number(steps) * size);
     updateSaveButtons();
@@ -65,7 +65,7 @@ export function initLog() {
   onAction([controls, historyEl], actions);
   onHoldStep(controls, actions.step);
   Object.entries(inputs).forEach(([key, input]) => bindNumberInput(input, FIELDS[key], updateSaveButtons));
-  initTimer();
+  initStopwatch();
 }
 
 export function renderLog() {

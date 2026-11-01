@@ -224,17 +224,17 @@ test('the note stays closed until asked for and closes when another exercise is 
   assertEqual([element('note-field').hidden, element('note').value], [true, ''], 'other exercise');
 });
 
-test('the timer buttons start and stop it, and logging restarts it while reset on log is ticked', () => {
+test('the stopwatch buttons start and stop it, and logging restarts it while reset on log is ticked', () => {
   openScreens();
-  click('log-controls', { action: 'timer-stop' });
-  assertEqual([element('timer-start').disabled, element('timer-stop').disabled], [false, true], 'stopped');
+  click('log-controls', { action: 'stopwatch-stop' });
+  assertEqual([element('stopwatch-start').disabled, element('stopwatch-stop').disabled], [false, true], 'stopped');
   element('reps').value = '5';
   element('weight').value = '50';
   click('log-controls', { action: 'log' });
-  assertEqual([element('timer-start').disabled, element('timer-time').textContent], [true, '0:00'], 'after logging');
-  click('log-controls', { action: 'timer-stop' });
-  element('timer-reset-on-log').checked = false;
-  element('timer-reset-on-log').dispatch('change', {});
+  assertEqual([element('stopwatch-start').disabled, element('stopwatch-time').textContent], [true, '0:00'], 'after logging');
+  click('log-controls', { action: 'stopwatch-stop' });
+  element('stopwatch-reset-on-log').checked = false;
+  element('stopwatch-reset-on-log').dispatch('change', {});
   click('log-controls', { action: 'log' });
-  assertEqual(element('timer-start').disabled, false, 'after logging unticked');
+  assertEqual(element('stopwatch-start').disabled, false, 'after logging unticked');
 });
