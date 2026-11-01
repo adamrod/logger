@@ -1,5 +1,6 @@
 import { dailySeries, defaultMetric, repRecords } from './analysis.js';
 import { entriesInRange, markPressed } from './chart-controls.js';
+import { revealPressedChip } from './chip-row.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { allVariants } from './exercises.js';
@@ -33,10 +34,11 @@ let variant = '';
 let chosenMetric = null;
 let records = [];
 let selectedWeight = null;
+let isVariantPicked = false;
 
 const actions = {
   range: ({ range: name }) => { range = name; renderAnalysis(); },
-  variant: ({ name }) => { variant = name; renderAnalysis(); },
+  variant: ({ name }) => { variant = name; isVariantPicked = true; renderAnalysis(); },
   metric: ({ metric: name }) => { chosenMetric = name; renderAnalysis(); },
   bar: ({ index }) => showRecord(Number(index)),
 };
@@ -48,6 +50,7 @@ export function initAnalysis() {
 export function enterAnalysis() {
   exercise = currentExercise();
   variant = currentVariant();
+  isVariantPicked = true;
   chosenMetric = null;
   selectedWeight = null;
   barsEl.scrollLeft = 0;
@@ -64,6 +67,8 @@ export function renderAnalysis() {
   markPressed(rangeGroup, 'range', range);
   variantsEl.hidden = variants.length === 0;
   variantsEl.innerHTML = ['', ...variants].map(chipHtml).join('');
+  if (isVariantPicked) revealPressedChip(variantsEl);
+  isVariantPicked = false;
   emptyEl.hidden = shownSets.length > 0;
   chartsEl.hidden = shownSets.length === 0;
   if (!shownSets.length) return;

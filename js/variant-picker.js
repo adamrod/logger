@@ -1,3 +1,4 @@
+import { revealPressedChip } from './chip-row.js';
 import { onAction } from './events.js';
 import { addVariant, allVariants, removeVariant } from './exercises.js';
 import { escapeHtml } from './format.js';
@@ -52,7 +53,7 @@ export function renderVariantPicker(selectedExercise, variant) {
   exercise = selectedExercise;
   current = variant;
   render();
-  if (isPicked) revealCurrent();
+  if (isPicked) revealPressedChip(chipsEl);
 }
 
 function render() {
@@ -71,10 +72,6 @@ function renderEditButton() {
   const [text, label] = isEditing ? ['Done', 'Done editing variants'] : ['Edit', 'Edit variants'];
   editButton.textContent = text;
   editButton.setAttribute('aria-label', label);
-}
-
-function revealCurrent() {
-  chipsEl.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function chipHtml(variant) {
