@@ -23,6 +23,7 @@ export function renderExerciseNote(selectedExercise) {
   toggleButton.setAttribute('aria-expanded', isOpen);
   field.hidden = !isOpen;
   if (input !== document.activeElement) input.value = noteOf(exercise);
+  toggleButton.textContent = noteOf(exercise) ? 'Notes' : '+ Notes';
   fitToText();
 }
 

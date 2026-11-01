@@ -215,6 +215,7 @@ test('the note stays closed until asked for and closes when another exercise is 
   sets.add({ exercise: 'Calf raise', reps: 15, weight: 60 });
   click('exercise-picker', { action: 'pick', name: 'Leg press' });
   assertEqual(element('note-field').hidden, true, 'before opening');
+  assertEqual(element('note-toggle').textContent, '+ Notes', 'label without a note');
   element('note-toggle').dispatch('click');
   assertEqual(element('note-field').hidden, false, 'open');
   assertEqual(document.activeElement === element('note'), true, 'empty note focused');
@@ -222,6 +223,7 @@ test('the note stays closed until asked for and closes when another exercise is 
   element('note').dispatch('input');
   element('note-toggle').dispatch('click');
   assertEqual([element('note-field').hidden, noteOf('Leg press')], [true, 'Seat 4'], 'closed after typing');
+  assertEqual(element('note-toggle').textContent, 'Notes', 'label with a note');
   element('note-toggle').dispatch('click');
   click('exercise-picker', { action: 'pick', name: 'Calf raise' });
   assertEqual([element('note-field').hidden, element('note').value], [true, ''], 'other exercise');
