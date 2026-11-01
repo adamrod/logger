@@ -6,6 +6,7 @@ const DEFAULTS = { startedAt: null, elapsed: 0, resetOnLog: true };
 const START_ICON = 'M8 5.5v13l10.5-6.5z';
 const STOP_ICON = 'M9 6v12M15 6v12';
 
+const stopwatchEl = document.getElementById('stopwatch');
 const timeEl = document.getElementById('stopwatch-time');
 const toggleButton = document.getElementById('stopwatch-toggle');
 const icon = document.getElementById('stopwatch-icon');
@@ -31,12 +32,18 @@ export const stopwatchActions = {
 };
 
 export function initStopwatch() {
+  stopwatchEl.addEventListener('pointerdown', showPress);
+  stopwatchEl.addEventListener('animationend', ({ target }) => target.classList.remove('is-pressed'));
   resetOnLogInput.addEventListener('change', () => save({ ...stopwatch, resetOnLog: resetOnLogInput.checked }));
   setInterval(renderTime, TICK_MS);
   renderStopwatch();
 }
 
 export const onSetLogged = () => update(restartOnLog);
+
+function showPress({ target }) {
+  target.closest('.stopwatch-button')?.classList.add('is-pressed');
+}
 
 function update(change) {
   save(change(stopwatch, Date.now()));
