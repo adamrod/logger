@@ -231,7 +231,7 @@ test('the note stays closed until asked for and closes when another exercise is 
   assertEqual([element('note-field').hidden, element('note').value], [true, ''], 'other exercise');
 });
 
-test('one button starts and stops the stopwatch, and logging restarts it while reset on log is ticked', () => {
+test('one button starts and stops the stopwatch, and logging restarts it while restart on log is ticked', () => {
   openScreens();
   const isRunning = () => element('stopwatch-toggle').getAttribute('aria-label') === 'Stop stopwatch';
   if (isRunning()) click('log-controls', { action: 'stopwatch-toggle' });
@@ -244,8 +244,8 @@ test('one button starts and stops the stopwatch, and logging restarts it while r
   click('log-controls', { action: 'log' });
   assertEqual([isRunning(), element('stopwatch-time').textContent], [true, '0:00'], 'after logging');
   click('log-controls', { action: 'stopwatch-toggle' });
-  element('stopwatch-reset-on-log').checked = false;
-  element('stopwatch-reset-on-log').dispatch('change', {});
+  element('stopwatch-restart-on-log').checked = false;
+  element('stopwatch-restart-on-log').dispatch('change', {});
   click('log-controls', { action: 'log' });
   assertEqual(isRunning(), false, 'after logging unticked');
 });

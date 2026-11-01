@@ -3,7 +3,7 @@ import { formatDuration } from './format.js';
 const STORAGE_KEY = 'logger.v2.stopwatch';
 const TICK_MS = 1000;
 const LIMIT_MS = 12 * 60 * 60 * 1000;
-const DEFAULTS = { startedAt: null, elapsed: 0, resetOnLog: true };
+const DEFAULTS = { startedAt: null, elapsed: 0, restartOnLog: true };
 const START_ICON = 'M8 5.5v13l10.5-6.5z';
 const STOP_ICON = 'M9 6v12M15 6v12';
 
@@ -11,7 +11,7 @@ const stopwatchEl = document.getElementById('stopwatch');
 const timeEl = document.getElementById('stopwatch-time');
 const toggleButton = document.getElementById('stopwatch-toggle');
 const icon = document.getElementById('stopwatch-icon');
-const resetOnLogInput = document.getElementById('stopwatch-reset-on-log');
+const restartOnLogInput = document.getElementById('stopwatch-restart-on-log');
 
 let stopwatch = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') };
 
@@ -29,7 +29,7 @@ export const expireStopwatch = (state, now) => (elapsedOf(state, now) >= LIMIT_M
   ? { ...state, startedAt: null, elapsed: 0 }
   : state);
 
-export const restartOnLog = (state, now) => (state.resetOnLog ? { ...state, startedAt: now, elapsed: 0 } : state);
+export const restartAfterLog = (state, now) => (state.restartOnLog ? { ...state, startedAt: now, elapsed: 0 } : state);
 
 export const stopwatchActions = {
   'stopwatch-toggle': () => update(toggleStopwatch),
@@ -39,13 +39,13 @@ export const stopwatchActions = {
 export function initStopwatch() {
   stopwatchEl.addEventListener('pointerdown', showPress);
   stopwatchEl.addEventListener('animationend', ({ target }) => target.classList.remove('is-pressed'));
-  resetOnLogInput.addEventListener('change', () => save({ ...stopwatch, resetOnLog: resetOnLogInput.checked }));
+  restartOnLogInput.addEventListener('change', () => save({ ...stopwatch, restartOnLog: restartOnLogInput.checked }));
   document.addEventListener('visibilitychange', () => update(expireStopwatch));
   setInterval(renderTime, TICK_MS);
   update(expireStopwatch);
 }
 
-export const onSetLogged = () => update(restartOnLog);
+export const onSetLogged = () => update(restartAfterLog);
 
 function showPress({ target }) {
   target.closest('.stopwatch-button')?.classList.add('is-pressed');
@@ -65,7 +65,7 @@ function renderStopwatch() {
   const running = isRunning(stopwatch);
   toggleButton.setAttribute('aria-label', running ? 'Stop stopwatch' : 'Start stopwatch');
   icon.setAttribute('d', running ? STOP_ICON : START_ICON);
-  resetOnLogInput.checked = stopwatch.resetOnLog;
+  restartOnLogInput.checked = stopwatch.restartOnLog;
   renderTime();
 }
 
