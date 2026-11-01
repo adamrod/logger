@@ -355,4 +355,6 @@ test('the day arrows step to the previous and next days with something logged', 
   assertEqual([location.hash, element('day-summary').textContent], ['#day/1990-01-08', 'BW 81'], 'weight only');
   click('day-steps', { action: 'step', step: 'next' });
   assertEqual(location.hash, '#day/1990-01-09', 'next set day');
+  click('day-steps', { action: 'latest' });
+  assertEqual([location.hash, element('day-latest').disabled], [`#day/${formatIsoDate(new Date(sets.getEntries().at(-1).timestamp))}`, true], 'latest day');
 });

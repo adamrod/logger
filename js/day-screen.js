@@ -11,6 +11,7 @@ const summaryEl = document.getElementById('day-summary');
 const stepsEl = document.getElementById('day-steps');
 const previousButton = document.getElementById('day-previous');
 const nextButton = document.getElementById('day-next');
+const latestButton = document.getElementById('day-latest');
 const exercisesEl = document.getElementById('day-exercises');
 
 let day = new Date();
@@ -19,6 +20,7 @@ const nearby = () => nearbyDays(loggedDays(sets.getEntries(), bodyWeights.getEnt
 
 const actions = {
   step: ({ step }) => showDay(nearby()[step]),
+  latest: () => showDay(lastLoggedDay()),
   exercise: ({ name }) => {
     showExercise(name);
     location.hash = '#log';
@@ -42,6 +44,7 @@ export function renderDay() {
   const { previous, next } = nearby();
   previousButton.disabled = !previous;
   nextButton.disabled = !next;
+  latestButton.disabled = !next;
   const summary = daySummary(day, sets.getEntries(), bodyWeights.getEntries());
   titleEl.textContent = formatLongDay(day);
   summaryEl.textContent = summaryText(summary);
