@@ -24,6 +24,7 @@ function createElement() {
     setAttribute: () => {},
     querySelector: () => null,
     querySelectorAll: () => [],
+    scrollTo: () => {},
     getBoundingClientRect: () => ({ top: 0 }),
     style: {},
     focus() { document.activeElement = this; },

@@ -1,5 +1,4 @@
 import { formatDateTimeValue, formatDay, formatDuration, parseDateTimeValue } from '../js/format.js';
-import { restSince } from '../js/rest-timer.js';
 import { readWhen, showWhen } from '../js/when-field.js';
 import { assertEqual, test } from './harness.js';
 
@@ -36,13 +35,4 @@ test('a changed date field gives the chosen local time, never the future', () =>
   input.value = '2999-01-01T00:00';
   const read = Date.parse(readWhen(input, '2026-10-30T06:04:31.123Z'));
   assertEqual(Math.abs(read - Date.now()) < MINUTE, true);
-});
-
-test('rest time shows for half an hour after the last set', () => {
-  const now = Date.parse('2026-10-30T12:00:00.000Z');
-  const setAgo = (ms) => ({ timestamp: new Date(now - ms).toISOString() });
-  assertEqual(restSince(undefined, now), null);
-  assertEqual(restSince(setAgo(2 * MINUTE), now), 2 * MINUTE);
-  assertEqual(restSince(setAgo(30 * MINUTE), now), null);
-  assertEqual(restSince(setAgo(-MINUTE), now), null);
 });

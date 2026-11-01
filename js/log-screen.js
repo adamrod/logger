@@ -8,9 +8,9 @@ import { roundValue } from './format.js';
 import { revealNewest } from './history.js';
 import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
-import { initRestTimer, renderRestTimer } from './rest-timer.js';
 import { setHistoryHtml } from './set-history.js';
 import { getChosenVariant, saveChosenVariant, sets } from './store.js';
+import { initTimer, onSetLogged, timerActions } from './timer.js';
 
 const FIELDS = {
   reps: { ...INTEGER, step: 1, min: 0 },
@@ -43,6 +43,7 @@ const editor = createEntryEditor(sets, {
 
 const actions = {
   ...editor.actions,
+  ...timerActions,
   step: ({ field, steps }, size = 1) => {
     stepInput(inputs[field], FIELDS[field], Number(steps) * size);
     updateSaveButtons();
@@ -51,6 +52,7 @@ const actions = {
     const set = readSet();
     if (!set) return;
     sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
+    onSetLogged();
     revealNewest(historyEl, sets.getEntries().at(-1));
   },
 };
@@ -63,7 +65,7 @@ export function initLog() {
   onAction([controls, historyEl], actions);
   onHoldStep(controls, actions.step);
   Object.entries(inputs).forEach(([key, input]) => bindNumberInput(input, FIELDS[key], updateSaveButtons));
-  initRestTimer();
+  initTimer();
 }
 
 export function renderLog() {
@@ -73,7 +75,6 @@ export function renderLog() {
   renderVariantPicker(exercise, isEditing() ? editedVariant : currentVariant());
   editor.render();
   updateSaveButtons();
-  renderRestTimer();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
   analysisLink.hidden = exerciseSets.length === 0;
   historyEl.innerHTML = setHistoryHtml(exerciseSets, {

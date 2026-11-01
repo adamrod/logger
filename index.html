@@ -110,7 +110,20 @@
           <button type="button" class="btn btn-secondary" data-action="cancel-delete">Keep</button>
           <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete</button>
         </div>
-        <p class="rest-timer" id="rest-timer" role="timer" hidden><span class="label">Rest</span> <span class="rest-time" id="rest-time"></span></p>
+        <div class="timer">
+          <div class="label-row">
+            <span class="label" id="timer-label">Timer</span>
+            <label class="timer-option"><input type="checkbox" class="check" id="timer-reset-on-log"> Reset on log</label>
+          </div>
+          <div class="timer-body">
+            <button type="button" class="timer-button" data-action="timer-reset" aria-label="Reset timer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4h4"/></svg></button>
+            <span class="timer-time" id="timer-time" role="timer" aria-labelledby="timer-label">0:00</span>
+            <div class="timer-buttons">
+              <button type="button" class="timer-button" id="timer-stop" data-action="timer-stop" aria-label="Stop timer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+              <button type="button" class="timer-button" id="timer-start" data-action="timer-start" aria-label="Start timer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

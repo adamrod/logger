@@ -1,4 +1,4 @@
-const VERSION = 57;
+const VERSION = 58;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -30,13 +30,13 @@ const APP_SHELL = [
   'js/name-list.js',
   'js/number-field.js',
   'js/picker-menu.js',
-  'js/rest-timer.js',
   'js/settings-screen.js',
   'js/set-history.js',
   'js/settings.js',
   'js/store.js',
   'js/sync.js',
   'js/sync-status.js',
+  'js/timer.js',
   'js/variant-picker.js',
   'js/when-field.js',
   'icons/icon-180.png',

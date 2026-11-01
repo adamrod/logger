@@ -223,3 +223,18 @@ test('the note stays closed until asked for and closes when another exercise is 
   click('exercise-picker', { action: 'pick', name: 'Calf raise' });
   assertEqual([element('note-field').hidden, element('note').value], [true, ''], 'other exercise');
 });
+
+test('the timer buttons start and stop it, and logging restarts it while reset on log is ticked', () => {
+  openScreens();
+  click('log-controls', { action: 'timer-stop' });
+  assertEqual([element('timer-start').disabled, element('timer-stop').disabled], [false, true], 'stopped');
+  element('reps').value = '5';
+  element('weight').value = '50';
+  click('log-controls', { action: 'log' });
+  assertEqual([element('timer-start').disabled, element('timer-time').textContent], [true, '0:00'], 'after logging');
+  click('log-controls', { action: 'timer-stop' });
+  element('timer-reset-on-log').checked = false;
+  element('timer-reset-on-log').dispatch('change', {});
+  click('log-controls', { action: 'log' });
+  assertEqual(element('timer-start').disabled, false, 'after logging unticked');
+});
