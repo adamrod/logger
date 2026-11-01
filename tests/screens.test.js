@@ -187,6 +187,25 @@ test('moving an edited set to another variant keeps the history on the variant b
   assertEqual([edited.variant, currentVariant(), isShown()], ['Right', 'Left', false], 'after saving');
 });
 
+test('all variants widens the history to every variant and is offered only once a variant is chosen', () => {
+  openScreens();
+  sets.add({ exercise: 'Single leg RDL', variant: 'Left', reps: 8, weight: 16 });
+  sets.add({ exercise: 'Single leg RDL', variant: 'Right', reps: 8, weight: 16 });
+  sets.add({ exercise: 'Back extension', reps: 12, weight: 0 });
+  const { timestamp } = sets.getEntries().at(-2);
+  const toggle = element('history-all-variants');
+  const isShown = () => element('history-list').innerHTML.includes(timestamp);
+  click('exercise-picker', { action: 'pick', name: 'Back extension' });
+  assertEqual(toggle.hidden, true, 'without variants');
+  click('exercise-picker', { action: 'pick', name: 'Single leg RDL' });
+  click('variant-picker', { action: 'pick', name: 'Left' });
+  assertEqual([toggle.hidden, toggle.getAttribute('aria-pressed'), isShown()], [false, 'false', false], 'off');
+  click('history-all-variants', { action: 'toggle-all-variants' });
+  assertEqual([toggle.getAttribute('aria-pressed'), isShown()], ['true', true], 'on');
+  click('history-all-variants', { action: 'toggle-all-variants' });
+  assertEqual(isShown(), false, 'off again');
+});
+
 test('a set deleted from edit mode is gone', () => {
   openScreens();
   sets.add({ exercise: 'Lunges', reps: 9, weight: 0 });

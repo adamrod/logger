@@ -9,6 +9,7 @@ import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealN
 import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { setHistoryHtml } from './set-history.js';
+import { getSettings, updateSettings } from './settings.js';
 import { getChosenVariant, notes, saveChosenVariant, sets } from './store.js';
 import { initStopwatch, onSetLogged, stopwatchActions } from './stopwatch.js';
 
@@ -25,6 +26,7 @@ const inputs = { reps: document.getElementById('reps'), weight: document.getElem
 const logButton = document.getElementById('log-button');
 const saveButton = document.getElementById('save-button');
 const historyEl = document.getElementById('history-list');
+const allVariantsToggle = document.getElementById('history-all-variants');
 const analysisLink = document.getElementById('analysis-link');
 
 let selected = sets.getEntries().at(-1)?.exercise;
@@ -56,6 +58,7 @@ const actions = {
     revealNewest(historyEl, sets.getEntries().at(-1));
   },
   day: ({ day }) => { location.hash = `#day/${day}`; },
+  'toggle-all-variants': () => updateSettings({ showAllVariants: !getSettings().showAllVariants }),
 };
 
 export function initLog() {
@@ -63,7 +66,7 @@ export function initLog() {
   initVariantPicker(selectVariant);
   initExerciseNote();
   fillForm(lastSetOf(currentExercise()) ?? EMPTY_SET);
-  onAction([controls, historyEl], actions);
+  onAction([controls, historyEl, allVariantsToggle], actions);
   onHoldStep(controls, actions.step);
   Object.entries(inputs).forEach(([key, input]) => bindNumberInput(input, FIELDS[key], updateSaveButtons));
   initStopwatch();
@@ -78,8 +81,11 @@ export function renderLog() {
   updateSaveButtons();
   const exerciseSets = sets.getEntries().filter((entry) => entry.exercise === exercise);
   analysisLink.hidden = exerciseSets.length === 0;
+  const { showAllVariants } = getSettings();
+  allVariantsToggle.hidden = !currentVariant();
+  allVariantsToggle.setAttribute('aria-pressed', showAllVariants);
   historyEl.innerHTML = setHistoryHtml(exerciseSets, {
-    variant: currentVariant(),
+    variant: showAllVariants ? '' : currentVariant(),
     isUnsynced: sets.isUnsynced,
     editingId: editor.editingId(),
   });

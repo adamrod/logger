@@ -1,7 +1,7 @@
 import { notifyChange } from './events.js';
 
 const STORAGE_KEY = 'logger.settings';
-const DEFAULTS = { owner: '', repo: '', token: '', screenTimeout: 0 };
+const DEFAULTS = { owner: '', repo: '', token: '', screenTimeout: 0, showAllVariants: false };
 
 let settings = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') };
 
