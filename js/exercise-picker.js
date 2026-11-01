@@ -1,5 +1,6 @@
 import { addExercise, allExercises, isOtherExercise, removeExercise, renameExercise } from './exercises.js';
 import { escapeHtml } from './format.js';
+import { highlight } from './highlight.js';
 import { createPickerMenu } from './picker-menu.js';
 
 const ICON_ACTIONS = {
@@ -8,6 +9,7 @@ const ICON_ACTIONS = {
 };
 
 const select = document.getElementById('exercise-select');
+const exerciseButton = document.getElementById('exercise-button');
 const nameForm = document.getElementById('exercise-form');
 const nameInput = document.getElementById('exercise-name');
 const submitButton = document.getElementById('exercise-submit');
@@ -60,6 +62,8 @@ export function renderExercisePicker(exercise) {
   current = exercise;
   render();
 }
+
+export const highlightExercise = () => highlight(exerciseButton);
 
 function startNaming(name) {
   menu.close();

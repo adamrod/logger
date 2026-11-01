@@ -1,15 +1,15 @@
 import { createEntryEditor } from './entry-editor.js';
 import { allExercises, allVariants } from './exercises.js';
-import { initExerciseNote, renderExerciseNote } from './exercise-note.js';
-import { initExercisePicker, renderExercisePicker } from './exercise-picker.js';
-import { initVariantPicker, renderVariantPicker } from './variant-picker.js';
+import { initExerciseNote, renderExerciseNote, showNote } from './exercise-note.js';
+import { highlightExercise, initExercisePicker, renderExercisePicker } from './exercise-picker.js';
+import { highlightVariants, initVariantPicker, renderVariantPicker } from './variant-picker.js';
 import { onAction } from './events.js';
 import { roundValue } from './format.js';
-import { revealNewest } from './history.js';
+import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
 import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
 import { setHistoryHtml } from './set-history.js';
-import { getChosenVariant, saveChosenVariant, sets } from './store.js';
+import { getChosenVariant, notes, saveChosenVariant, sets } from './store.js';
 import { initStopwatch, onSetLogged, stopwatchActions } from './stopwatch.js';
 
 const FIELDS = {
@@ -84,12 +84,33 @@ export function renderLog() {
   });
 }
 
+export async function revealSets(step) {
+  const { exercise } = step.place;
+  showExercise(exercise);
+  await fadeOutEntries(historyEl, leavingEntries(step, sets));
+  const exercisesBefore = allExercises();
+  const variantsBefore = allVariants(exercise);
+  step.apply();
+  revealEntries(historyEl, arrivingEntries(step, sets));
+  if (allExercises().join('\n') !== exercisesBefore.join('\n')) highlightExercise();
+  highlightVariants(allVariants(exercise).filter((name) => !variantsBefore.includes(name)));
+  if (step.parts.every(({ target }) => target === notes)) showNote();
+}
+
 export function currentExercise() {
   return allExercises().includes(selected) ? selected : allExercises()[0];
 }
 
 export function currentVariant() {
   return allVariants(currentExercise()).includes(selectedVariant) ? selectedVariant : '';
+}
+
+function showExercise(exercise) {
+  if (exercise !== currentExercise()) selectExercise(exercise);
+  else {
+    editor.stopEditing();
+    renderLog();
+  }
 }
 
 function selectExercise(exercise) {

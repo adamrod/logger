@@ -3,7 +3,7 @@ import { createEntryEditor } from './entry-editor.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { daysBetween, formatDay, formatDelta, formatTime, roundValue } from './format.js';
-import { historyHtml, revealNewest } from './history.js';
+import { arrivingEntries, fadeOutEntries, historyHtml, leavingEntries, revealEntries, revealNewest } from './history.js';
 import { onHoldStep } from './hold-step.js';
 import { DECIMAL, bindNumberInput, stepInput } from './number-field.js';
 import { bodyWeights } from './store.js';
@@ -62,6 +62,14 @@ export function renderBodyWeight() {
     editingId: editor.editingId(),
     empty: 'No weights logged yet.',
   });
+}
+
+export async function revealWeights(step) {
+  editor.stopEditing();
+  renderBodyWeight();
+  await fadeOutEntries(historyEl, leavingEntries(step, bodyWeights));
+  step.apply();
+  revealEntries(historyEl, arrivingEntries(step, bodyWeights));
 }
 
 function changesByTimestamp(entries) {

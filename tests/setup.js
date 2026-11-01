@@ -29,6 +29,7 @@ function createElement() {
     scrollTo: () => {},
     getBoundingClientRect: () => ({ top: 0 }),
     style: {},
+    classList: { add: () => {}, remove: () => {} },
     focus() { document.activeElement = this; },
     blur() { if (document.activeElement === this) document.activeElement = null; },
   };

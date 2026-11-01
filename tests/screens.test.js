@@ -3,8 +3,9 @@ import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
 import { onChange } from '../js/events.js';
 import { noteOf } from '../js/exercises.js';
 import { formatIsoDate, roundValue } from '../js/format.js';
-import { currentExercise, currentVariant, initLog, renderLog } from '../js/log-screen.js';
+import { currentExercise, currentVariant, initLog, renderLog, revealSets } from '../js/log-screen.js';
 import { bodyWeights, sets } from '../js/store.js';
+import { nextUndo, trackPlace } from '../js/undo.js';
 import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
 
@@ -290,4 +291,33 @@ test('a custom range starts from the first shown set and narrows to the chosen d
   element('analysis-to').value = formatIsoDate(daysAgo(10));
   element('analysis-to').dispatch('change');
   assertEqual(summary(), '1 day · 1 set', 'to moved');
+});
+
+test('undoing a deleted set goes back to its exercise', async () => {
+  openScreens();
+  trackPlace(() => ({ screen: 'log', exercise: currentExercise() }));
+  sets.add({ exercise: 'Hip thrusts', reps: 8, weight: 100 });
+  sets.add({ exercise: 'Calf raises', reps: 15, weight: 40 });
+  click('exercise-picker', { action: 'pick', name: 'Hip thrusts' });
+  const set = lastSetOf('Hip thrusts');
+  click('history-list', { action: 'edit', id: set.timestamp });
+  click('log-controls', { action: 'delete' });
+  click('log-controls', { action: 'confirm-delete' });
+  click('exercise-picker', { action: 'pick', name: 'Calf raises' });
+  await revealSets(nextUndo());
+  assertEqual(currentExercise(), 'Hip thrusts');
+  assertEqual(lastSetOf('Hip thrusts'), set);
+  trackPlace(() => null);
+});
+
+test('undoing a note opens the notes', async () => {
+  openScreens();
+  trackPlace(() => ({ screen: 'log', exercise: currentExercise() }));
+  sets.add({ exercise: 'Face pulls', reps: 15, weight: 20 });
+  click('exercise-picker', { action: 'pick', name: 'Face pulls' });
+  element('note').value = 'Pause';
+  element('note').dispatch('input', {});
+  await revealSets(nextUndo());
+  assertEqual([noteOf('Face pulls'), element('note-field').hidden], ['', false]);
+  trackPlace(() => null);
 });

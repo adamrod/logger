@@ -1,4 +1,4 @@
-const VERSION = 71;
+const VERSION = 72;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -22,6 +22,7 @@ const APP_SHELL = [
   'js/exercise-picker.js',
   'js/format.js',
   'js/github.js',
+  'js/highlight.js',
   'js/history.js',
   'js/hold-step.js',
   'js/keep-awake.js',
@@ -37,6 +38,8 @@ const APP_SHELL = [
   'js/sync.js',
   'js/sync-status.js',
   'js/stopwatch.js',
+  'js/undo.js',
+  'js/undo-buttons.js',
   'js/variant-picker.js',
   'js/when-field.js',
   'icons/icon-180.png',

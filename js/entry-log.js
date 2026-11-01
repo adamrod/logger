@@ -1,5 +1,6 @@
 import { parseCsv, toCsv } from './csv.js';
 import { notifyChange, notifyEdit } from './events.js';
+import { recordChange, undoable } from './undo.js';
 
 const EMPTY_SYNC = { lastSyncAt: null, addedIds: [], deletedIds: [], editedIds: [] };
 
@@ -12,6 +13,15 @@ export const isAddedHere = ({ lastSyncAt, addedIds }, entry) => !lastSyncAt
   || addedIds.includes(entry.timestamp);
 
 const idsOf = (entries) => entries.map((entry) => entry.timestamp);
+
+function combineChanges(first, second) {
+  const laterRemoved = new Set(idsOf(second.before));
+  const earlierAdded = new Set(idsOf(first.after));
+  return {
+    before: [...first.before, ...second.before.filter((entry) => !earlierAdded.has(entry.timestamp))],
+    after: [...first.after.filter((entry) => !laterRemoved.has(entry.timestamp)), ...second.after],
+  };
+}
 
 export function createEntryLog({ file, columns, numbers, keys }) {
   let entries = parseCsv(localStorage.getItem(keys.entries) ?? '', numbers);
@@ -34,7 +44,12 @@ export function createEntryLog({ file, columns, numbers, keys }) {
 
   function markAdded(added) {
     touch(added);
-    remember('addedIds', added);
+    const deletedIds = new Set(syncMeta.deletedIds);
+    const restored = added.filter((entry) => deletedIds.has(entry.timestamp));
+    const restoredIds = new Set(idsOf(restored));
+    syncMeta = { ...syncMeta, deletedIds: syncMeta.deletedIds.filter((id) => !restoredIds.has(id)) };
+    remember('editedIds', restored);
+    remember('addedIds', added.filter((entry) => !restoredIds.has(entry.timestamp)));
   }
 
   function markChanged(key, changed) {
@@ -66,7 +81,25 @@ export function createEntryLog({ file, columns, numbers, keys }) {
     notifyEdit();
   }
 
-  return {
+  function replace(removed, added) {
+    const removedIds = new Set(idsOf(removed));
+    const addedIds = new Set(idsOf(added));
+    entries = [...entries.filter((entry) => !removedIds.has(entry.timestamp)), ...added].sort(byTimestamp);
+    markChanged('editedIds', added.filter((entry) => removedIds.has(entry.timestamp)));
+    markChanged('deletedIds', removed.filter((entry) => !addedIds.has(entry.timestamp)));
+    markAdded(added.filter((entry) => !removedIds.has(entry.timestamp)));
+    saveEdit();
+  }
+
+  function commit(removed, added) {
+    if (!removed.length && !added.length) return;
+    undoable(() => {
+      replace(removed, added);
+      recordChange(log, removed, added);
+    });
+  }
+
+  const log = {
     file,
     columns,
     numbers,
@@ -76,39 +109,28 @@ export function createEntryLog({ file, columns, numbers, keys }) {
     isUnsynced,
     hasChanges: () => syncMeta.deletedIds.length > 0 || entries.some(isUnsynced),
 
+    replace,
+    combine: combineChanges,
+
     add(entry) {
-      const added = { timestamp: nextUniqueTimestamp(), ...entry };
-      entries = [...entries, added];
-      markAdded([added]);
-      saveEdit();
+      commit([], [{ timestamp: nextUniqueTimestamp(), ...entry }]);
     },
 
     update(timestamp, changes) {
       const entry = entries.find((e) => e.timestamp === timestamp);
       if (!entry) return;
       const isMoved = (changes.timestamp ?? timestamp) !== timestamp;
-      const updated = { ...entry, ...changes, timestamp: isMoved ? freeTimestamp(changes.timestamp) : timestamp };
-      entries = entries.map((e) => (e === entry ? updated : e)).sort(byTimestamp);
-      if (isMoved) {
-        markChanged('deletedIds', [entry]);
-        markAdded([updated]);
-      } else markChanged('editedIds', [entry]);
-      saveEdit();
+      commit([entry], [{ ...entry, ...changes, timestamp: isMoved ? freeTimestamp(changes.timestamp) : timestamp }]);
     },
 
     updateWhere(matches, changes) {
-      const matched = new Set(entries.filter(matches));
-      entries = entries.map((e) => (matched.has(e) ? { ...e, ...changes } : e));
-      markChanged('editedIds', [...matched]);
-      saveEdit();
+      const matched = entries.filter(matches);
+      commit(matched, matched.map((entry) => ({ ...entry, ...changes })));
     },
 
     remove(timestamp) {
       const entry = entries.find((e) => e.timestamp === timestamp);
-      if (!entry) return;
-      entries = entries.filter((e) => e !== entry);
-      markChanged('deletedIds', [entry]);
-      saveEdit();
+      if (entry) commit([entry], []);
     },
 
     beginSync() {
@@ -132,4 +154,5 @@ export function createEntryLog({ file, columns, numbers, keys }) {
       save();
     },
   };
+  return log;
 }

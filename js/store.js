@@ -1,6 +1,7 @@
 import { createEntryLog } from './entry-log.js';
 import { notifyChange } from './events.js';
 import { mergeLists } from './name-list.js';
+import { recordChange } from './undo.js';
 
 const KEYS = {
   exercises: 'logger.v2.exercise-list',
@@ -32,25 +33,21 @@ export const notes = createEntryLog({
 
 export const entryLogs = [sets, bodyWeights, notes];
 
-let exerciseList = JSON.parse(localStorage.getItem(KEYS.exercises) ?? 'null') ?? EMPTY_LIST;
-let variantLists = JSON.parse(localStorage.getItem(KEYS.variants) ?? '{}');
+const exerciseList = createUndoableValue(KEYS.exercises, EMPTY_LIST);
+const variantLists = createUndoableValue(KEYS.variants, {});
 let chosenVariants = JSON.parse(localStorage.getItem(KEYS.chosenVariants) ?? '{}');
 
-export const getExerciseList = () => exerciseList;
+export const getExerciseList = exerciseList.get;
 
-export const getVariantList = (exercise) => variantLists[exercise] ?? EMPTY_LIST;
+export const getVariantList = (exercise) => variantLists.get()[exercise] ?? EMPTY_LIST;
 
-export function saveExerciseList(list) {
-  exerciseList = list;
-  localStorage.setItem(KEYS.exercises, JSON.stringify(exerciseList));
-  notifyChange();
-}
+export const saveExerciseList = exerciseList.save;
 
-export const saveVariantList = (exercise, list) => saveVariantLists({ ...variantLists, [exercise]: list });
+export const saveVariantList = (exercise, list) => variantLists.save({ ...variantLists.get(), [exercise]: list });
 
 export function moveVariantList(from, to) {
-  const { [from]: moved = EMPTY_LIST, ...others } = variantLists;
-  saveVariantLists({ ...others, [to]: mergeLists(others[to] ?? EMPTY_LIST, moved) });
+  const { [from]: moved = EMPTY_LIST, ...others } = variantLists.get();
+  variantLists.save({ ...others, [to]: mergeLists(others[to] ?? EMPTY_LIST, moved) });
 }
 
 export const getChosenVariant = (exercise) => chosenVariants[exercise];
@@ -60,8 +57,23 @@ export function saveChosenVariant(exercise, variant) {
   localStorage.setItem(KEYS.chosenVariants, JSON.stringify(chosenVariants));
 }
 
-function saveVariantLists(lists) {
-  variantLists = lists;
-  localStorage.setItem(KEYS.variants, JSON.stringify(variantLists));
-  notifyChange();
+function createUndoableValue(key, fallback) {
+  let value = JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback;
+
+  function replace(previous, next) {
+    value = next;
+    localStorage.setItem(key, JSON.stringify(value));
+    notifyChange();
+  }
+
+  const saved = {
+    get: () => value,
+    save: (next) => {
+      recordChange(saved, value, next);
+      replace(value, next);
+    },
+    replace,
+    combine: ({ before }, { after }) => ({ before, after }),
+  };
+  return saved;
 }

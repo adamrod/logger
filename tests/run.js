@@ -1,6 +1,7 @@
 import './setup.js';
 import './entry-log.test.js';
 import './sync.test.js';
+import './undo.test.js';
 import './exercises.test.js';
 import './format.test.js';
 import './stopwatch.test.js';

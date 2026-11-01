@@ -1,4 +1,5 @@
 import { noteOf, saveNote } from './exercises.js';
+import { highlight } from './highlight.js';
 
 const toggleButton = document.getElementById('note-toggle');
 const field = document.getElementById('note-field');
@@ -23,6 +24,12 @@ export function renderExerciseNote(selectedExercise) {
   field.hidden = !isOpen;
   if (input !== document.activeElement) input.value = noteOf(exercise);
   fitToText();
+}
+
+export function showNote() {
+  isOpen = true;
+  renderExerciseNote(exercise);
+  highlight(input);
 }
 
 function toggle() {

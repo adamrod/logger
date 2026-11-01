@@ -2,6 +2,7 @@ import { revealPressedChip } from './chip-row.js';
 import { onAction } from './events.js';
 import { addVariant, allVariants, removeVariant } from './exercises.js';
 import { escapeHtml } from './format.js';
+import { highlight } from './highlight.js';
 
 const NEW_CHIP = '<button type="button" class="chip chip-new" data-action="start-add" aria-label="New variant">+</button>';
 
@@ -59,6 +60,12 @@ export function renderVariantPicker(selectedExercise, variant) {
   current = variant;
   render();
   if (isPicked) revealPressedChip(chipsEl);
+}
+
+export function highlightVariants(names) {
+  const chips = [...chipsEl.querySelectorAll('.chip')].filter((chip) => names.includes(chip.dataset.name));
+  chips.forEach(highlight);
+  chips[0]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function render() {

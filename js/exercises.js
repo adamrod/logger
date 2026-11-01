@@ -1,5 +1,6 @@
 import { forgetName, visibleNames, withName, withoutLogged, withoutName } from './name-list.js';
 import { getExerciseList, getVariantList, moveVariantList, saveExerciseList, saveVariantList, notes, sets } from './store.js';
+import { undoable } from './undo.js';
 
 const loggedExercises = () => sets.getEntries().map((entry) => entry.exercise);
 
@@ -15,20 +16,22 @@ export const allVariants = (exercise) => visibleNames(getVariantList(exercise), 
 
 export function addExercise(name) {
   const { name: known, list } = withName(getExerciseList(), loggedExercises(), name);
-  if (list !== getExerciseList()) saveExerciseList(list);
+  if (list !== getExerciseList()) undoable(() => saveExerciseList(list));
   return known;
 }
 
-export const removeExercise = (name) => saveExerciseList(withoutName(getExerciseList(), name));
+export const removeExercise = (name) => undoable(() => saveExerciseList(withoutName(getExerciseList(), name)));
 
 export function renameExercise(from, to) {
   const others = loggedExercises().filter((name) => name !== from);
   const { name: known, list } = withName(forgetName(getExerciseList(), from), others, to);
   if (known === from) return from;
-  saveExerciseList(list);
-  moveVariantList(from, known);
-  sets.updateWhere((entry) => entry.exercise === from, { exercise: known });
-  notes.updateWhere((entry) => entry.exercise === from, { exercise: known });
+  undoable(() => {
+    saveExerciseList(list);
+    moveVariantList(from, known);
+    sets.updateWhere((entry) => entry.exercise === from, { exercise: known });
+    notes.updateWhere((entry) => entry.exercise === from, { exercise: known });
+  });
   return known;
 }
 
@@ -37,11 +40,11 @@ export const isOtherExercise = (name, other) => allExercises()
 
 export function addVariant(exercise, name) {
   const { name: known, list } = withName(getVariantList(exercise), loggedVariants(exercise), name);
-  if (list !== getVariantList(exercise)) saveVariantList(exercise, list);
+  if (list !== getVariantList(exercise)) undoable(() => saveVariantList(exercise, list));
   return known;
 }
 
-export const removeVariant = (exercise, name) => saveVariantList(exercise, withoutName(getVariantList(exercise), name));
+export const removeVariant = (exercise, name) => undoable(() => saveVariantList(exercise, withoutName(getVariantList(exercise), name)));
 
 function forgetLogged(list, logged, save) {
   const kept = withoutLogged(list, logged);
@@ -59,7 +62,9 @@ export function forgetLoggedNames() {
 
 export const noteOf = (exercise) => noteEntryOf(exercise)?.note ?? '';
 
-export function saveNote(exercise, text) {
+export const saveNote = (exercise, text) => undoable(() => writeNote(exercise, text), `note:${exercise}`);
+
+function writeNote(exercise, text) {
   const entry = noteEntryOf(exercise);
   const hasText = text.trim() !== '';
   if (!entry && hasText) notes.add({ exercise, note: text });

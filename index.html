@@ -18,11 +18,21 @@
 </head>
 <body>
 <div class="app">
-  <nav class="tabs" aria-label="Sections">
-    <a class="tab" href="#log">Sets</a>
-    <a class="tab" href="#body-weight">Weight</a>
-    <a class="tab" href="#settings">Settings</a>
-  </nav>
+  <header class="top-bar">
+    <nav class="tabs" aria-label="Sections">
+      <a class="tab" href="#log">Sets</a>
+      <a class="tab" href="#body-weight">Weight</a>
+      <a class="tab" href="#settings">Settings</a>
+    </nav>
+    <div class="undo-actions">
+      <button type="button" class="undo-button" id="undo" aria-label="Undo" disabled>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+      </button>
+      <button type="button" class="undo-button" id="redo" aria-label="Redo" disabled>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>
+      </button>
+    </div>
+  </header>
 
   <section class="screen" id="screen-log" hidden>
     <div class="log-form">

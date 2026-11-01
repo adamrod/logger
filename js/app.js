@@ -1,12 +1,14 @@
 import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
-import { initBodyWeight, renderBodyWeight } from './body-weight-screen.js';
+import { initBodyWeight, renderBodyWeight, revealWeights } from './body-weight-screen.js';
 import { onChange } from './events.js';
 import { forgetLoggedNames } from './exercises.js';
 import { initKeepAwake } from './keep-awake.js';
-import { initLog, renderLog } from './log-screen.js';
+import { currentExercise, initLog, renderLog, revealSets } from './log-screen.js';
 import { initSettings, renderSettings } from './settings-screen.js';
 import { initAutoSync } from './sync.js';
 import { initSyncStatus, renderSyncStatus } from './sync-status.js';
+import { trackPlace } from './undo.js';
+import { initUndoButtons, renderUndoButtons } from './undo-buttons.js';
 
 const RENDERERS = {
   log: renderLog,
@@ -16,6 +18,7 @@ const RENDERERS = {
 };
 const ENTER_HANDLERS = { analysis: enterAnalysis };
 const PARENT_TABS = { analysis: 'log' };
+const REVEALERS = { log: revealSets, 'body-weight': revealWeights };
 
 let current = null;
 
@@ -38,6 +41,20 @@ function route() {
 function render() {
   RENDERERS[current]();
   renderSyncStatus();
+  renderUndoButtons();
+}
+
+async function showReplayed(step) {
+  goTo(step.place.screen);
+  const reveal = REVEALERS[current];
+  if (reveal) await reveal(step);
+  else step.apply();
+}
+
+function goTo(screen) {
+  if (screen === current) return;
+  history.pushState(null, '', `#${screen}`);
+  route();
 }
 
 function letIosShowPressedButtons() {}
@@ -52,6 +69,8 @@ initBodyWeight();
 initAnalysis();
 initSettings();
 initSyncStatus();
+initUndoButtons(showReplayed);
+trackPlace(() => ({ screen: current, exercise: currentExercise() }));
 onChange(render);
 window.addEventListener('hashchange', route);
 window.addEventListener('resize', render);
