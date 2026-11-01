@@ -294,29 +294,7 @@ li:first-child > .option-new { border-top: none; }
 .analysis-nav > .text-link { margin-left: -12px; }
 
 .analysis-head { display: flex; flex-direction: column; gap: 2px; padding: 4px var(--gutter) 16px; }
-.analysis-title { font-size: 24px; line-height: 30px; font-weight: 700; }
-.analysis-head .picker-menu { top: calc(100% + 2px); }
-
-.title-button {
-  max-width: 100%;
-  margin: -7px 0;
-  padding: 7px 0;
-  border: none;
-  background: none;
-  text-align: left;
-  overflow-wrap: anywhere;
-}
-.title-button::after {
-  content: '';
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin: 0 4px 5px 10px;
-  border: solid var(--muted);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
+.analysis-title { font-size: 24px; line-height: 30px; font-weight: 700; overflow-wrap: anywhere; }
 .analysis-variants { padding: 0 var(--gutter) 16px; }
 
 .analysis-empty { margin-top: 0; padding: 12px var(--gutter) 0; border-top: 1px solid var(--divider); }

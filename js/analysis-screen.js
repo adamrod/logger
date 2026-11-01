@@ -2,16 +2,16 @@ import { dailySeries, defaultMetric, repRecords } from './analysis.js';
 import { entriesInRange, markPressed } from './chart-controls.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
-import { allExercises, allVariants } from './exercises.js';
+import { allVariants } from './exercises.js';
 import { describeSet, escapeHtml, formatChange, formatDay, formatSet, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
 import { currentExercise, currentVariant } from './log-screen.js';
-import { createPickerMenu } from './picker-menu.js';
 import { sets } from './store.js';
 
 const HEADINGS = { weight: 'Max weight', reps: 'Max reps', volume: 'Volume' };
 const MIN_STEPS = { weight: 0, reps: 1, volume: 1 };
 
+const titleEl = document.getElementById('analysis-title');
 const summaryEl = document.getElementById('analysis-summary');
 const rangeGroup = document.getElementById('analysis-ranges');
 const variantsEl = document.getElementById('analysis-variants');
@@ -26,10 +26,6 @@ const barsEl = document.getElementById('rep-max-bars');
 const recordValue = document.getElementById('rep-max-value');
 const recordDate = document.getElementById('rep-max-date');
 const dailyChart = createLineChart(document.getElementById('daily-plot'), showDaily);
-const exerciseMenu = createPickerMenu('analysis-exercise', {
-  names: loggedExercises,
-  onPick: (name) => { showExercise(name, ''); renderAnalysis(); },
-});
 
 let range = 'All';
 let exercise;
@@ -50,7 +46,11 @@ export function initAnalysis() {
 }
 
 export function enterAnalysis() {
-  showExercise(currentExercise(), currentVariant());
+  exercise = currentExercise();
+  variant = currentVariant();
+  chosenMetric = null;
+  selectedWeight = null;
+  barsEl.scrollLeft = 0;
 }
 
 export function renderAnalysis() {
@@ -59,7 +59,7 @@ export function renderAnalysis() {
   const shownSets = entriesInRange(exerciseSets, range);
   const metric = chosenMetric ?? defaultMetric(shownSets);
   const daily = dailySeries(shownSets, metric);
-  exerciseMenu.render(exercise);
+  titleEl.textContent = exercise ?? '';
   summaryEl.textContent = `${countText(daily.length, 'day')} · ${countText(shownSets.length, 'set')}`;
   markPressed(rangeGroup, 'range', range);
   variantsEl.hidden = variants.length === 0;
@@ -69,14 +69,6 @@ export function renderAnalysis() {
   if (!shownSets.length) return;
   renderDaily(daily, metric);
   renderRecords(shownSets);
-}
-
-function showExercise(name, variantName) {
-  exercise = name;
-  variant = variantName;
-  chosenMetric = null;
-  selectedWeight = null;
-  barsEl.scrollLeft = 0;
 }
 
 function renderDaily(daily, metric) {
@@ -119,10 +111,6 @@ function chipHtml(name) {
   const value = escapeHtml(name);
   return `<button type="button" class="chip" data-action="variant" data-name="${value}"
     aria-pressed="${name === variant}">${value || 'All'}</button>`;
-}
-
-function loggedExercises() {
-  return allExercises().filter((name) => name === exercise || sets.getEntries().some((set) => set.exercise === name));
 }
 
 const setText = (set) => (variant ? formatSet(set) : describeSet(set));
