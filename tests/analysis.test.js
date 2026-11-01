@@ -1,4 +1,4 @@
-import { bestDayIndex, bodyWeightAt, dailySeries } from '../js/analysis.js';
+import { bestDayIndex, bodyWeightAt, dailySeries, personalRecords } from '../js/analysis.js';
 import { assertEqual, test } from './harness.js';
 
 const weighIns = [
@@ -44,4 +44,36 @@ test('the best day is the heaviest set, more reps breaking a tie, or the first o
   ];
   const best = (metric) => bestDayIndex(dailySeries(sets, metric, weighIns), metric);
   assertEqual([best('weight'), best('reps'), best('relative'), best('volume')], [1, 3, 0, 3]);
+});
+
+const lifts = (...rows) => rows.map(([day, reps, weight, variant = ''], index) => ({
+  timestamp: new Date(2026, 9, day, 18, index).toISOString(), variant, reps, weight,
+}));
+
+const recordIndexes = (sets) => {
+  const records = personalRecords(sets);
+  return sets.flatMap((set, index) => (records.has(set) ? [index] : []));
+};
+
+test('a variant\'s first day has nothing to beat, so it has no personal records', () => {
+  assertEqual(recordIndexes(lifts([1, 5, 100], [1, 3, 110])), []);
+});
+
+test('a set is a personal record when no earlier set was as heavy with as many reps', () => {
+  const sets = lifts([1, 5, 100], [2, 1, 105], [3, 6, 95], [4, 4, 100], [5, 5, 100], [6, 9, 0]);
+  assertEqual(recordIndexes(sets), [1, 2, 5]);
+});
+
+test('sets without weight are personal records by reps alone', () => {
+  assertEqual(recordIndexes(lifts([1, 8, 0], [2, 7, 0], [3, 9, 0])), [2]);
+});
+
+test('of a day\'s sets only the best are personal records, the first of equal ones', () => {
+  const sets = lifts([1, 5, 120], [2, 5, 125], [2, 6, 125], [2, 3, 130], [2, 6, 125]);
+  assertEqual(recordIndexes(sets), [2, 3]);
+});
+
+test('each variant is compared only with its own sets', () => {
+  const sets = lifts([1, 7, 35, 'Left'], [1, 6, 35, 'Right'], [2, 7, 35, 'Left'], [2, 7, 35, 'Right']);
+  assertEqual(recordIndexes(sets), [3]);
 });

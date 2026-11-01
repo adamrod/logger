@@ -60,3 +60,10 @@ test('a set without weight shows only its reps', () => {
   assertEqual(setChipText({ reps: 8, weight: 0 }), '8');
   assertEqual(setChipText({ reps: 5, weight: 77.504 }), '5<span class="set-times">×</span>77.5');
 });
+
+test('a personal record shows PR inside its own chip and says so in its label', () => {
+  const sets = [set(at(29, 18), '', 5), set(at(30, 18), '', 6), set(at(30, 19), '', 4)];
+  const chips = historyOf(sets, '').split('<li>').slice(1);
+  const marked = chips.map((chip) => [chip.includes('<span class="set-record">PR</span></button>'), chip.includes(', personal record,')]);
+  assertEqual(marked, [[true, true], [false, false], [false, false]]);
+});

@@ -1,3 +1,4 @@
+import { personalRecords } from './analysis.js';
 import { entryDate } from './entry-log.js';
 import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, roundValue } from './format.js';
 import { currentDateAttribute, editAttributes, unsyncedHtml } from './history.js';
@@ -27,7 +28,8 @@ export function setHistoryHtml(entries, view) {
   const shown = view.variant ? entries.filter((entry) => variantOf(entry) === view.variant) : entries;
   if (!shown.length) return '<p class="empty">No sets logged yet.</p>';
   const days = historyDays(shown);
-  return `<div class="set-history">${sinceLastHtml(daysSinceLast(days, new Date()))}${days.map((day) => dayHtml(day, view)).join('')}</div>`;
+  const dayView = { ...view, records: personalRecords(shown) };
+  return `<div class="set-history">${sinceLastHtml(daysSinceLast(days, new Date()))}${days.map((day) => dayHtml(day, dayView)).join('')}</div>`;
 }
 
 const sinceLastHtml = (days) => (days === 0 ? '' : `<div class="history-since"><span class="history-gap">${days}d</span></div>`);
@@ -49,7 +51,12 @@ function rowHtml({ variant, sets }, view) {
     </div>`;
 }
 
-function chipHtml(set, { isUnsynced, editingId }) {
+const recordHtml = (isRecord) => (isRecord ? '<span class="set-record">PR</span>' : '');
+
+function chipHtml(set, { isUnsynced, editingId, records }) {
+  const isRecord = records.has(set);
+  const description = isRecord ? `${describeSet(set)}, personal record` : describeSet(set);
+  const content = `${setChipText(set)}${recordHtml(isRecord)}${unsyncedHtml(set, isUnsynced)}`;
   return `
-    <li><button type="button" class="set-chip" ${editAttributes(set, describeSet(set), editingId)}>${setChipText(set)}${unsyncedHtml(set, isUnsynced)}</button></li>`;
+    <li><button type="button" class="set-chip" ${editAttributes(set, description, editingId)}>${content}</button></li>`;
 }

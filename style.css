@@ -482,6 +482,7 @@ li:first-child > .option-new { border-top: none; }
 }
 .set-chip[aria-current="true"] { background: var(--fill); }
 .set-times { margin: 0 1px; font-weight: 400; color: var(--muted); }
+.set-record { margin-left: 1px; font-size: 10px; font-weight: 600; vertical-align: 6px; color: var(--muted); }
 .set-chip .set-unsynced { position: absolute; top: 4px; right: 0; }
 
 .is-new { animation: entry-in 0.35s ease-out; }

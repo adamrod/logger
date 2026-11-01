@@ -55,3 +55,21 @@ export function repRecords(sets) {
     .map((sameWeight) => sameWeight.reduce((best, set) => (set.reps > best.reps ? set : best)))
     .sort((a, b) => b.weight - a.weight);
 }
+
+const covers = (a, b) => a.weight >= b.weight && a.reps >= b.reps;
+
+const outdoes = (a, b) => covers(a, b) && !covers(b, a);
+
+const bestOfDay = (day) => day.filter((set, i) => !day.some((other, j) => (j < i ? covers(other, set) : outdoes(other, set))));
+
+const unbeaten = (sets, earlier) => sets.filter((set) => !earlier.some((other) => covers(other, set)));
+
+function variantRecords(sets) {
+  const days = byDay(sets);
+  return days.flatMap((day, i) => (i === 0 ? [] : unbeaten(bestOfDay(day), days.slice(0, i).flat())));
+}
+
+export function personalRecords(sets) {
+  const variants = Map.groupBy(sets, (set) => set.variant ?? '');
+  return new Set([...variants.values()].flatMap(variantRecords));
+}
