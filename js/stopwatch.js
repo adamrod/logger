@@ -2,6 +2,7 @@ import { formatDuration } from './format.js';
 
 const STORAGE_KEY = 'logger.v2.stopwatch';
 const TICK_MS = 1000;
+const LIMIT_MS = 12 * 60 * 60 * 1000;
 const DEFAULTS = { startedAt: null, elapsed: 0, resetOnLog: true };
 const START_ICON = 'M8 5.5v13l10.5-6.5z';
 const STOP_ICON = 'M9 6v12M15 6v12';
@@ -24,6 +25,10 @@ export const toggleStopwatch = (state, now) => (isRunning(state)
 
 export const resetStopwatch = (state, now) => ({ ...state, startedAt: isRunning(state) ? now : null, elapsed: 0 });
 
+export const expireStopwatch = (state, now) => (elapsedOf(state, now) >= LIMIT_MS
+  ? { ...state, startedAt: null, elapsed: 0 }
+  : state);
+
 export const restartOnLog = (state, now) => (state.resetOnLog ? { ...state, startedAt: now, elapsed: 0 } : state);
 
 export const stopwatchActions = {
@@ -35,11 +40,16 @@ export function initStopwatch() {
   stopwatchEl.addEventListener('pointerdown', showPress);
   stopwatchEl.addEventListener('animationend', ({ target }) => target.classList.remove('is-pressed'));
   resetOnLogInput.addEventListener('change', () => save({ ...stopwatch, resetOnLog: resetOnLogInput.checked }));
-  setInterval(renderTime, TICK_MS);
-  renderStopwatch();
+  setInterval(tick, TICK_MS);
+  update(expireStopwatch);
 }
 
 export const onSetLogged = () => update(restartOnLog);
+
+function tick() {
+  if (expireStopwatch(stopwatch, Date.now()) === stopwatch) renderTime();
+  else update(expireStopwatch);
+}
 
 function showPress({ target }) {
   target.closest('.stopwatch-button')?.classList.add('is-pressed');
