@@ -279,6 +279,19 @@ test('tapping Max moves the readout from the latest day to the best day in the r
   assertEqual(shown(), ['2 × 10', '2 × 10'], 'best day');
 });
 
+test('tapping Min and Max on the weight chart moves the readout to those weights', () => {
+  openScreens();
+  const daysAgo = (days) => new Date(Date.now() - days * 86400000).toISOString();
+  [[2, 1], [1, 500]].forEach(([days, weight]) => bodyWeights.add({ timestamp: daysAgo(days), weight }));
+  element('chart-plot').clientWidth = 350;
+  click('chart-ranges', { action: 'range', range: 'All' });
+  const shown = () => element('chart-value').textContent;
+  click('chart-extremes', { action: 'min' });
+  assertEqual(shown(), 1, 'min weight');
+  click('chart-extremes', { action: 'max' });
+  assertEqual(shown(), 500, 'max weight');
+});
+
 test('a custom range starts from the first shown set and narrows to the chosen days', () => {
   openScreens();
   const daysAgo = (days) => new Date(Date.now() - days * 86400000);
