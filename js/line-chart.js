@@ -1,7 +1,9 @@
 import { formatMonth, formatShortDay, roundValue } from './format.js';
 
 const HEIGHT = 160;
-const PLOT = { top: 8, right: 40, bottom: 20 };
+const PLOT = { top: 8, bottom: 20 };
+const LABEL_GAP = 8;
+const LABEL_CHAR_WIDTH = 7;
 const NICE_STEPS = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
 const MAX_TICK_INTERVALS = 10;
 const DAY_STEPS = [1, 2, 7, 14];
@@ -44,7 +46,7 @@ function createScale(series, width, minStep) {
   const ticks = yTicks(series.map((item) => item.value), minStep);
   const first = series[0].date.getTime();
   const span = series.at(-1).date.getTime() - first;
-  const right = width - PLOT.right;
+  const right = width - LABEL_GAP - labelWidth(ticks);
   const bottom = HEIGHT - PLOT.bottom;
   const low = ticks[0];
   const high = ticks.at(-1);
@@ -55,6 +57,8 @@ function createScale(series, width, minStep) {
     y: (value) => bottom - ((value - low) / (high - low)) * (bottom - PLOT.top),
   };
 }
+
+const labelWidth = (ticks) => Math.max(...ticks.map((tick) => String(tick).length)) * LABEL_CHAR_WIDTH;
 
 function yTicks(values, minStep) {
   const min = Math.min(...values);
@@ -79,7 +83,7 @@ function gridHtml({ ticks, right, y }) {
   return ticks.map((tick) => {
     const top = round(y(tick));
     return `<line class="grid" x1="0" x2="${right}" y1="${top}" y2="${top}"/>
-      <text class="axis-label" x="${right + 8}" y="${top}" dy="0.35em">${tick}</text>`;
+      <text class="axis-label" x="${right + LABEL_GAP}" y="${top}" dy="0.35em">${tick}</text>`;
   }).join('');
 }
 
