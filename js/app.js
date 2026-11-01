@@ -35,7 +35,7 @@ function route() {
   document.querySelectorAll('.screen').forEach((screen) => {
     screen.hidden = screen.id !== `screen-${current}`;
   });
-  document.querySelectorAll('.tab').forEach((tab) => {
+  document.querySelectorAll('.top-bar a').forEach((tab) => {
     if (tab.hash === `#${currentTab}`) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   });
