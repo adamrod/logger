@@ -1,4 +1,4 @@
-const AWAKE_FOR_MS = 10 * 60000;
+const AWAKE_FOR_MS = 7 * 60000;
 
 let wakeLock = null;
 let sleepTimer = null;

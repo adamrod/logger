@@ -83,25 +83,25 @@ test('the app keeps the screen awake while it is open', withOpenApp(() => {
   assertEqual(heldLocks(), 1);
 }));
 
-test('the screen stays awake until ten minutes after the last touch', withOpenApp(async () => {
+test('the screen stays awake until seven minutes after the last touch', withOpenApp(async () => {
   touch();
-  await passTime(9 * MINUTE);
+  await passTime(6 * MINUTE);
   touch();
-  await passTime(9 * MINUTE);
-  assertEqual(heldLocks(), 1, 'held 9 minutes after a touch');
+  await passTime(6 * MINUTE);
+  assertEqual(heldLocks(), 1, 'held 6 minutes after a touch');
   await passTime(MINUTE);
-  assertEqual(heldLocks(), 0, 'held 10 minutes after a touch');
+  assertEqual(heldLocks(), 0, 'held 7 minutes after a touch');
 }));
 
 test('a touch keeps the screen awake again after it was let sleep', withOpenApp(async () => {
-  await passTime(10 * MINUTE);
+  await passTime(7 * MINUTE);
   touch();
   await settle();
   assertEqual(heldLocks(), 1);
 }));
 
 test('quick touches hold one wake lock', withOpenApp(async () => {
-  await passTime(10 * MINUTE);
+  await passTime(7 * MINUTE);
   touch();
   touch();
   await settle();
@@ -118,7 +118,7 @@ test('coming back to the app keeps the screen awake again', withOpenApp(async ()
 }));
 
 test('a refused wake lock is asked for again on the next touch', withOpenApp(async () => {
-  await passTime(10 * MINUTE);
+  await passTime(7 * MINUTE);
   refusals = 1;
   touch();
   await settle();
