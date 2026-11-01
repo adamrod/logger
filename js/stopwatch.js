@@ -40,16 +40,12 @@ export function initStopwatch() {
   stopwatchEl.addEventListener('pointerdown', showPress);
   stopwatchEl.addEventListener('animationend', ({ target }) => target.classList.remove('is-pressed'));
   resetOnLogInput.addEventListener('change', () => save({ ...stopwatch, resetOnLog: resetOnLogInput.checked }));
-  setInterval(tick, TICK_MS);
+  document.addEventListener('visibilitychange', () => update(expireStopwatch));
+  setInterval(renderTime, TICK_MS);
   update(expireStopwatch);
 }
 
 export const onSetLogged = () => update(restartOnLog);
-
-function tick() {
-  if (expireStopwatch(stopwatch, Date.now()) === stopwatch) renderTime();
-  else update(expireStopwatch);
-}
 
 function showPress({ target }) {
   target.closest('.stopwatch-button')?.classList.add('is-pressed');
