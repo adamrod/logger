@@ -8,6 +8,7 @@ const TIME = dateFormat({ hour: '2-digit', minute: '2-digit' });
 const DAY_MONTH = dateFormat({ day: 'numeric', month: 'short' });
 const DAY_MONTH_YEAR = dateFormat({ day: 'numeric', month: 'short', year: 'numeric' });
 const MONTH = dateFormat({ month: 'short' });
+const MONTH_YEAR = dateFormat({ month: 'long', year: 'numeric' });
 const WEEKDAY = dateFormat({ weekday: 'short' });
 const LONG_DAY = dateFormat({ weekday: 'long', day: 'numeric', month: 'long' });
 const LONG_DAY_YEAR = dateFormat({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -63,8 +64,25 @@ const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.
 
 export function formatDuration(ms) {
   const seconds = Math.floor(ms / 1000);
-  return `${Math.floor(seconds / 60)}:${pad(seconds % 60)}`;
+  const minutes = Math.floor(seconds / 60);
+  const secondsText = pad(seconds % 60);
+  return minutes < 60 ? `${minutes}:${secondsText}` : `${Math.floor(minutes / 60)}:${pad(minutes % 60)}:${secondsText}`;
 }
+
+export function formatLength(ms) {
+  const minutes = Math.round(ms / 60000);
+  return minutes < 60 ? `${minutes}m` : `${Math.floor(minutes / 60)}h ${pad(minutes % 60)}m`;
+}
+
+export function ordinal(number) {
+  const tens = number % 100;
+  const suffix = tens >= 11 && tens <= 13 ? 'th' : { 1: 'st', 2: 'nd', 3: 'rd' }[number % 10] ?? 'th';
+  return `${number}${suffix}`;
+}
+
+export const formatMonthYear = (date) => MONTH_YEAR.format(date);
+
+export const formatWeekday = (date) => WEEKDAY.format(date);
 
 export function parseDateValue(value) {
   const [year, month, day] = value.split('-').map(Number);

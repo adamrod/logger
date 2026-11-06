@@ -31,7 +31,21 @@ export const notes = createEntryLog({
   keys: { entries: 'logger.v2.notes.csv', sync: 'logger.v2.notes-sync' },
 });
 
-export const entryLogs = [sets, bodyWeights, notes];
+export const climbs = createEntryLog({
+  file: 'climbs.csv',
+  columns: ['timestamp', 'gym', 'style', 'grade', 'climb', 'name', 'tags', 'result'],
+  numbers: [],
+  keys: { entries: 'logger.v2.climbs.csv', sync: 'logger.v2.climbs-sync' },
+});
+
+export const gyms = createEntryLog({
+  file: 'gyms.csv',
+  columns: ['timestamp', 'gym', 'grades'],
+  numbers: [],
+  keys: { entries: 'logger.v2.gyms.csv', sync: 'logger.v2.gyms-sync' },
+});
+
+export const entryLogs = [sets, bodyWeights, notes, climbs, gyms];
 
 const exerciseList = createUndoableValue(KEYS.exercises, EMPTY_LIST);
 const variantLists = createUndoableValue(KEYS.variants, {});

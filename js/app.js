@@ -1,5 +1,9 @@
 import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
 import { initBodyWeight, renderBodyWeight, revealWeights } from './body-weight-screen.js';
+import { enterClimbCalendar, initClimbCalendar, renderClimbCalendar } from './climb-calendar-screen.js';
+import { enterClimbProgress, initClimbProgress, renderClimbProgress } from './climb-progress-screen.js';
+import { climbPlace, enterClimb, initClimb, renderClimb, revealClimbs } from './climb-screen.js';
+import { enterClimbSession, initClimbSession, renderClimbSession } from './climb-session-screen.js';
 import { enterDay, initDay, renderDay } from './day-screen.js';
 import { onChange } from './events.js';
 import { forgetLoggedNames } from './exercises.js';
@@ -13,14 +17,31 @@ import { initUndoButtons, renderUndoButtons } from './undo-buttons.js';
 
 const RENDERERS = {
   log: renderLog,
+  climb: renderClimb,
+  'climb-session': renderClimbSession,
+  'climb-calendar': renderClimbCalendar,
+  'climb-progress': renderClimbProgress,
   settings: renderSettings,
   'body-weight': renderBodyWeight,
   analysis: renderAnalysis,
   day: renderDay,
 };
-const ENTER_HANDLERS = { analysis: enterAnalysis, day: enterDay };
-const PARENT_TABS = { analysis: 'log', day: 'log' };
-const REVEALERS = { log: revealSets, 'body-weight': revealWeights };
+const ENTER_HANDLERS = {
+  analysis: enterAnalysis,
+  day: enterDay,
+  climb: enterClimb,
+  'climb-session': enterClimbSession,
+  'climb-calendar': enterClimbCalendar,
+  'climb-progress': enterClimbProgress,
+};
+const PARENT_TABS = {
+  analysis: 'log',
+  day: 'log',
+  'climb-session': 'climb',
+  'climb-calendar': 'climb',
+  'climb-progress': 'climb',
+};
+const REVEALERS = { log: revealSets, climb: revealClimbs, 'body-weight': revealWeights };
 
 let current = null;
 let enteredHash = null;
@@ -69,13 +90,17 @@ function snapPageBackAfterKeyboard() {
 
 forgetLoggedNames();
 initLog();
+initClimb();
+initClimbSession();
+initClimbCalendar();
+initClimbProgress();
 initBodyWeight();
 initAnalysis();
 initDay();
 initSettings();
 initSyncStatus();
 initUndoButtons(showReplayed);
-trackPlace(() => ({ screen: current, exercise: currentExercise() }));
+trackPlace(() => ({ screen: current, exercise: currentExercise(), ...climbPlace() }));
 onChange(render);
 window.addEventListener('hashchange', route);
 window.addEventListener('resize', render);

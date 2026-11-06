@@ -11,7 +11,7 @@ import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js'
 import { setHistoryHtml } from './set-history.js';
 import { getSettings, updateSettings } from './settings.js';
 import { getChosenVariant, notes, saveChosenVariant, sets } from './store.js';
-import { initStopwatch, onSetLogged, stopwatchActions } from './stopwatch.js';
+import { createStopwatch, restartAfterLog } from './stopwatch.js';
 
 const FIELDS = {
   reps: { ...INTEGER, step: 1, min: 0 },
@@ -20,6 +20,8 @@ const FIELDS = {
 const EMPTY_SET = { reps: 0, weight: 0 };
 
 const variantOf = (entry) => entry?.variant ?? '';
+
+const stopwatch = createStopwatch({ id: 'stopwatch', name: 'stopwatch', storageKey: 'logger.v2.stopwatch' });
 
 const controls = document.getElementById('log-controls');
 const inputs = { reps: document.getElementById('reps'), weight: document.getElementById('weight') };
@@ -45,7 +47,7 @@ const editor = createEntryEditor(sets, {
 
 const actions = {
   ...editor.actions,
-  ...stopwatchActions,
+  ...stopwatch.actions,
   step: ({ field, steps }, size = 1) => {
     stepInput(inputs[field], FIELDS[field], Number(steps) * size);
     updateSaveButtons();
@@ -54,7 +56,7 @@ const actions = {
     const set = readSet();
     if (!set) return;
     sets.add({ exercise: currentExercise(), variant: currentVariant(), ...set });
-    onSetLogged();
+    stopwatch.update(restartAfterLog);
     revealNewest(historyEl, sets.getEntries().at(-1));
   },
   day: ({ day }) => { location.hash = `#day/${day}`; },
@@ -69,7 +71,7 @@ export function initLog() {
   onAction([controls, historyEl, allVariantsToggle], actions);
   onHoldStep(controls, actions.step);
   Object.entries(inputs).forEach(([key, input]) => bindNumberInput(input, FIELDS[key], updateSaveButtons));
-  initStopwatch();
+  stopwatch.init();
 }
 
 export function renderLog() {
