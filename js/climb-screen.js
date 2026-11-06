@@ -28,7 +28,6 @@ const gradeChips = document.getElementById('grade-chips');
 const cardEl = document.getElementById('climb-card');
 const cardTitle = document.getElementById('climb-title');
 const cardMeta = document.getElementById('climb-meta');
-const editButton = document.getElementById('climb-edit');
 const newButton = document.getElementById('climb-new');
 const nameToggle = document.getElementById('climb-name-toggle');
 const tagsToggle = document.getElementById('climb-tags-toggle');
@@ -92,7 +91,7 @@ const actions = {
     renderClimb();
     tagInput.focus();
   },
-  'edit-climb': ({ climb }) => editClimb(climb ?? place.selected),
+  'edit-climb': ({ climb }) => editClimb(climb),
   'toggle-result': ({ id }) => changeAttempt(id, (attempt) => ({ ...attempt, result: attempt.result === 'top' ? 'attempt' : 'top' })),
   'remove-attempt': ({ id }) => {
     editing.attempts = editing.attempts.filter((attempt) => attempt.timestamp !== id);
@@ -396,7 +395,6 @@ function renderCard() {
   cardEl.classList.toggle('is-current', Boolean(edited || selected));
   cardTitle.textContent = edited ? 'Editing climb' : climb.name || (selected ? 'Climb' : 'New climb');
   cardMeta.textContent = cardMetaText(edited, selected);
-  editButton.hidden = Boolean(edited || !selected);
   newButton.hidden = Boolean(edited || !selected);
   nameToggle.textContent = climb.name ? 'Rename' : '+ Name';
   nameToggle.setAttribute('aria-expanded', openPanel === 'name');
