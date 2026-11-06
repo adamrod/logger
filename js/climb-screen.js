@@ -1,13 +1,11 @@
-import { markPressed } from './chart-controls.js';
 import { revealPressedChip } from './chip-row.js';
 import { climbContext, climbHistoryHtml, projectListHtml } from './climb-history.js';
 import {
   DEFAULT_TAGS, STYLES, UNGRADED, attemptsOfClimb, climbOf, climbingSessions, isLive, joinTags, kindOf, lastGradeAt, lastStyleAt,
   openProjects, tagsOf,
 } from './climbing.js';
-import { createEntryEditor } from './entry-editor.js';
 import { onAction } from './events.js';
-import { countText, escapeHtml, formatDuration, formatWhen } from './format.js';
+import { countText, escapeHtml, formatDuration, formatTime } from './format.js';
 import { initGymForm, isGymFormOpen, openGymForm, showFirstGymForm } from './gym-form.js';
 import { allGyms, gradesAt, gymGrades } from './gyms.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
@@ -15,10 +13,12 @@ import { createPickerMenu } from './picker-menu.js';
 import { createStopwatch, restartUnlessStartedSince } from './stopwatch.js';
 import { climbs } from './store.js';
 import { undoable } from './undo.js';
+import { readTime } from './when-field.js';
 
 const STATE_KEY = 'logger.v2.climb';
 const TICK_MS = 1000;
 const EDIT_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const NEW_CLIMB = { grade: null, name: '', tags: [] };
 
 const gymBar = document.getElementById('gym-bar');
@@ -26,9 +26,9 @@ const controls = document.getElementById('climb-controls');
 const styleSelect = document.getElementById('climb-style');
 const gradeChips = document.getElementById('grade-chips');
 const cardEl = document.getElementById('climb-card');
-const cardGrade = document.getElementById('climb-grade');
 const cardTitle = document.getElementById('climb-title');
 const cardMeta = document.getElementById('climb-meta');
+const editButton = document.getElementById('climb-edit');
 const newButton = document.getElementById('climb-new');
 const nameToggle = document.getElementById('climb-name-toggle');
 const tagsToggle = document.getElementById('climb-tags-toggle');
@@ -38,8 +38,9 @@ const tagForm = document.getElementById('tag-form');
 const tagInput = document.getElementById('tag-name');
 const restTime = document.getElementById('climb-rest-time');
 const logButtons = document.getElementById('climb-log-buttons');
-const resultField = document.getElementById('climb-result-field');
-const resultGroup = document.getElementById('climb-result');
+const attemptsEl = document.getElementById('climb-attempts');
+const editActions = document.getElementById('climb-edit-actions');
+const deleteActions = document.getElementById('climb-delete-actions');
 const analysisLink = document.getElementById('climb-analysis-link');
 const historyEl = document.getElementById('climb-history');
 
@@ -51,18 +52,11 @@ const allAttempts = () => climbs.getEntries();
 
 let place = { gym: allAttempts().at(-1)?.gym ?? null, styles: {}, selected: null, ...JSON.parse(localStorage.getItem(STATE_KEY) ?? '{}') };
 let draft = NEW_CLIMB;
-let form = null;
+let editing = null;
+let isConfirmingDelete = false;
 let openPanel = null;
 let removingProject = null;
 let isGradeRevealDue = true;
-
-const editor = createEntryEditor(climbs, {
-  logButton: logButtons,
-  editActions: document.getElementById('climb-edit-actions'),
-  deleteActions: document.getElementById('climb-delete-actions'),
-  whenField: document.getElementById('climb-when-field'),
-  whenInput: document.getElementById('climb-when'),
-}, { fill: fillForm, read: readForm, save: saveAttempt, render: renderClimb });
 
 const gymPicker = createPickerMenu('gym', {
   names: allGyms,
@@ -81,7 +75,6 @@ const gymPicker = createPickerMenu('gym', {
 });
 
 const actions = {
-  ...editor.actions,
   ...sessionStopwatch.actions,
   grade: ({ grade }) => chooseGrade(grade),
   log: ({ result }) => logAttempt(result),
@@ -99,10 +92,26 @@ const actions = {
     renderClimb();
     tagInput.focus();
   },
-  'edit-result': ({ result }) => {
-    form.result = result;
+  'edit-climb': ({ climb }) => editClimb(climb ?? place.selected),
+  'toggle-result': ({ id }) => changeAttempt(id, (attempt) => ({ ...attempt, result: attempt.result === 'top' ? 'attempt' : 'top' })),
+  'remove-attempt': ({ id }) => {
+    editing.attempts = editing.attempts.filter((attempt) => attempt.timestamp !== id);
     renderClimb();
   },
+  save: () => saveClimb(),
+  'cancel-edit': () => {
+    stopEditing();
+    renderClimb();
+  },
+  delete: () => {
+    isConfirmingDelete = true;
+    renderClimb();
+  },
+  'cancel-delete': () => {
+    isConfirmingDelete = false;
+    renderClimb();
+  },
+  'confirm-delete': () => deleteClimb(),
   'remove-project': ({ climb }) => {
     removingProject = climb;
     renderClimb();
@@ -120,6 +129,7 @@ export function initClimb() {
   nameInput.addEventListener('change', () => changeClimb({ name: nameInput.value.trim() }));
   nameInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') nameInput.blur(); });
   tagForm.addEventListener('submit', addTag);
+  attemptsEl.addEventListener('change', ({ target }) => changeAttempt(target.dataset.id, (attempt) => ({ ...attempt, time: target.value })));
   sessionStopwatch.init();
   setInterval(renderRest, TICK_MS);
 }
@@ -133,7 +143,7 @@ export function currentGym() {
   return gyms.includes(place.gym) ? place.gym : gyms[0] ?? null;
 }
 
-const currentStyle = () => editedForm()?.style
+const currentStyle = () => editing?.style
   ?? place.styles[currentGym()]
   ?? lastStyleAt(allAttempts(), currentGym())
   ?? 'boulder';
@@ -142,10 +152,29 @@ export const currentKind = () => kindOf(currentStyle());
 
 export const climbPlace = () => ({ gym: currentGym(), selected: place.selected });
 
-export const editClimbAttempt = (id) => editor.actions.edit({ id });
+export function editClimb(id) {
+  const attempts = attemptsOfClimb(allAttempts(), id);
+  if (!attempts.length) return;
+  const { gym, grade, name, tags } = climbOf(attempts);
+  const { style } = attempts.at(-1);
+  savePlace({ gym });
+  editing = {
+    id,
+    grade,
+    name,
+    tags,
+    style,
+    loggedStyle: style,
+    attempts: attempts.map(({ timestamp, result }) => ({ timestamp, result, time: formatTime(new Date(timestamp)) })),
+  };
+  isConfirmingDelete = false;
+  openPanel = null;
+  removingProject = null;
+  renderClimb();
+}
 
 export async function revealClimbs(step) {
-  editor.stopEditing();
+  stopEditing();
   await fadeOutEntries(historyEl, leavingEntries(step, climbs));
   savePlace({ gym: step.place.gym ?? place.gym, selected: step.place.selected ?? null });
   step.apply();
@@ -167,8 +196,6 @@ export function renderClimb() {
   isGradeRevealDue = false;
 }
 
-const editedForm = () => (editor.editingId() === null ? null : form);
-
 const currentGrades = () => gradesAt(currentGym(), currentKind());
 
 const gradeOptions = () => [...currentGrades(), UNGRADED];
@@ -189,9 +216,9 @@ function draftGrade() {
   return [draft.grade, last].find((grade) => gradeOptions().includes(grade)) ?? grades[Math.floor(grades.length / 3)];
 }
 
-const shownGrade = () => editedForm()?.grade ?? selectedClimb()?.grade ?? draftGrade();
+const shownGrade = () => editing?.grade ?? selectedClimb()?.grade ?? draftGrade();
 
-const shownClimb = () => editedForm() ?? selectedClimb() ?? draft;
+const shownClimb = () => editing ?? selectedClimb() ?? draft;
 
 function liveSession() {
   const session = climbingSessions(allAttempts()).at(-1);
@@ -214,7 +241,7 @@ function logAttempt(result) {
 }
 
 function chooseGrade(grade) {
-  const edited = editedForm();
+  const edited = editing;
   const selected = selectedClimb();
   if (edited) edited.grade = grade;
   else if (selected?.grade === grade) return;
@@ -224,7 +251,7 @@ function chooseGrade(grade) {
 }
 
 function chooseStyle(style) {
-  const edited = editedForm();
+  const edited = editing;
   if (edited) edited.style = style;
   else {
     if (kindOf(style) !== currentKind()) startNewClimb(null);
@@ -243,7 +270,7 @@ function startNewClimb(grade) {
 function pickClimb(id) {
   const latest = attemptsOfClimb(allAttempts(), id).at(-1);
   const style = kindOf(currentStyle()) === kindOf(latest.style) ? currentStyle() : latest.style;
-  editor.stopEditing();
+  stopEditing();
   removingProject = null;
   openPanel = null;
   savePlace({ gym: latest.gym, styles: { ...place.styles, [latest.gym]: style }, selected: id });
@@ -252,7 +279,7 @@ function pickClimb(id) {
 }
 
 function selectGym(gym) {
-  editor.stopEditing();
+  stopEditing();
   savePlace({ gym, selected: null });
   draft = NEW_CLIMB;
   isGradeRevealDue = true;
@@ -276,7 +303,7 @@ function placeAfterRename(from, to) {
 }
 
 function changeClimb(changes) {
-  const edited = editedForm();
+  const edited = editing;
   const selected = selectedClimb();
   if (edited) Object.assign(edited, changes);
   else if (selected) climbs.updateWhere((attempt) => attempt.climb === selected.id, asColumns(changes));
@@ -308,22 +335,32 @@ function addTag(event) {
   else renderClimb();
 }
 
-function fillForm(attempt) {
-  savePlace({ gym: attempt.gym });
-  openPanel = null;
-  form = { grade: attempt.grade, name: attempt.name ?? '', tags: tagsOf(attempt), result: attempt.result, style: attempt.style };
+function stopEditing() {
+  editing = null;
+  isConfirmingDelete = false;
 }
 
-function readForm() {
-  return { ...form, name: form.name.trim(), tags: joinTags(form.tags) };
+function changeAttempt(id, change) {
+  editing.attempts = editing.attempts.map((attempt) => (attempt.timestamp === id ? change(attempt) : attempt));
+  renderClimb();
 }
 
-function saveAttempt(id, { timestamp, result, style, ...climbFields }) {
-  const { climb } = allAttempts().find((attempt) => attempt.timestamp === id);
-  undoable(() => {
-    climbs.updateWhere((attempt) => attempt.climb === climb, climbFields);
-    climbs.update(id, { result, style, timestamp });
-  });
+function saveClimb() {
+  const { id, grade, name, tags, style, loggedStyle, attempts } = editing;
+  const edited = new Map(attempts.map((attempt) => [attempt.timestamp, attempt]));
+  const climbFields = { grade, name: name.trim(), tags: joinTags(tags), ...(style !== loggedStyle && { style }) };
+  stopEditing();
+  undoable(() => attemptsOfClimb(allAttempts(), id).forEach(({ timestamp }) => {
+    const attempt = edited.get(timestamp);
+    if (attempt) climbs.update(timestamp, { ...climbFields, result: attempt.result, timestamp: readTime(timestamp, attempt.time) });
+    else climbs.remove(timestamp);
+  }));
+}
+
+function deleteClimb() {
+  const { id } = editing;
+  stopEditing();
+  undoable(() => attemptsOfClimb(allAttempts(), id).forEach(({ timestamp }) => climbs.remove(timestamp)));
 }
 
 function setHtml(element, html) {
@@ -338,7 +375,7 @@ const chipHtml = (action, key, value, isPressed, label = value) => `<button type
   data-${key}="${escapeHtml(value)}" aria-pressed="${isPressed}" aria-label="${escapeHtml(label)}">${escapeHtml(value)}</button>`;
 
 function renderStyles() {
-  const edited = editedForm();
+  const edited = editing;
   const styles = Object.entries(STYLES).filter(([style]) => !edited || kindOf(style) === kindOf(edited.style));
   setHtml(styleSelect, styles.map(([style, label]) => optionHtml(style, label)).join(''));
   styleSelect.value = currentStyle();
@@ -352,14 +389,14 @@ function renderGrades() {
 }
 
 function renderCard() {
-  const edited = editedForm();
+  const edited = editing;
   const selected = selectedClimb();
   const climb = shownClimb();
   const isTagsOpen = openPanel === 'tags' || openPanel === 'new-tag';
   cardEl.classList.toggle('is-current', Boolean(edited || selected));
-  cardGrade.textContent = shownGrade();
-  cardTitle.textContent = edited ? 'Editing attempt' : climb.name || (selected ? 'Climb' : 'New climb');
+  cardTitle.textContent = edited ? 'Editing climb' : climb.name || (selected ? 'Climb' : 'New climb');
   cardMeta.textContent = cardMetaText(edited, selected);
+  editButton.hidden = Boolean(edited || !selected);
   newButton.hidden = Boolean(edited || !selected);
   nameToggle.textContent = climb.name ? 'Rename' : '+ Name';
   nameToggle.setAttribute('aria-expanded', openPanel === 'name');
@@ -374,7 +411,7 @@ function renderCard() {
 }
 
 function cardMetaText(edited, selected) {
-  if (edited) return formatWhen(new Date(editor.editingId()));
+  if (edited) return countText(edited.attempts.length, 'attempt');
   if (!selected) return 'Starts with your next attempt';
   const today = liveSession()?.attempts.filter((attempt) => attempt.climb === selected.id).length ?? 0;
   const before = selected.attempts.length - today;
@@ -395,15 +432,28 @@ function renderRest() {
 }
 
 function renderEditing() {
-  const edited = editedForm();
-  editor.render();
-  resultField.hidden = !edited;
-  if (edited) markPressed(resultGroup, 'result', edited.result);
+  logButtons.hidden = Boolean(editing);
+  editActions.hidden = !editing || isConfirmingDelete;
+  deleteActions.hidden = !isConfirmingDelete;
+  attemptsEl.hidden = !editing;
+  if (editing) setHtml(attemptsEl, editing.attempts.map(attemptEditHtml).join(''));
+}
+
+function attemptEditHtml({ timestamp, result, time }, i) {
+  const id = escapeHtml(timestamp);
+  const isTopped = result === 'top';
+  return `
+    <li class="attempt-edit">
+      <span class="attempt-number">${i + 1}</span>
+      <input class="input attempt-time" type="time" data-id="${id}" value="${escapeHtml(time)}" aria-label="Time of attempt ${i + 1}">
+      <button type="button" class="chip result-chip" data-action="toggle-result" data-id="${id}" aria-pressed="${isTopped}">${isTopped ? 'Top' : 'Attempt'}</button>
+      <button type="button" class="option-icon" data-action="remove-attempt" data-id="${id}" aria-label="Remove attempt ${i + 1}">${REMOVE_ICON}</button>
+    </li>`;
 }
 
 function renderHistory() {
   const sessions = climbingSessions(allAttempts()).filter((session) => session.gym === currentGym());
-  const view = { selectedId: place.selected, editingId: editor.editingId(), canPick: true };
+  const view = { selectedId: editing?.id ?? place.selected, action: 'pick' };
   analysisLink.hidden = !sessions.length;
   setHtml(historyEl, projectsHtml() + climbHistoryHtml(sessions, climbContext(), view));
 }

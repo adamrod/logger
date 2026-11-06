@@ -4,13 +4,13 @@ import { enterClimbAnalysis, initClimbAnalysis, renderClimbAnalysis } from '../j
 import { climbPlace, initClimb, renderClimb, revealClimbs } from '../js/climb-screen.js';
 import { enterClimbSession, initClimbSession, renderClimbSession } from '../js/climb-session-screen.js';
 import { enterDayCalendar, initDayCalendar, renderDayCalendar } from '../js/day-calendar-screen.js';
-import { enterDay, renderDay } from '../js/day-screen.js';
 import { climbingSessions, numberGrades, openProjects } from '../js/climbing.js';
 import { onChange } from '../js/events.js';
-import { formatDateTimeValue, formatIsoDate } from '../js/format.js';
+import { formatIsoDate, formatTime } from '../js/format.js';
 import { saveGym } from '../js/gyms.js';
 import { climbs } from '../js/store.js';
 import { nextRedo, nextUndo, trackPlace } from '../js/undo.js';
+import { readTime } from '../js/when-field.js';
 import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
 
@@ -56,6 +56,8 @@ function pickGym(name) {
   click('gym-picker', { action: 'pick', name });
 }
 
+const editTheClimb = (climb) => click('climb-history', { action: 'edit-climb', climb });
+
 function startFresh(grade) {
   pickGym(GYM);
   change('climb-style', 'boulder');
@@ -87,9 +89,9 @@ test('a boulder with no grade is logged as ?, and grading it later moves the who
   startFresh('?');
   assertEqual(isShown('grade-chips', 'aria-label="No grade"'), true, 'offered');
   logAll('AA');
-  const { climb, timestamp } = last();
+  const { climb } = last();
   assertEqual(attemptsOf(climb).map((attempt) => attempt.grade), ['?', '?'], 'logged');
-  click('climb-history', { action: 'edit', id: timestamp });
+  editTheClimb(climb);
   controls({ action: 'grade', grade: '6' });
   controls({ action: 'save' });
   assertEqual(attemptsOf(climb).map((attempt) => attempt.grade), ['6', '6'], 'graded later');
@@ -136,49 +138,71 @@ test('renaming and tagging the chosen climb changes every attempt on it', () => 
   assertEqual(attemptsOf(climb).map((attempt) => [attempt.name, attempt.tags]), [['Arete', 'Roof'], ['Arete', 'Roof']]);
 });
 
-test('editing an attempt changes its result and time, and moves the whole climb to the new grade and name', () => {
+test('the climb editor changes the grade and name of every attempt, and each attempt\'s result and time', () => {
   openClimb();
   startFresh('3');
   logAll('AA');
   const [first, second] = attemptsOf(last().climb);
-  click('climb-history', { action: 'edit', id: second.timestamp });
-  assertEqual([element('climb-log-buttons').hidden, element('climb-result-field').hidden], [true, false], 'while editing');
+  editTheClimb(first.climb);
+  assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [true, false], 'while editing');
+  assertEqual(isShown('climb-attempts', 'aria-label="Time of attempt 2"'), true, 'lists attempts');
   controls({ action: 'grade', grade: '8' });
   change('climb-name', 'Crack');
-  controls({ action: 'edit-result', result: 'top' });
-  const earlier = new Date(Date.parse(first.timestamp) - 3600000);
-  element('climb-when').value = formatDateTimeValue(earlier);
+  controls({ action: 'toggle-result', id: second.timestamp });
+  const earlier = formatTime(new Date(Date.parse(first.timestamp) - 60000));
+  element('climb-attempts').dispatch('change', { target: { dataset: { id: first.timestamp }, value: earlier } });
   controls({ action: 'save' });
   const edited = attemptsOf(first.climb);
-  assertEqual(edited.map((attempt) => [attempt.grade, attempt.name, attempt.result]), [['8', 'Crack', 'top'], ['8', 'Crack', 'attempt']], 'saved');
-  assertEqual(new Date(edited[0].timestamp).getHours(), earlier.getHours(), 'moved earlier');
-  assertEqual([element('climb-log-buttons').hidden, element('climb-result-field').hidden], [false, true], 'after saving');
+  assertEqual(edited.map((attempt) => [attempt.grade, attempt.name, attempt.result]), [['8', 'Crack', 'attempt'], ['8', 'Crack', 'top']], 'saved');
+  assertEqual(edited[0].timestamp, readTime(first.timestamp, earlier), 'moved');
+  assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [false, true], 'after saving');
 });
 
-test('a deleted attempt is gone, and undo brings it back', async () => {
+test('an attempt removed in the editor is gone once saved, and undo brings it back', async () => {
   openClimb();
   await withPlaces(async () => {
     startFresh('2');
     logAll('AA');
     const { climb, timestamp } = last();
-    click('climb-history', { action: 'edit', id: timestamp });
-    controls({ action: 'delete' });
-    assertEqual(element('climb-delete-actions').hidden, false, 'asks first');
-    controls({ action: 'confirm-delete' });
-    assertEqual(attemptsOf(climb).length, 1, 'deleted');
+    editTheClimb(climb);
+    controls({ action: 'remove-attempt', id: timestamp });
+    assertEqual(attemptsOf(climb).length, 2, 'kept until saved');
+    controls({ action: 'save' });
+    assertEqual(attemptsOf(climb).length, 1, 'removed');
     await revealClimbs(nextUndo());
     assertEqual(attemptsOf(climb).length, 2, 'undone');
   });
 });
 
-test('deleting the only attempt of the chosen climb goes back to a new climb at its grade', () => {
+test('deleting a climb removes all its attempts after asking, and cancelling changes nothing', async () => {
+  openClimb();
+  await withPlaces(async () => {
+    startFresh('2');
+    logAll('AAT');
+    const { climb } = last();
+    editTheClimb(climb);
+    controls({ action: 'grade', grade: '9' });
+    controls({ action: 'cancel-edit' });
+    assertEqual(attemptsOf(climb).map((attempt) => attempt.grade), ['2', '2', '2'], 'cancelled');
+    editTheClimb(climb);
+    controls({ action: 'delete' });
+    assertEqual([element('climb-delete-actions').hidden, element('climb-edit-actions').hidden], [false, true], 'asks first');
+    controls({ action: 'confirm-delete' });
+    assertEqual(attemptsOf(climb).length, 0, 'deleted');
+    await revealClimbs(nextUndo());
+    assertEqual(attemptsOf(climb).length, 3, 'undone');
+  });
+});
+
+test('removing the only attempt of the chosen climb goes back to a new climb at its grade', () => {
   openClimb();
   startFresh('6');
   log('attempt');
-  click('climb-history', { action: 'edit', id: last().timestamp });
-  controls({ action: 'delete' });
-  controls({ action: 'confirm-delete' });
-  assertEqual([element('climb-title').textContent, element('climb-grade').textContent], ['New climb', '6']);
+  const { climb, timestamp } = last();
+  editTheClimb(climb);
+  controls({ action: 'remove-attempt', id: timestamp });
+  controls({ action: 'save' });
+  assertEqual([element('climb-title').textContent, isShown('grade-chips', 'data-grade="6" aria-pressed="true"')], ['New climb', true]);
 });
 
 test('undoing a top brings its climb back as the chosen climb, redoing lets it go again', async () => {
@@ -295,11 +319,11 @@ test('the session stopwatch starts with a new session and stays stopped within i
   assertEqual(label(), 'Start session', 'stopped within the session');
 });
 
-test('the session report shows the latest session, steps back, and edits an attempt on Climb', () => {
+test('the session report shows the latest session, steps back, and edits a climb on Climb', () => {
   openClimb();
   startFresh('4');
   log('attempt');
-  const { timestamp } = last();
+  const { climb } = last();
   enterClimbSession();
   renderClimbSession();
   assertEqual(isShown('climb-session-body', 'Attempts by grade'), true, 'report');
@@ -307,7 +331,7 @@ test('the session report shows the latest session, steps back, and edits an atte
   click('climb-session-steps', { action: 'step', step: '-1' });
   const previous = climbingSessions(climbs.getEntries()).at(-2);
   assertEqual(location.hash, `#climb-session/${previous.id}`, 'stepped back');
-  click('climb-session-body', { action: 'edit', id: timestamp });
+  click('climb-session-body', { action: 'edit-climb', climb });
   assertEqual([location.hash, element('climb-log-buttons').hidden], ['#climb', true], 'editing on Climb');
   controls({ action: 'cancel-edit' });
 });
@@ -356,20 +380,6 @@ test('a send harder than every earlier session at the gym is marked PR', () => {
   pickGym('Record wall');
   assertEqual(element('climb-history').innerHTML.match(/set-record/g)?.length, 1);
   pickGym(GYM);
-});
-
-test('the day shows its climbing sessions, opens their report, and edits an attempt on Climb', () => {
-  openClimb();
-  startFresh('4');
-  log('attempt');
-  const { timestamp } = last();
-  enterDay(formatIsoDate(new Date()));
-  renderDay();
-  assertEqual(isShown('day-climbs', GYM), true, 'session shown');
-  assertEqual(element('day-summary').textContent.includes('attempt'), true, 'summary');
-  click('day-climbs', { action: 'edit', id: timestamp });
-  assertEqual([location.hash, element('climb-log-buttons').hidden], ['#climb', true], 'editing on Climb');
-  controls({ action: 'cancel-edit' });
 });
 
 test('the Sets calendar lists logged days and links each to its day', () => {

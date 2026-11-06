@@ -1,7 +1,7 @@
 import { STYLES, climbsIn, isTop, outcomeOf, recordSends, sessionCount } from './climbing.js';
 import { countText, daysBetween, escapeHtml, formatDay, formatShortDay } from './format.js';
 import { gradesAt } from './gyms.js';
-import { UNSYNCED_HTML, currentDateAttribute, editAttributes, gapHtml, sinceLastHtml } from './history.js';
+import { UNSYNCED_HTML, currentDateAttribute, gapHtml, sinceLastHtml } from './history.js';
 import { climbs } from './store.js';
 
 const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -11,7 +11,7 @@ const metaText = (parts) => parts.filter(Boolean).map(escapeHtml).join(' · ');
 
 const ropeStyles = (climb) => (climb.kind === 'rope' ? [...new Set(climb.attempts.map((attempt) => STYLES[attempt.style]))] : []);
 
-const describeAttempt = (attempt) => `${attempt.grade} ${isTop(attempt) ? 'top' : 'attempt'}`;
+const ROW_LABELS = { pick: 'Climb {grade} again', 'edit-climb': 'Edit {grade} climb' };
 
 export function climbContext() {
   const all = climbs.getEntries();
@@ -25,22 +25,25 @@ const climbHtml = (grade, title, meta) => `
     ${meta ? `<span class="climb-meta">${meta}</span>` : ''}
   </span>`;
 
-export function climbListHtml(attempts, context, { selectedId = null, editingId = null, canPick = false } = {}) {
+function attemptDotsHtml(climb) {
+  const dotHtml = (attempt, i) => `
+    <li><button type="button" class="attempt-dot${isTop(attempt) ? ' is-top' : ''}" data-action="edit-climb" data-climb="${escapeHtml(climb.id)}"
+      aria-label="Edit ${escapeHtml(climb.grade)} ${isTop(attempt) ? 'top' : 'attempt'} ${i + 1}"></button></li>`;
+  return `<ul class="attempt-dots">${climb.attempts.map(dotHtml).join('')}</ul>`;
+}
+
+export function climbListHtml(attempts, context, { selectedId = null, action = 'edit-climb' } = {}) {
   const rowHtml = (climb) => {
     const id = escapeHtml(climb.id);
     const outcome = escapeHtml(outcomeOf(context.byClimb.get(climb.id), climb.attempts));
     const isRecord = climb.attempts.some((attempt) => context.records.has(attempt.timestamp));
     const title = outcome + (isRecord ? RECORD_HTML : '') + (climb.attempts.some(context.isUnsynced) ? UNSYNCED_HTML : '');
     const body = climbHtml(climb.grade, title, metaText([climb.name, ...climb.tags, ...ropeStyles(climb)]));
-    const head = canPick
-      ? `<button type="button" class="climb-pick" data-action="pick" data-climb="${id}" aria-label="Climb ${escapeHtml(climb.grade)} again">${body}</button>`
-      : `<div class="climb-pick">${body}</div>`;
-    const dots = climb.attempts.map((attempt) => `
-      <li><button type="button" class="attempt-dot${isTop(attempt) ? ' is-top' : ''}"
-        ${editAttributes(attempt, describeAttempt(attempt), editingId)}></button></li>`).join('');
+    const label = escapeHtml(ROW_LABELS[action].replace('{grade}', climb.grade));
     return `
       <li class="climb-row"${climb.id === selectedId ? ' aria-current="true"' : ''}>
-        ${head}<ul class="attempt-dots">${dots}</ul>
+        <button type="button" class="climb-pick" data-action="${action}" data-climb="${id}" aria-label="${label}">${body}</button>
+        ${attemptDotsHtml(climb)}
       </li>`;
   };
   return `<ul class="climb-list">${climbsIn(attempts).toReversed().map(rowHtml).join('')}</ul>`;

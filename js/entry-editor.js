@@ -3,7 +3,6 @@ import { readWhen, showWhen } from './when-field.js';
 export function createEntryEditor(log, { logButton, editActions, deleteActions, whenField, whenInput }, screen) {
   let editingId = null;
   let confirmingDelete = false;
-  const saveChanges = screen.save ?? ((id, changes) => log.update(id, changes));
 
   function stopEditing() {
     const id = editingId;
@@ -24,7 +23,7 @@ export function createEntryEditor(log, { logButton, editActions, deleteActions, 
       const changes = screen.read();
       if (!changes) return;
       const id = stopEditing();
-      saveChanges(id, { ...changes, timestamp: readWhen(whenInput, id) });
+      log.update(id, { ...changes, timestamp: readWhen(whenInput, id) });
     },
     'cancel-edit': () => { stopEditing(); screen.render(); },
     delete: () => { confirmingDelete = true; screen.render(); },

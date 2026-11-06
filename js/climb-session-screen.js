@@ -4,7 +4,7 @@ import { climbContext, climbListHtml } from './climb-history.js';
 import {
   DOTS_LEGEND, attemptRowsHtml, sectionHtml, statTilesHtml, tagBarsHtml, topsDetail,
 } from './climb-report.js';
-import { editClimbAttempt } from './climb-screen.js';
+import { editClimb } from './climb-screen.js';
 import { attemptsByGrade, climbStats, climbingSessions, meanRest, sessionFocus, stylesText, tagCounts } from './climbing.js';
 import { onAction } from './events.js';
 import { formatDuration, formatLength, formatLongDay, formatTime } from './format.js';
@@ -27,8 +27,8 @@ const sessions = () => climbingSessions(climbs.getEntries());
 const actions = {
   step: ({ step }) => showSession(sessions()[shownIndex() + Number(step)]),
   latest: () => showSession(sessions().at(-1)),
-  edit: ({ id }) => {
-    editClimbAttempt(id);
+  'edit-climb': ({ climb }) => {
+    editClimb(climb);
     location.hash = '#climb';
   },
 };

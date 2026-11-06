@@ -39,11 +39,8 @@ test('the days next to a day are the closest logged days before and after it', (
   assertEqual(nearby(20), [null, '2026-10-25'], 'first day');
 });
 
-test('a day sums up its sets, climbing attempts and body weight', () => {
-  const attempt = (day, hour, gym) => ({ timestamp: at(day, hour), gym, style: 'boulder', grade: '5', climb: `${gym}${hour}`, result: 'attempt' });
-  const attempts = [attempt(29, 9, 'Cave'), attempt(30, 17, 'Wall'), attempt(30, 18, 'Wall'), attempt(30, 22, 'Cave')];
-  const summary = daySummary(new Date(2026, 9, 30), [set(at(30, 7), 'Squat', '', 5)], [{ timestamp: at(30, 7), weight: 80 }], attempts);
-  assertEqual(summary.climbing.map((session) => [session.gym, session.attempts.length]), [['Wall', 2], ['Cave', 1]], 'sessions');
-  assertEqual(daySummaryText(summary), '1 exercise · 1 set · 3 attempts · BW 80', 'text');
-  assertEqual(daySummaryText(daySummary(new Date(2026, 9, 29), [], [], attempts)), '1 attempt', 'climbing only');
+test('a day sums up its sets and body weight', () => {
+  const summary = daySummary(new Date(2026, 9, 30), [set(at(30, 7), 'Squat', '', 5)], [{ timestamp: at(30, 7), weight: 80 }]);
+  assertEqual(daySummaryText(summary), '1 exercise · 1 set · BW 80');
+  assertEqual(daySummaryText(daySummary(new Date(2026, 9, 30), [], [{ timestamp: at(30, 7), weight: 80 }])), 'BW 80', 'weight only');
 });

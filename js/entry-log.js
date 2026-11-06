@@ -120,7 +120,7 @@ export function createEntryLog({ file, columns, numbers, keys }) {
 
     update(timestamp, changes) {
       const entry = entries.find((e) => e.timestamp === timestamp);
-      if (!entry) return;
+      if (!entry || !differsFrom(changes)(entry)) return;
       const isMoved = (changes.timestamp ?? timestamp) !== timestamp;
       commit([entry], [{ ...entry, ...changes, timestamp: isMoved ? freeTimestamp(changes.timestamp) : timestamp }]);
     },

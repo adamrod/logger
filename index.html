@@ -230,7 +230,6 @@
         <p class="chart-meta" id="day-summary"></p>
       </div>
       <div id="day-exercises"></div>
-      <div id="day-climbs"></div>
     </div>
   </section>
 
@@ -319,12 +318,12 @@
 
         <section class="climb-card" id="climb-card" aria-label="Climb">
           <div class="climb-head">
-            <span class="grade-box" id="climb-grade"></span>
             <div class="climb-text">
               <span class="climb-title" id="climb-title"></span>
               <span class="climb-meta" id="climb-meta"></span>
             </div>
-            <button type="button" class="btn-text climb-new" id="climb-new" data-action="new-climb">New</button>
+            <button type="button" class="btn-text climb-action" id="climb-edit" data-action="edit-climb">Edit</button>
+            <button type="button" class="btn-text climb-action" id="climb-new" data-action="new-climb">New</button>
           </div>
           <div class="climb-extras">
             <button type="button" class="btn-text climb-extra" id="climb-name-toggle" data-action="toggle-name"
@@ -339,6 +338,7 @@
             <input class="input" id="tag-name" aria-label="New tag" placeholder="Tag, e.g. Heel hook" autocomplete="off" enterkeyhint="done">
             <button class="btn btn-primary">Add</button>
           </form>
+          <ol class="attempt-edits" id="climb-attempts" aria-label="Attempts" hidden></ol>
         </section>
 
         <div class="climb-timers">
@@ -361,17 +361,6 @@
         <div class="log-buttons" id="climb-log-buttons">
           <button type="button" class="btn btn-secondary" data-action="log" data-result="attempt">Attempt</button>
           <button type="button" class="btn btn-primary" data-action="log" data-result="top">Top</button>
-        </div>
-        <div class="field" id="climb-result-field" hidden>
-          <span class="label" id="climb-result-label">Result</span>
-          <div class="chips" id="climb-result" role="group" aria-labelledby="climb-result-label">
-            <button type="button" class="chip" data-action="edit-result" data-result="attempt">Attempt</button>
-            <button type="button" class="chip" data-action="edit-result" data-result="top">Top</button>
-          </div>
-        </div>
-        <div class="field" id="climb-when-field" hidden>
-          <label class="label" for="climb-when">Time</label>
-          <input class="input when-input" id="climb-when" type="datetime-local">
         </div>
         <div class="edit-actions" id="climb-edit-actions" hidden>
           <button type="button" class="btn btn-secondary" data-action="cancel-edit">Cancel</button>

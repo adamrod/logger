@@ -3,11 +3,11 @@ import { allLoggedDays } from './day-screen.js';
 import { daySummary, daySummaryText } from './day-summary.js';
 import { countText, formatIsoDate } from './format.js';
 import { createMonthCalendar } from './month-calendar.js';
-import { bodyWeights, climbs, sets } from './store.js';
+import { bodyWeights, sets } from './store.js';
 
 function dayEntry(day) {
-  const summary = daySummary(day, sets.getEntries(), bodyWeights.getEntries(), climbs.getEntries());
-  const names = [...summary.exercises.map(({ exercise }) => exercise), ...summary.climbing.map(({ gym }) => gym)];
+  const summary = daySummary(day, sets.getEntries(), bodyWeights.getEntries());
+  const names = summary.exercises.map(({ exercise }) => exercise);
   return {
     date: day,
     href: `#day/${formatIsoDate(day)}`,
