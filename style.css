@@ -266,7 +266,7 @@ li:first-child > .option-new { border-top: none; }
 
 .log-controls { display: flex; flex-direction: column; gap: 12px; }
 .log-controls .btn { height: 48px; font-size: 16px; }
-.log-controls > .btn, .edit-actions { margin-top: 4px; }
+.log-controls > .btn, .log-buttons, .edit-actions { margin-top: 4px; }
 
 .set-fields { display: flex; flex-direction: column; gap: 12px; }
 
@@ -628,12 +628,13 @@ li:first-child > .option-new { border-top: none; }
   min-width: 52px;
   height: 52px;
   padding: 0 8px;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: var(--fill);
+  background: var(--bg);
   font-size: 22px;
   font-weight: 700;
 }
-.climb-card.is-current .grade-box { background: var(--text); color: var(--bg); }
+.climb-card.is-current .grade-box { border-color: var(--muted); background: var(--fill); }
 .climb-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .climb-title { overflow: hidden; font-size: 17px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .climb-meta { overflow: hidden; font-size: 13px; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
@@ -649,16 +650,16 @@ li:first-child > .option-new { border-top: none; }
 .climb-timers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .climb-timer { display: flex; flex-direction: column; gap: 2px; }
 .climb-timer-body { display: flex; align-items: center; gap: 4px; height: 44px; }
+.climb-timer-body > .stopwatch-button:first-child { margin-left: -12px; }
 .climb-rest { align-items: flex-end; }
 .climb-rest .stopwatch-time { line-height: 44px; }
 .stopwatch-time.is-idle { color: var(--border); }
 
 .log-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.log-buttons .btn { height: 60px; font-size: 18px; }
-.log-buttons .log-top { background: var(--text); color: var(--bg); }
+
 
 .history-calendar { width: 36px; height: 34px; margin: 0 auto 0 0; }
-.history-calendar:has(+ .history-filter) { margin-right: 0; }
+.history-calendar:has(+ .history-filter:not([hidden])) { margin-right: 0; }
 .climb-subhead { padding: 12px 0 4px; }
 .climb-day { display: block; }
 .climb-day .history-date { display: block; }
@@ -667,7 +668,7 @@ li:first-child > .option-new { border-top: none; }
 .climb-list > .climb-row:last-child { border-bottom: none; }
 .climb-pick { flex: 1; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 6px 0; border: none; background: none; text-align: left; }
 .climb-grade { flex: none; display: grid; place-items: center; min-width: 36px; height: 32px; padding: 0 6px; border-radius: 8px; font-size: 16px; font-weight: 700; }
-.climb-row[aria-current="true"] .climb-grade { background: var(--text); color: var(--bg); }
+.climb-row[aria-current="true"] .climb-grade { background: var(--fill); }
 .climb-info { display: flex; flex-direction: column; min-width: 0; }
 .climb-outcome { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
 

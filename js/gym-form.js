@@ -1,5 +1,5 @@
 import { markPressed } from './chart-controls.js';
-import { FONT_GRADES, numberGrades, scaleTypeOf } from './climbing.js';
+import { FONT_GRADES, UNGRADED, numberGrades, scaleTypeOf } from './climbing.js';
 import { onAction } from './events.js';
 import { allGyms, isOtherGym, saveGym } from './gyms.js';
 
@@ -55,7 +55,7 @@ function formGrades() {
   if (scale === 'font') return FONT_GRADES;
   if (scale === 'numbers') return numberGrades(count);
   const typed = customInput.value.split(GRADE_SEPARATORS).map((grade) => grade.replaceAll('|', '').trim());
-  return [...new Set(typed.filter(Boolean))];
+  return [...new Set(typed.filter((grade) => grade && grade !== UNGRADED))];
 }
 
 function problemWith(name, grades) {

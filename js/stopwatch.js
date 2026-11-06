@@ -6,8 +6,6 @@ const DEFAULTS = { startedAt: null, elapsed: 0, restartOnLog: true };
 const START_ICON = 'M8 5.5v13l10.5-6.5z';
 const PAUSE_ICON = 'M9 6v12M15 6v12';
 
-export const STOP_ICON = 'M7 7h10v10H7z';
-
 export const isRunning = ({ startedAt }) => startedAt !== null;
 
 export const elapsedOf = (state, now) => (isRunning(state) ? now - state.startedAt : state.elapsed);
@@ -28,9 +26,8 @@ export const restartAfterLog = (state, now) => (state.restartOnLog ? restart(sta
 
 export const restartUnlessStartedSince = (time) => (state, now) => (isRunning(state) && state.startedAt > time ? state : restart(state, now));
 
-export const startFreshOrStop = (state, now) => (isRunning(state) ? toggleStopwatch(state, now) : restart(state, now));
 
-export function createStopwatch({ id, name, storageKey, toggle = toggleStopwatch, stopIcon = PAUSE_ICON }) {
+export function createStopwatch({ id, name, storageKey }) {
   const stopwatchEl = document.getElementById(id);
   const timeEl = document.getElementById(`${id}-time`);
   const toggleButton = document.getElementById(`${id}-toggle`);
@@ -56,7 +53,7 @@ export function createStopwatch({ id, name, storageKey, toggle = toggleStopwatch
   function render() {
     const running = isRunning(stopwatch);
     toggleButton.setAttribute('aria-label', `${running ? 'Stop' : 'Start'} ${name}`);
-    icon.setAttribute('d', running ? stopIcon : START_ICON);
+    icon.setAttribute('d', running ? PAUSE_ICON : START_ICON);
     if (restartOnLogInput) restartOnLogInput.checked = stopwatch.restartOnLog;
     renderTime();
   }
@@ -78,7 +75,7 @@ export function createStopwatch({ id, name, storageKey, toggle = toggleStopwatch
     init,
     update,
     actions: {
-      [`${id}-toggle`]: () => update(toggle),
+      [`${id}-toggle`]: () => update(toggleStopwatch),
       [`${id}-reset`]: () => update(resetStopwatch),
     },
   };

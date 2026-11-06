@@ -82,6 +82,19 @@ test('an attempt keeps the climb chosen, a top starts a new climb at the same gr
   assertEqual([last().climb !== climb, last().grade], [true, '5'], 'next climb');
 });
 
+test('a boulder with no grade is logged as ?, and grading it later moves the whole climb', () => {
+  openClimb();
+  startFresh('?');
+  assertEqual(isShown('grade-chips', 'aria-label="No grade"'), true, 'offered');
+  logAll('AA');
+  const { climb, timestamp } = last();
+  assertEqual(attemptsOf(climb).map((attempt) => attempt.grade), ['?', '?'], 'logged');
+  click('climb-history', { action: 'edit', id: timestamp });
+  controls({ action: 'grade', grade: '6' });
+  controls({ action: 'save' });
+  assertEqual(attemptsOf(climb).map((attempt) => attempt.grade), ['6', '6'], 'graded later');
+});
+
 test('tapping another grade starts a new climb, tapping its own grade or New keeps the grade', () => {
   openClimb();
   startFresh('6');
@@ -235,9 +248,9 @@ test('a custom grade list keeps its order and drops blanks and repeats', () => {
   openClimb();
   click('gym-picker', { action: 'add', name: 'Colours' });
   click('gym-form', { action: 'scale', scale: 'custom' });
-  element('gym-custom').value = ' Yellow, Green,,Blue\nGreen , Red|';
+  element('gym-custom').value = ' Yellow, Green,,Blue\nGreen , ?, Red|';
   submit('gym-form');
-  assertEqual(element('grade-chips').innerHTML.match(/data-grade="[^"]+"/g), ['data-grade="Yellow"', 'data-grade="Green"', 'data-grade="Blue"', 'data-grade="Red"']);
+  assertEqual(element('grade-chips').innerHTML.match(/data-grade="[^"]+"/g), ['data-grade="Yellow"', 'data-grade="Green"', 'data-grade="Blue"', 'data-grade="Red"', 'data-grade="?"']);
   pickGym(GYM);
 });
 

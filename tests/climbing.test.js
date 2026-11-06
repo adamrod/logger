@@ -1,6 +1,6 @@
 import { calendarDays, parseMonthValue, monthValue } from '../js/calendar.js';
 import {
-  FONT_GRADES, attemptsByGrade, climbStats, climbingSessions, gradePyramid, hardestGrade, isLive, meanRest,
+  FONT_GRADES, UNGRADED, attemptsByGrade, climbStats, climbingSessions, gradePyramid, hardestGrade, isLive, meanRest,
   numberGrades, openProjects, outcomeOf, recordSends, scaleTypeOf, sessionFocus, stylesText, tagCounts,
 } from '../js/climbing.js';
 import { formatDuration, formatLength, ordinal } from '../js/format.js';
@@ -143,6 +143,18 @@ test('a record is the hardest send of a session that beats every earlier session
   ];
   const records = recordSends(attempts, () => [...grades, '6a', '6b']);
   assertEqual(attempts.filter((each) => records.has(each.timestamp)).map((each) => [each.grade, each.style]), [['6', 'boulder'], ['6b', 'lead']]);
+});
+
+test('an ungraded boulder counts as attempts and tops but never as the hardest send or a record', () => {
+  const earlier = tries('graded', 'T', { grade: '4' }, -DAY_MINUTES);
+  const comp = tries('comp', 'AT', { grade: UNGRADED, name: 'Comp 3', tags: 'Comp' });
+  const all = [...earlier, ...comp];
+  const stats = climbStats(comp, all, grades);
+  assertEqual([stats.attempts, stats.tops, stats.hardestSend], [2, 1, null], 'stats');
+  assertEqual(outcomeOf(comp, comp), 'Sent · 2nd attempt', 'outcome');
+  assertEqual(recordSends(all, () => grades).size, 0, 'no record');
+  assertEqual(gradePyramid([...earlier, ...comp], all, grades).map(({ grade }) => grade), ['4', UNGRADED], 'pyramid');
+  assertEqual(tagCounts(comp, all), [{ tag: 'Comp', sent: 1, total: 1 }], 'tag');
 });
 
 test('attempts group by grade, hardest first', () => {

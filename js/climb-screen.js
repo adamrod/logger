@@ -2,7 +2,7 @@ import { markPressed } from './chart-controls.js';
 import { revealPressedChip } from './chip-row.js';
 import { climbContext, climbHistoryHtml, projectListHtml } from './climb-history.js';
 import {
-  DEFAULT_TAGS, STYLES, attemptsOfClimb, climbOf, climbingSessions, isLive, joinTags, kindOf, lastGradeAt, lastStyleAt,
+  DEFAULT_TAGS, STYLES, UNGRADED, attemptsOfClimb, climbOf, climbingSessions, isLive, joinTags, kindOf, lastGradeAt, lastStyleAt,
   openProjects, tagsOf,
 } from './climbing.js';
 import { createEntryEditor } from './entry-editor.js';
@@ -12,7 +12,7 @@ import { initGymForm, isGymFormOpen, openGymForm, showFirstGymForm } from './gym
 import { allGyms, gradesAt, gymGrades } from './gyms.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
 import { createPickerMenu } from './picker-menu.js';
-import { STOP_ICON, createStopwatch, restartUnlessStartedSince, startFreshOrStop } from './stopwatch.js';
+import { createStopwatch, restartUnlessStartedSince } from './stopwatch.js';
 import { climbs } from './store.js';
 import { undoable } from './undo.js';
 
@@ -45,13 +45,7 @@ const historyEl = document.getElementById('climb-history');
 
 const renderedHtml = new WeakMap();
 
-const sessionStopwatch = createStopwatch({
-  id: 'session-stopwatch',
-  name: 'session',
-  storageKey: 'logger.v2.session-stopwatch',
-  toggle: startFreshOrStop,
-  stopIcon: STOP_ICON,
-});
+const sessionStopwatch = createStopwatch({ id: 'session-stopwatch', name: 'session', storageKey: 'logger.v2.session-stopwatch' });
 
 const allAttempts = () => climbs.getEntries();
 
@@ -177,6 +171,8 @@ const editedForm = () => (editor.editingId() === null ? null : form);
 
 const currentGrades = () => gradesAt(currentGym(), currentKind());
 
+const gradeOptions = () => [...currentGrades(), UNGRADED];
+
 function savePlace(changes) {
   place = { ...place, ...changes };
   localStorage.setItem(STATE_KEY, JSON.stringify(place));
@@ -190,7 +186,7 @@ function selectedClimb() {
 function draftGrade() {
   const grades = currentGrades();
   const last = lastGradeAt(allAttempts(), currentGym(), currentKind());
-  return [draft.grade, last].find((grade) => grades.includes(grade)) ?? grades[Math.floor(grades.length / 3)];
+  return [draft.grade, last].find((grade) => gradeOptions().includes(grade)) ?? grades[Math.floor(grades.length / 3)];
 }
 
 const shownGrade = () => editedForm()?.grade ?? selectedClimb()?.grade ?? draftGrade();
@@ -338,8 +334,8 @@ function setHtml(element, html) {
 
 const optionHtml = (value, label) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`;
 
-const chipHtml = (action, key, value, isPressed) => `<button type="button" class="chip ${action}-chip" data-action="${action}"
-  data-${key}="${escapeHtml(value)}" aria-pressed="${isPressed}">${escapeHtml(value)}</button>`;
+const chipHtml = (action, key, value, isPressed, label = value) => `<button type="button" class="chip ${action}-chip" data-action="${action}"
+  data-${key}="${escapeHtml(value)}" aria-pressed="${isPressed}" aria-label="${escapeHtml(label)}">${escapeHtml(value)}</button>`;
 
 function renderStyles() {
   const edited = editedForm();
@@ -351,7 +347,8 @@ function renderStyles() {
 
 function renderGrades() {
   const grade = shownGrade();
-  setHtml(gradeChips, currentGrades().map((option) => chipHtml('grade', 'grade', option, option === grade)).join(''));
+  const label = (option) => (option === UNGRADED ? 'No grade' : option);
+  setHtml(gradeChips, gradeOptions().map((option) => chipHtml('grade', 'grade', option, option === grade, label(option))).join(''));
 }
 
 function renderCard() {

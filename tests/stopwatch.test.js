@@ -1,5 +1,5 @@
 import {
-  elapsedOf, expireStopwatch, isRunning, resetStopwatch, restartAfterLog, restartUnlessStartedSince, startFreshOrStop, toggleStopwatch,
+  elapsedOf, expireStopwatch, isRunning, resetStopwatch, restartAfterLog, restartUnlessStartedSince, toggleStopwatch,
 } from '../js/stopwatch.js';
 import { assertEqual, test } from './harness.js';
 
@@ -34,14 +34,6 @@ test('the stopwatch stops at zero once it reaches twelve hours', () => {
   assertEqual(expireStopwatch(running, 12 * HOUR - SECOND), running, 'under the limit');
   const expired = expireStopwatch(running, 7 * 24 * HOUR);
   assertEqual([isRunning(expired), elapsedOf(expired, 8 * 24 * HOUR)], [false, 0], 'over the limit');
-});
-
-test('the session stopwatch starts from zero and holds its time when stopped', () => {
-  const held = toggleStopwatch(toggleStopwatch(STOPPED, 0), 50 * SECOND);
-  const started = startFreshOrStop(held, 100 * SECOND);
-  assertEqual(elapsedOf(started, 130 * SECOND), 30 * SECOND, 'started fresh');
-  const stopped = startFreshOrStop(started, 130 * SECOND);
-  assertEqual([isRunning(stopped), elapsedOf(stopped, 999 * SECOND)], [false, 30 * SECOND], 'stopped');
 });
 
 test('a new session keeps a stopwatch started since the last session and restarts any other', () => {

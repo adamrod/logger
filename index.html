@@ -345,6 +345,7 @@
           <div class="stopwatch climb-timer" id="session-stopwatch">
             <span class="label" id="session-stopwatch-label">Session</span>
             <div class="climb-timer-body">
+              <button type="button" class="stopwatch-button" data-action="session-stopwatch-reset" aria-label="Reset session"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4h4"/></svg></button>
               <span class="stopwatch-time" id="session-stopwatch-time" role="timer" aria-labelledby="session-stopwatch-label">0:00</span>
               <button type="button" class="stopwatch-button" id="session-stopwatch-toggle" data-action="session-stopwatch-toggle" aria-label="Start session">
                 <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path id="session-stopwatch-icon" d="M8 5.5v13l10.5-6.5z"/></svg>
@@ -359,7 +360,7 @@
 
         <div class="log-buttons" id="climb-log-buttons">
           <button type="button" class="btn btn-secondary" data-action="log" data-result="attempt">Attempt</button>
-          <button type="button" class="btn btn-primary log-top" data-action="log" data-result="top">Top</button>
+          <button type="button" class="btn btn-primary" data-action="log" data-result="top">Top</button>
         </div>
         <div class="field" id="climb-result-field" hidden>
           <span class="label" id="climb-result-label">Result</span>
