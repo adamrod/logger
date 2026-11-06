@@ -1,4 +1,4 @@
-const VERSION = 84;
+const VERSION = 85;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -12,17 +12,18 @@ const APP_SHELL = [
   'js/body-weight-chart.js',
   'js/body-weight-screen.js',
   'js/calendar.js',
+  'js/climb-analysis-screen.js',
   'js/chart-controls.js',
   'js/chip-row.js',
   'js/climb-calendar-screen.js',
   'js/climb-charts.js',
   'js/climb-history.js',
-  'js/climb-progress-screen.js',
   'js/climb-report.js',
   'js/climb-screen.js',
   'js/climb-session-screen.js',
   'js/climbing.js',
   'js/csv.js',
+  'js/day-calendar-screen.js',
   'js/day-screen.js',
   'js/day-summary.js',
   'js/entry-editor.js',
@@ -40,6 +41,7 @@ const APP_SHELL = [
   'js/hold-step.js',
   'js/keep-awake.js',
   'js/line-chart.js',
+  'js/month-calendar.js',
   'js/log-screen.js',
   'js/name-list.js',
   'js/number-field.js',

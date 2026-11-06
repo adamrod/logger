@@ -1,14 +1,22 @@
-import { STYLES, attemptsOfClimb, climbsIn, isTop, outcomeOf, sessionCount } from './climbing.js';
-import { countText, escapeHtml, formatShortDay } from './format.js';
-import { UNSYNCED_HTML, editAttributes } from './history.js';
+import { STYLES, climbsIn, isTop, outcomeOf, recordSends, sessionCount } from './climbing.js';
+import { countText, daysBetween, escapeHtml, formatDay, formatShortDay } from './format.js';
+import { gradesAt } from './gyms.js';
+import { UNSYNCED_HTML, currentDateAttribute, editAttributes, gapHtml, sinceLastHtml } from './history.js';
+import { climbs } from './store.js';
 
 const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const RECORD_HTML = '<span class="set-record">PR</span>';
 
 const metaText = (parts) => parts.filter(Boolean).map(escapeHtml).join(' · ');
 
 const ropeStyles = (climb) => (climb.kind === 'rope' ? [...new Set(climb.attempts.map((attempt) => STYLES[attempt.style]))] : []);
 
 const describeAttempt = (attempt) => `${attempt.grade} ${isTop(attempt) ? 'top' : 'attempt'}`;
+
+export function climbContext() {
+  const all = climbs.getEntries();
+  return { byClimb: Map.groupBy(all, (attempt) => attempt.climb), records: recordSends(all, gradesAt), isUnsynced: climbs.isUnsynced };
+}
 
 const climbHtml = (grade, title, meta) => `
   <span class="climb-grade">${escapeHtml(grade)}</span>
@@ -17,11 +25,12 @@ const climbHtml = (grade, title, meta) => `
     ${meta ? `<span class="climb-meta">${meta}</span>` : ''}
   </span>`;
 
-export function climbListHtml(attempts, allAttempts, { selectedId = null, editingId = null, isUnsynced, canPick }) {
+export function climbListHtml(attempts, context, { selectedId = null, editingId = null, canPick = false } = {}) {
   const rowHtml = (climb) => {
     const id = escapeHtml(climb.id);
-    const outcome = escapeHtml(outcomeOf(attemptsOfClimb(allAttempts, climb.id), climb.attempts));
-    const title = outcome + (climb.attempts.some(isUnsynced) ? UNSYNCED_HTML : '');
+    const outcome = escapeHtml(outcomeOf(context.byClimb.get(climb.id), climb.attempts));
+    const isRecord = climb.attempts.some((attempt) => context.records.has(attempt.timestamp));
+    const title = outcome + (isRecord ? RECORD_HTML : '') + (climb.attempts.some(context.isUnsynced) ? UNSYNCED_HTML : '');
     const body = climbHtml(climb.grade, title, metaText([climb.name, ...climb.tags, ...ropeStyles(climb)]));
     const head = canPick
       ? `<button type="button" class="climb-pick" data-action="pick" data-climb="${id}" aria-label="Climb ${escapeHtml(climb.grade)} again">${body}</button>`
@@ -35,6 +44,22 @@ export function climbListHtml(attempts, allAttempts, { selectedId = null, editin
       </li>`;
   };
   return `<ul class="climb-list">${climbsIn(attempts).toReversed().map(rowHtml).join('')}</ul>`;
+}
+
+export function climbHistoryHtml(sessions, context, view) {
+  if (!sessions.length) return '<p class="empty">No climbs logged here yet.</p>';
+  const newestFirst = sessions.toReversed();
+  const dateOf = (session) => new Date(session.startAt);
+  const sessionHtml = (session, i) => {
+    const older = newestFirst[i + 1];
+    return `
+      <section class="history-day climb-day"${currentDateAttribute(dateOf(session))}>
+        <button type="button" class="history-date" data-action="session" data-id="${escapeHtml(session.id)}">${formatDay(dateOf(session))}</button>
+        ${climbListHtml(session.attempts, context, view)}
+        ${older ? gapHtml(daysBetween(dateOf(older), dateOf(session))) : ''}
+      </section>`;
+  };
+  return sinceLastHtml(daysBetween(dateOf(newestFirst[0]), new Date())) + newestFirst.map(sessionHtml).join('');
 }
 
 export function projectListHtml(projects, removingId) {

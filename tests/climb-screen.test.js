@@ -1,11 +1,13 @@
 import { monthValue } from '../js/calendar.js';
 import { enterClimbCalendar, initClimbCalendar, renderClimbCalendar } from '../js/climb-calendar-screen.js';
-import { enterClimbProgress, initClimbProgress, renderClimbProgress } from '../js/climb-progress-screen.js';
+import { enterClimbAnalysis, initClimbAnalysis, renderClimbAnalysis } from '../js/climb-analysis-screen.js';
 import { climbPlace, initClimb, renderClimb, revealClimbs } from '../js/climb-screen.js';
 import { enterClimbSession, initClimbSession, renderClimbSession } from '../js/climb-session-screen.js';
+import { enterDayCalendar, initDayCalendar, renderDayCalendar } from '../js/day-calendar-screen.js';
+import { enterDay, renderDay } from '../js/day-screen.js';
 import { climbingSessions, numberGrades, openProjects } from '../js/climbing.js';
 import { onChange } from '../js/events.js';
-import { formatDateTimeValue } from '../js/format.js';
+import { formatDateTimeValue, formatIsoDate } from '../js/format.js';
 import { saveGym } from '../js/gyms.js';
 import { climbs } from '../js/store.js';
 import { nextRedo, nextUndo, trackPlace } from '../js/undo.js';
@@ -23,7 +25,8 @@ function openClimb() {
   initClimb();
   initClimbSession();
   initClimbCalendar();
-  initClimbProgress();
+  initClimbAnalysis();
+  initDayCalendar();
   onChange(renderClimb);
   renderClimb();
 }
@@ -301,20 +304,65 @@ test('the calendar marks days with a session and steps through months', () => {
   const now = new Date();
   enterClimbCalendar(monthValue(now));
   renderClimbCalendar();
-  assertEqual(isShown('climb-calendar-grid', 'has-session'), true, 'marked');
+  assertEqual(isShown('climb-calendar-grid', 'has-entry'), true, 'marked');
   click('climb-calendar-steps', { action: 'step', step: '-1' });
   assertEqual(location.hash, `#climb-calendar/${monthValue(new Date(now.getFullYear(), now.getMonth() - 1, 1))}`, 'stepped back');
   click('climb-calendar-steps', { action: 'today' });
   assertEqual(location.hash, `#climb-calendar/${monthValue(now)}`, 'today');
 });
 
-test('progress shows the chosen discipline at the current gym', () => {
+test('analysis shows the chosen discipline at the current gym', () => {
   openClimb();
   startFresh('6');
   log('top');
-  enterClimbProgress();
-  renderClimbProgress();
-  assertEqual([element('climb-progress-title').textContent, isShown('climb-progress-body', 'Pyramid')], [GYM, true], 'boulders');
-  click('climb-progress-kinds', { action: 'kind', kind: 'rope' });
-  assertEqual(isShown('climb-progress-body', '6b'), true, 'routes');
+  enterClimbAnalysis();
+  renderClimbAnalysis();
+  assertEqual([element('climb-analysis-title').textContent, isShown('climb-analysis-body', 'Pyramid')], [GYM, true], 'boulders');
+  click('climb-analysis-kinds', { action: 'kind', kind: 'rope' });
+  assertEqual(isShown('climb-analysis-body', '6b'), true, 'routes');
+});
+
+test('the history lists each session at the gym under its date, which opens the session report', () => {
+  openClimb();
+  startFresh('3');
+  log('attempt');
+  const session = climbingSessions(climbs.getEntries()).at(-1);
+  assertEqual(isShown('climb-history', `data-action="session" data-id="${session.id}"`), true, 'date button');
+  click('climb-history', { action: 'session', id: session.id });
+  assertEqual(location.hash, `#climb-session/${session.id}`, 'opened');
+});
+
+test('a send harder than every earlier session at the gym is marked PR', () => {
+  openClimb();
+  const daysAgo = (days) => new Date(Date.now() - days * 86400000).toISOString();
+  const send = (days, grade) => climbs.add({ timestamp: daysAgo(days), gym: 'Record wall', style: 'boulder', grade, climb: `record${days}`, result: 'top' });
+  saveGym(null, 'Record wall', numberGrades(9));
+  send(30, '6');
+  send(20, '5');
+  send(10, '7');
+  pickGym('Record wall');
+  assertEqual(element('climb-history').innerHTML.match(/set-record/g)?.length, 1);
+  pickGym(GYM);
+});
+
+test('the day shows its climbing sessions, opens their report, and edits an attempt on Climb', () => {
+  openClimb();
+  startFresh('4');
+  log('attempt');
+  const { timestamp } = last();
+  enterDay(formatIsoDate(new Date()));
+  renderDay();
+  assertEqual(isShown('day-climbs', GYM), true, 'session shown');
+  assertEqual(element('day-summary').textContent.includes('attempt'), true, 'summary');
+  click('day-climbs', { action: 'edit', id: timestamp });
+  assertEqual([location.hash, element('climb-log-buttons').hidden], ['#climb', true], 'editing on Climb');
+  controls({ action: 'cancel-edit' });
+});
+
+test('the Sets calendar lists logged days and links each to its day', () => {
+  openClimb();
+  enterDayCalendar(monthValue(new Date()));
+  renderDayCalendar();
+  assertEqual(isShown('calendar-list', `#day/${formatIsoDate(new Date())}`), true, 'today listed');
+  assertEqual(isShown('calendar-grid', 'has-entry'), true, 'marked');
 });

@@ -49,6 +49,10 @@ export const unsyncedHtml = (entry, isUnsynced) => (isUnsynced(entry) ? UNSYNCED
 
 export const currentDateAttribute = (date) => (isToday(date) ? ' aria-current="date"' : '');
 
+export const gapHtml = (days) => (days ? `<span class="history-gap">${days}d</span>` : '');
+
+export const sinceLastHtml = (days) => (days ? `<div class="history-since">${gapHtml(days)}</div>` : '');
+
 function entryHtml(entry, view) {
   const leadHtml = view.lead.map((cell) => `<span class="set-lead">${escapeHtml(cell(entry))}</span>`).join('');
   const isEditing = entry.timestamp === view.editingId;

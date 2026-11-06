@@ -1,7 +1,7 @@
 import { personalRecords } from './analysis.js';
 import { entryDate } from './entry-log.js';
 import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, formatIsoDate, roundValue } from './format.js';
-import { currentDateAttribute, editAttributes, unsyncedHtml } from './history.js';
+import { currentDateAttribute, editAttributes, gapHtml, sinceLastHtml, unsyncedHtml } from './history.js';
 
 const variantOf = (entry) => entry.variant ?? '';
 
@@ -31,14 +31,12 @@ export function setHistoryHtml(entries, view) {
   return `<div class="set-history">${sinceLastHtml(daysSinceLast(days, new Date()))}${days.map((day) => dayHtml(day, dayView)).join('')}</div>`;
 }
 
-const sinceLastHtml = (days) => (days === 0 ? '' : `<div class="history-since"><span class="history-gap">${days}d</span></div>`);
-
 function dayHtml({ date, gap, rows }, view) {
   return `
     <section class="history-day"${currentDateAttribute(date)}>
       <button type="button" class="history-date" data-action="day" data-day="${formatIsoDate(date)}">${formatDay(date)}</button>
       ${rows.map((row) => setRowHtml(row, view)).join('')}
-      ${gap === null ? '' : `<span class="history-gap">${gap}d</span>`}
+      ${gapHtml(gap)}
     </section>`;
 }
 

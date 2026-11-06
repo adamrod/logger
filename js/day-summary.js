@@ -1,5 +1,6 @@
+import { climbingSessions } from './climbing.js';
 import { entryDate } from './entry-log.js';
-import { dayKey } from './format.js';
+import { countText, dayKey, roundValue } from './format.js';
 import { variantRows } from './set-history.js';
 
 const onDay = (day) => (entry) => dayKey(entryDate(entry)) === dayKey(day);
@@ -16,9 +17,24 @@ export function nearbyDays(days, day) {
   };
 }
 
-export function daySummary(day, sets, weighIns) {
+export function daySummary(day, sets, weighIns, attempts = []) {
   const daySets = sets.filter(onDay(day));
   const exercises = [...Map.groupBy(daySets, (set) => set.exercise)]
     .map(([exercise, exerciseSets]) => ({ exercise, rows: variantRows(exerciseSets) }));
-  return { exercises, setCount: daySets.length, bodyWeight: weighIns.findLast(onDay(day))?.weight ?? null };
+  return {
+    exercises,
+    setCount: daySets.length,
+    bodyWeight: weighIns.findLast(onDay(day))?.weight ?? null,
+    climbing: climbingSessions(attempts.filter(onDay(day))),
+  };
+}
+
+export function daySummaryText({ exercises, setCount, bodyWeight, climbing }) {
+  const attemptCount = climbing.reduce((sum, session) => sum + session.attempts.length, 0);
+  return [
+    setCount && countText(exercises.length, 'exercise'),
+    setCount && countText(setCount, 'set'),
+    attemptCount && countText(attemptCount, 'attempt'),
+    bodyWeight !== null && `BW ${roundValue(bodyWeight)}`,
+  ].filter(Boolean).join(' · ');
 }

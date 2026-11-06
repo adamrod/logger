@@ -26,7 +26,7 @@ export const DOTS_LEGEND = '<span class="legend"><span class="dot is-top"></span
 
 export const CELLS_LEGEND = '<span class="legend"><span class="cell is-sent"></span>sent<span class="cell"></span>not yet</span>';
 
-export const dotsHtml = (attempts) => `<span class="dots">${attempts.map((attempt) => `<span class="dot${isTop(attempt) ? ' is-top' : ''}"></span>`).join('')}</span>`;
+const dotsHtml = (attempts) => `<span class="dots">${attempts.map((attempt) => `<span class="dot${isTop(attempt) ? ' is-top' : ''}"></span>`).join('')}</span>`;
 
 export function attemptRowsHtml(byGrade) {
   const rowHtml = ({ grade, attempts }) => `

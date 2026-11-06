@@ -12,24 +12,24 @@ import { climbs } from './store.js';
 
 const LEGEND = '<span class="legend"><span class="dot is-top"></span>send<span class="dot"></span>flash</span>';
 
-const kindsGroup = document.getElementById('climb-progress-kinds');
-const titleEl = document.getElementById('climb-progress-title');
-const summaryEl = document.getElementById('climb-progress-summary');
-const bodyEl = document.getElementById('climb-progress-body');
+const kindsGroup = document.getElementById('climb-analysis-kinds');
+const titleEl = document.getElementById('climb-analysis-title');
+const summaryEl = document.getElementById('climb-analysis-summary');
+const bodyEl = document.getElementById('climb-analysis-body');
 
 let rangePicker;
 let kind = 'boulder';
 
-export function initClimbProgress() {
-  rangePicker = createRangePicker('climb-progress', renderClimbProgress);
-  onAction([kindsGroup], { kind: ({ kind: chosen }) => { kind = chosen; renderClimbProgress(); } });
+export function initClimbAnalysis() {
+  rangePicker = createRangePicker('climb-analysis', renderClimbAnalysis);
+  onAction([kindsGroup], { kind: ({ kind: chosen }) => { kind = chosen; renderClimbAnalysis(); } });
 }
 
-export function enterClimbProgress() {
+export function enterClimbAnalysis() {
   kind = currentKind();
 }
 
-export function renderClimbProgress() {
+export function renderClimbAnalysis() {
   const gym = currentGym();
   const all = climbs.getEntries();
   const atGym = all.filter((attempt) => attempt.gym === gym && kindOf(attempt.style) === kind);
@@ -37,14 +37,14 @@ export function renderClimbProgress() {
   const sessions = climbingSessions(attempts);
   rangePicker.show();
   markPressed(kindsGroup, 'kind', kind);
-  titleEl.textContent = gym ?? 'Progress';
+  titleEl.textContent = gym ?? 'Analysis';
   summaryEl.textContent = `${countText(sessions.length, 'session')} · ${countText(attempts.length, 'attempt')}`;
   bodyEl.innerHTML = attempts.length
-    ? progressHtml(attempts, sessions, all, gradesAt(gym, kind))
+    ? analysisHtml(attempts, sessions, all, gradesAt(gym, kind))
     : '<p class="empty analysis-empty">Nothing logged in this range.</p>';
 }
 
-function progressHtml(attempts, sessions, all, grades) {
+function analysisHtml(attempts, sessions, all, grades) {
   const stats = climbStats(attempts, all, grades);
   const tiles = statTilesHtml([
     ['Sessions', String(sessions.length)],

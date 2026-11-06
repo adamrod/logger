@@ -1,7 +1,7 @@
 import { calendarDays, parseMonthValue, monthValue } from '../js/calendar.js';
 import {
   FONT_GRADES, attemptsByGrade, climbStats, climbingSessions, gradePyramid, hardestGrade, isLive, meanRest,
-  numberGrades, openProjects, outcomeOf, scaleTypeOf, sessionFocus, stylesText, tagCounts,
+  numberGrades, openProjects, outcomeOf, recordSends, scaleTypeOf, sessionFocus, stylesText, tagCounts,
 } from '../js/climbing.js';
 import { formatDuration, formatLength, ordinal } from '../js/format.js';
 import { assertEqual, test } from './harness.js';
@@ -126,6 +126,23 @@ test('the pyramid and the tags count a climb as sent once it was sent by its las
   const all = [...sentBefore, ...range, ...sentAfter];
   assertEqual(gradePyramid(range, all, grades), [{ grade: '7', sent: 0, total: 1 }, { grade: '6', sent: 2, total: 2 }]);
   assertEqual(tagCounts(range, all), [{ tag: 'Crimps', sent: 1, total: 2 }, { tag: 'Slab', sent: 2, total: 2 }]);
+});
+
+test('a record is the hardest send of a session that beats every earlier session at that gym and discipline', () => {
+  const send = (day, grade, fields = {}, minutes = 0) => attempt(day * DAY_MINUTES + minutes, { climb: `${day}${grade}`, grade, result: 'top', ...fields });
+  const attempts = [
+    send(0, '5'),
+    send(1, '5'),
+    send(2, '6'),
+    attempt(2 * DAY_MINUTES + 3, { climb: 'tried', grade: '8' }),
+    send(2, '6', { climb: 'again' }, 6),
+    send(3, '7', { style: 'toprope' }),
+    send(4, '7', { gym: 'Cave' }),
+    send(5, '6a', { style: 'lead' }),
+    send(6, '6b', { style: 'lead' }),
+  ];
+  const records = recordSends(attempts, () => [...grades, '6a', '6b']);
+  assertEqual(attempts.filter((each) => records.has(each.timestamp)).map((each) => [each.grade, each.style]), [['6', 'boulder'], ['6b', 'lead']]);
 });
 
 test('attempts group by grade, hardest first', () => {

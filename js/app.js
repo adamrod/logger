@@ -1,9 +1,10 @@
 import { enterAnalysis, initAnalysis, renderAnalysis } from './analysis-screen.js';
 import { initBodyWeight, renderBodyWeight, revealWeights } from './body-weight-screen.js';
+import { enterClimbAnalysis, initClimbAnalysis, renderClimbAnalysis } from './climb-analysis-screen.js';
 import { enterClimbCalendar, initClimbCalendar, renderClimbCalendar } from './climb-calendar-screen.js';
-import { enterClimbProgress, initClimbProgress, renderClimbProgress } from './climb-progress-screen.js';
 import { climbPlace, enterClimb, initClimb, renderClimb, revealClimbs } from './climb-screen.js';
 import { enterClimbSession, initClimbSession, renderClimbSession } from './climb-session-screen.js';
+import { enterDayCalendar, initDayCalendar, renderDayCalendar } from './day-calendar-screen.js';
 import { enterDay, initDay, renderDay } from './day-screen.js';
 import { onChange } from './events.js';
 import { forgetLoggedNames } from './exercises.js';
@@ -20,26 +21,29 @@ const RENDERERS = {
   climb: renderClimb,
   'climb-session': renderClimbSession,
   'climb-calendar': renderClimbCalendar,
-  'climb-progress': renderClimbProgress,
+  'climb-analysis': renderClimbAnalysis,
   settings: renderSettings,
   'body-weight': renderBodyWeight,
   analysis: renderAnalysis,
   day: renderDay,
+  calendar: renderDayCalendar,
 };
 const ENTER_HANDLERS = {
   analysis: enterAnalysis,
   day: enterDay,
+  calendar: enterDayCalendar,
   climb: enterClimb,
   'climb-session': enterClimbSession,
   'climb-calendar': enterClimbCalendar,
-  'climb-progress': enterClimbProgress,
+  'climb-analysis': enterClimbAnalysis,
 };
 const PARENT_TABS = {
   analysis: 'log',
   day: 'log',
+  calendar: 'log',
   'climb-session': 'climb',
   'climb-calendar': 'climb',
-  'climb-progress': 'climb',
+  'climb-analysis': 'climb',
 };
 const REVEALERS = { log: revealSets, climb: revealClimbs, 'body-weight': revealWeights };
 
@@ -93,10 +97,11 @@ initLog();
 initClimb();
 initClimbSession();
 initClimbCalendar();
-initClimbProgress();
+initClimbAnalysis();
 initBodyWeight();
 initAnalysis();
 initDay();
+initDayCalendar();
 initSettings();
 initSyncStatus();
 initUndoButtons(showReplayed);

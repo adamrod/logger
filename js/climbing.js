@@ -3,7 +3,7 @@ import { ordinal } from './format.js';
 
 export const STYLES = { boulder: 'Boulder', lead: 'Lead', toprope: 'Top rope', auto: 'Auto-belay' };
 export const FONT_GRADES = ['3', '4', '4+', '5', '5+', '6A', '6A+', '6B', '6B+', '6C', '6C+', '7A', '7A+', '7B', '7B+', '7C', '7C+', '8A', '8A+', '8B', '8B+', '8C', '8C+'];
-export const FRENCH_GRADES = ['4a', '4b', '4c', '5a', '5b', '5c', '6a', '6a+', '6b', '6b+', '6c', '6c+', '7a', '7a+', '7b', '7b+', '7c', '7c+', '8a', '8a+', '8b', '8b+', '8c', '8c+', '9a'];
+const FRENCH_GRADES = ['4a', '4b', '4c', '5a', '5b', '5c', '6a', '6a+', '6b', '6b+', '6c', '6c+', '7a', '7a+', '7b', '7b+', '7c', '7c+', '8a', '8a+', '8b', '8b+', '8c', '8c+', '9a'];
 export const DEFAULT_TAGS = ['Slab', 'Vertical', 'Overhang', 'Roof', 'Crimps', 'Slopers', 'Pinches', 'Pockets', 'Dyno', 'Compression'];
 
 const SESSION_GAP_MS = 3 * 60 * 60 * 1000;
@@ -95,7 +95,7 @@ function sendLabel(before, sendIndex) {
 
 const firstOfEachClimb = (attempts) => new Set(climbsIn(attempts).map((climb) => climb.attempts[0].timestamp));
 
-export function flashesAmong(attempts, allAttempts) {
+function flashesAmong(attempts, allAttempts) {
   const firstAttempts = firstOfEachClimb(allAttempts);
   return attempts.filter((attempt) => isSend(attempt) && firstAttempts.has(attempt.timestamp));
 }
@@ -173,4 +173,19 @@ export function sessionHighs(sessions, allAttempts, grades) {
   }));
 }
 
-export const stylesText = (attempts) => [...new Set(attempts.map((attempt) => STYLES[attempt.style]))].join(', ');
+export function recordSends(attempts, gradesAt) {
+  const placesSent = Map.groupBy(attempts.filter(isSend), (attempt) => `${attempt.gym}|${kindOf(attempt.style)}`);
+  return new Set([...placesSent.values()].flatMap((sends) => {
+    const grades = gradesAt(sends[0].gym, kindOf(sends[0].style));
+    const rank = (attempt) => grades.indexOf(attempt.grade);
+    let best = -1;
+    return climbingSessions(sends).flatMap(({ attempts: sessionSends }, i) => {
+      const top = sessionSends.reduce((hardest, attempt) => (rank(attempt) > rank(hardest) ? attempt : hardest));
+      const isRecord = i > 0 && rank(top) > best;
+      best = Math.max(best, rank(top));
+      return isRecord ? [top.timestamp] : [];
+    });
+  }));
+}
+
+export const stylesText =(attempts) => [...new Set(attempts.map((attempt) => STYLES[attempt.style]))].join(', ');

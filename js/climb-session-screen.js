@@ -1,6 +1,6 @@
 import { monthValue } from './calendar.js';
 import { attemptTimelineSvg } from './climb-charts.js';
-import { climbListHtml } from './climb-history.js';
+import { climbContext, climbListHtml } from './climb-history.js';
 import {
   DOTS_LEGEND, attemptRowsHtml, sectionHtml, statTilesHtml, tagBarsHtml, topsDetail,
 } from './climb-report.js';
@@ -87,7 +87,7 @@ function sessionHtml(session) {
     ['Hardest flash', stats.hardestFlash],
     ['Avg rest', rest === null ? null : formatDuration(rest)],
   ]);
-  const climbsHtml = climbListHtml(session.attempts, all, { isUnsynced: climbs.isUnsynced, canPick: false });
+  const climbsHtml = climbListHtml(session.attempts, climbContext());
   return `
     <div class="climb-section">${tiles}</div>
     ${sectionHtml('Attempts by grade', attemptRowsHtml(attemptsByGrade(attempts, grades)), DOTS_LEGEND)}

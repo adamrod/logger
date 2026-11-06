@@ -1,13 +1,13 @@
 import { markPressed } from './chart-controls.js';
 import { revealPressedChip } from './chip-row.js';
-import { climbListHtml, projectListHtml } from './climb-history.js';
+import { climbContext, climbHistoryHtml, projectListHtml } from './climb-history.js';
 import {
   DEFAULT_TAGS, STYLES, attemptsOfClimb, climbOf, climbingSessions, isLive, joinTags, kindOf, lastGradeAt, lastStyleAt,
   openProjects, tagsOf,
 } from './climbing.js';
 import { createEntryEditor } from './entry-editor.js';
 import { onAction } from './events.js';
-import { countText, escapeHtml, formatDuration, formatLongDay, formatWhen } from './format.js';
+import { countText, escapeHtml, formatDuration, formatWhen } from './format.js';
 import { initGymForm, isGymFormOpen, openGymForm, showFirstGymForm } from './gym-form.js';
 import { allGyms, gradesAt, gymGrades } from './gyms.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
@@ -40,7 +40,7 @@ const restTime = document.getElementById('climb-rest-time');
 const logButtons = document.getElementById('climb-log-buttons');
 const resultField = document.getElementById('climb-result-field');
 const resultGroup = document.getElementById('climb-result');
-const historyHeading = document.getElementById('climb-history-heading');
+const analysisLink = document.getElementById('climb-analysis-link');
 const historyEl = document.getElementById('climb-history');
 
 const renderedHtml = new WeakMap();
@@ -96,6 +96,7 @@ const actions = {
     renderClimb();
   },
   pick: ({ climb }) => pickClimb(climb),
+  session: ({ id }) => { location.hash = `#climb-session/${id}`; },
   'toggle-name': () => togglePanel('name'),
   'toggle-tags': () => togglePanel('tags'),
   tag: ({ tag }) => toggleTag(tag),
@@ -138,7 +139,7 @@ export function currentGym() {
   return gyms.includes(place.gym) ? place.gym : gyms[0] ?? null;
 }
 
-export const currentStyle = () => editedForm()?.style
+const currentStyle = () => editedForm()?.style
   ?? place.styles[currentGym()]
   ?? lastStyleAt(allAttempts(), currentGym())
   ?? 'boulder';
@@ -200,8 +201,6 @@ function liveSession() {
   const session = climbingSessions(allAttempts()).at(-1);
   return session?.gym === currentGym() && isLive(session, Date.now()) ? session : null;
 }
-
-const shownSession = () => liveSession() ?? climbingSessions(allAttempts()).findLast((session) => session.gym === currentGym());
 
 function logAttempt(result) {
   const gym = currentGym();
@@ -406,20 +405,14 @@ function renderEditing() {
 }
 
 function renderHistory() {
-  const session = shownSession();
-  setHtml(historyHeading, session ? sessionLinkHtml(session) : 'This session');
-  const view = { selectedId: place.selected, editingId: editor.editingId(), isUnsynced: climbs.isUnsynced, canPick: true };
-  const sessionHtml = session ? climbListHtml(session.attempts, allAttempts(), view) : '<p class="empty">No climbs logged here yet.</p>';
-  setHtml(historyEl, sessionHtml + projectsHtml(session));
+  const sessions = climbingSessions(allAttempts()).filter((session) => session.gym === currentGym());
+  const view = { selectedId: place.selected, editingId: editor.editingId(), canPick: true };
+  analysisLink.hidden = !sessions.length;
+  setHtml(historyEl, projectsHtml() + climbHistoryHtml(sessions, climbContext(), view));
 }
 
-function sessionLinkHtml(session) {
-  const title = isLive(session, Date.now()) ? 'This session' : formatLongDay(new Date(session.startAt));
-  return `<a class="history-link" href="#climb-session/${escapeHtml(session.id)}">${escapeHtml(title)} ›</a>`;
-}
-
-function projectsHtml(session) {
-  const shown = new Set(session?.attempts.map((attempt) => attempt.climb));
-  const projects = openProjects(allAttempts(), currentGym(), currentKind()).filter((project) => !shown.has(project.id));
+function projectsHtml() {
+  const live = new Set(liveSession()?.attempts.map((attempt) => attempt.climb));
+  const projects = openProjects(allAttempts(), currentGym(), currentKind()).filter((project) => !live.has(project.id));
   return projects.length ? `<h2 class="label climb-subhead">Projects</h2>${projectListHtml(projects, removingProject)}` : '';
 }
