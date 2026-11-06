@@ -72,15 +72,14 @@ function submit(event) {
   errorEl.textContent = problem;
   errorEl.hidden = !problem;
   if (problem) return;
-  form.hidden = true;
   saveGym(original, name, grades);
-  onClose(name);
+  close({ name, original });
 }
 
-function close(name) {
+function close(saved) {
   form.hidden = true;
   nameInput.blur();
-  onClose(name);
+  onClose(saved);
 }
 
 function render() {

@@ -110,6 +110,15 @@ test('updating many entries queues each synced one as edited', () => {
   assertEqual(log.getSyncMeta().editedIds, ['2026-10-02T07:00:00.000Z', '2026-10-03T07:00:00.000Z']);
 });
 
+test('updating many entries leaves the ones that already have the values untouched', () => {
+  const log = syncedLog([
+    { timestamp: '2026-10-01T07:00:00.000Z', weight: 80 },
+    { timestamp: '2026-10-02T07:00:00.000Z', weight: 71 },
+  ]);
+  log.updateWhere(() => true, { weight: 80 });
+  assertEqual(log.getSyncMeta().editedIds, ['2026-10-02T07:00:00.000Z']);
+});
+
 test('moving a synced entry away and back keeps it as an edit', () => {
   const log = syncedLog([{ timestamp: '2026-10-01T07:00:00.000Z', weight: 70 }]);
   log.update('2026-10-01T07:00:00.000Z', { timestamp: '2026-09-30T07:00:00.000Z' });

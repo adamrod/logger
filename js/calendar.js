@@ -11,16 +11,11 @@ export function parseMonthValue(value) {
   return new Date(year, month - 1, 1);
 }
 
-export function calendarWeeks(month) {
+export function calendarDays(month) {
   const year = month.getFullYear();
   const index = month.getMonth();
   const leadingBlanks = (new Date(year, index, 1).getDay() + DAYS_IN_WEEK - 1) % DAYS_IN_WEEK;
-  const dayCount = new Date(year, index + 1, 0).getDate();
-  const cells = [
-    ...Array(leadingBlanks).fill(null),
-    ...Array.from({ length: dayCount }, (_, i) => new Date(year, index, i + 1)),
-  ];
-  const trailingBlanks = (DAYS_IN_WEEK - (cells.length % DAYS_IN_WEEK)) % DAYS_IN_WEEK;
-  const padded = [...cells, ...Array(trailingBlanks).fill(null)];
-  return Array.from({ length: padded.length / DAYS_IN_WEEK }, (_, week) => padded.slice(week * DAYS_IN_WEEK, (week + 1) * DAYS_IN_WEEK));
+  const days = Array.from({ length: new Date(year, index + 1, 0).getDate() }, (_, i) => new Date(year, index, i + 1));
+  const trailingBlanks = (DAYS_IN_WEEK - ((leadingBlanks + days.length) % DAYS_IN_WEEK)) % DAYS_IN_WEEK;
+  return [...Array(leadingBlanks).fill(null), ...days, ...Array(trailingBlanks).fill(null)];
 }

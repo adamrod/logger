@@ -27,9 +27,11 @@ export const numberGrades = (count) => Array.from({ length: count }, (_, i) => S
 
 export const gradesFor = (boulderGrades, kind) => (kind === 'boulder' ? boulderGrades : FRENCH_GRADES);
 
+const sameGrades = (a, b) => a.join('|') === b.join('|');
+
 export function scaleTypeOf(grades) {
-  if (grades.join('|') === FONT_GRADES.join('|')) return 'font';
-  return grades.join('|') === numberGrades(grades.length).join('|') ? 'numbers' : 'custom';
+  if (sameGrades(grades, FONT_GRADES)) return 'font';
+  return sameGrades(grades, numberGrades(grades.length)) ? 'numbers' : 'custom';
 }
 
 export function climbingSessions(attempts) {
@@ -47,14 +49,17 @@ export function climbingSessions(attempts) {
   return sessions;
 }
 
+export const sessionCount = (attempts) => climbingSessions(attempts).length;
+
 export const isLive = (session, now) => now - session.endAt < SESSION_GAP_MS;
 
-export function sessionKind(session) {
-  const boulders = session.attempts.filter((attempt) => attempt.style === 'boulder').length;
-  return boulders * 2 >= session.attempts.length ? 'boulder' : 'rope';
+export function sessionFocus({ attempts }) {
+  const boulders = attempts.filter((attempt) => attempt.style === 'boulder');
+  const kind = boulders.length * 2 >= attempts.length ? 'boulder' : 'rope';
+  return { kind, attempts: kind === 'boulder' ? boulders : attempts.filter((attempt) => attempt.style !== 'boulder') };
 }
 
-export const climbOf = (attempts) => {
+export function climbOf(attempts) {
   const latest = attempts.at(-1);
   return {
     id: latest.climb,
@@ -65,31 +70,34 @@ export const climbOf = (attempts) => {
     tags: tagsOf(latest),
     attempts,
   };
-};
+}
 
 export const climbsIn = (attempts) => [...Map.groupBy(attempts, (attempt) => attempt.climb).values()].map(climbOf);
 
 export const attemptsOfClimb = (attempts, id) => attempts.filter((attempt) => attempt.climb === id);
 
-const sessionCount = (attempts) => climbingSessions(attempts).length;
+export function outcomeOf(climbAttempts, here) {
+  const before = climbAttempts.filter((attempt) => attempt.timestamp < here[0].timestamp);
+  if (before.some(isSend)) return here.some(isTop) ? 'Repeat' : 'No top';
+  const sendIndex = here.findIndex(isSend);
+  if (sendIndex !== -1) return sendLabel(before, sendIndex);
+  const top = here.find(isTop);
+  if (top) return `${STYLES[top.style]} top`;
+  if (!climbAttempts.at(-1).name) return 'No top';
+  return before.length ? `Project · ${ordinal(sessionCount(before) + 1)} session` : 'Project';
+}
 
-export function outcomeOf(allAttempts, here) {
-  const before = allAttempts.filter((attempt) => attempt.timestamp < here[0].timestamp);
-  const firstTop = here.findIndex(isTop);
-  if (before.some(isSend)) return firstTop === -1 ? 'No top' : 'Repeat';
-  if (firstTop === -1) return here.at(-1).name ? projectLabel(before) : 'No top';
-  const top = here[firstTop];
-  if (!isSend(top)) return `${STYLES[top.style]} top`;
-  const attemptNumber = before.length + firstTop + 1;
+function sendLabel(before, sendIndex) {
+  const attemptNumber = before.length + sendIndex + 1;
   if (attemptNumber === 1) return 'Flash';
   return before.length ? `Sent · ${ordinal(sessionCount(before) + 1)} session` : `Sent · ${ordinal(attemptNumber)} attempt`;
 }
 
-const projectLabel = (before) => (before.length ? `Project · ${ordinal(sessionCount(before) + 1)} session` : 'Project');
+const firstOfEachClimb = (attempts) => new Set(climbsIn(attempts).map((climb) => climb.attempts[0].timestamp));
 
 export function flashesAmong(attempts, allAttempts) {
-  const firstIds = new Set(climbsIn(allAttempts).map((climb) => climb.attempts[0].timestamp));
-  return attempts.filter((attempt) => isSend(attempt) && firstIds.has(attempt.timestamp));
+  const firstAttempts = firstOfEachClimb(allAttempts);
+  return attempts.filter((attempt) => isSend(attempt) && firstAttempts.has(attempt.timestamp));
 }
 
 export function hardestGrade(attempts, grades) {
@@ -104,22 +112,25 @@ export function meanRest(attempts) {
   return gaps.length ? gaps.reduce((sum, gap) => sum + gap, 0) / gaps.length : null;
 }
 
-function firstSendsAmong(attempts, allAttempts) {
-  const firstIds = new Set(climbsIn(allAttempts.filter(isSend)).map((climb) => climb.attempts[0].timestamp));
-  return attempts.filter((attempt) => firstIds.has(attempt.timestamp));
-}
-
 export function climbStats(attempts, allAttempts, grades) {
   const flashes = flashesAmong(attempts, allAttempts);
-  const firstSends = firstSendsAmong(attempts, allAttempts);
+  const firstSends = firstOfEachClimb(allAttempts.filter(isSend));
+  const sentHere = attempts.filter((attempt) => firstSends.has(attempt.timestamp)).length;
   return {
     attempts: attempts.length,
     tops: attempts.filter(isTop).length,
     hardestSend: hardestGrade(attempts.filter(isSend), grades),
     hardestFlash: hardestGrade(flashes, grades),
-    flashRate: firstSends.length ? flashes.length / firstSends.length : null,
+    flashRate: sentHere ? flashes.length / sentHere : null,
   };
 }
+
+function isSentBy(climb, allAttempts) {
+  const lastTry = climb.attempts.at(-1).timestamp;
+  return attemptsOfClimb(allAttempts, climb.id).some((attempt) => isSend(attempt) && attempt.timestamp <= lastTry);
+}
+
+const sentCounts = (list) => ({ sent: list.filter((item) => item.isSent).length, total: list.length });
 
 const byRankDescending = (grades) => (a, b) => grades.indexOf(b.grade) - grades.indexOf(a.grade);
 
@@ -130,25 +141,17 @@ export function attemptsByGrade(attempts, grades) {
 }
 
 export function gradePyramid(attempts, allAttempts, grades) {
-  const climbs = climbsIn(attempts).map((climb) => ({
-    grade: climb.grade,
-    isSent: attemptsOfClimb(allAttempts, climb.id).some(isSend),
-  }));
+  const climbs = climbsIn(attempts).map((climb) => ({ grade: climb.grade, isSent: isSentBy(climb, allAttempts) }));
   return [...Map.groupBy(climbs, (climb) => climb.grade)]
-    .map(([grade, list]) => ({ grade, sent: list.filter((climb) => climb.isSent).length, total: list.length }))
+    .map(([grade, list]) => ({ grade, ...sentCounts(list) }))
     .sort(byRankDescending(grades));
 }
 
-export function tagCounts(attempts) {
-  const counts = new Map();
-  for (const climb of climbsIn(attempts)) {
-    const isSent = climb.attempts.some(isSend);
-    for (const tag of climb.tags) {
-      const count = counts.get(tag) ?? { tag, sent: 0, total: 0 };
-      counts.set(tag, { tag, sent: count.sent + (isSent ? 1 : 0), total: count.total + 1 });
-    }
-  }
-  return [...counts.values()].sort((a, b) => b.total - a.total || a.tag.localeCompare(b.tag));
+export function tagCounts(attempts, allAttempts) {
+  const tagged = climbsIn(attempts).flatMap((climb) => climb.tags.map((tag) => ({ tag, isSent: isSentBy(climb, allAttempts) })));
+  return [...Map.groupBy(tagged, (item) => item.tag)]
+    .map(([tag, list]) => ({ tag, ...sentCounts(list) }))
+    .sort((a, b) => b.total - a.total || a.tag.localeCompare(b.tag));
 }
 
 export function openProjects(attempts, gym, kind) {
@@ -157,15 +160,10 @@ export function openProjects(attempts, gym, kind) {
     .sort((a, b) => b.attempts.at(-1).timestamp.localeCompare(a.attempts.at(-1).timestamp));
 }
 
-export const projectSessions = (climb) => sessionCount(climb.attempts);
+export const lastGradeAt = (attempts, gym, kind) => attempts
+  .findLast((attempt) => attempt.gym === gym && kindOf(attempt.style) === kind)?.grade ?? null;
 
-export function lastGradeAt(attempts, gym, kind) {
-  return attempts.findLast((attempt) => attempt.gym === gym && kindOf(attempt.style) === kind)?.grade ?? null;
-}
-
-export function lastStyleAt(attempts, gym) {
-  return attempts.findLast((attempt) => attempt.gym === gym)?.style ?? null;
-}
+export const lastStyleAt = (attempts, gym) => attempts.findLast((attempt) => attempt.gym === gym)?.style ?? null;
 
 export function sessionHighs(sessions, allAttempts, grades) {
   return sessions.map((session) => ({
@@ -174,3 +172,5 @@ export function sessionHighs(sessions, allAttempts, grades) {
     flash: hardestGrade(flashesAmong(session.attempts, allAttempts), grades),
   }));
 }
+
+export const stylesText = (attempts) => [...new Set(attempts.map((attempt) => STYLES[attempt.style]))].join(', ');

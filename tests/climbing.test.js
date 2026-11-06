@@ -1,13 +1,13 @@
-import { calendarWeeks } from '../js/calendar.js';
+import { calendarDays, parseMonthValue, monthValue } from '../js/calendar.js';
 import {
-  FONT_GRADES, climbStats, climbingSessions, gradePyramid, meanRest, numberGrades, openProjects, outcomeOf,
-  scaleTypeOf, tagCounts,
+  FONT_GRADES, attemptsByGrade, climbStats, climbingSessions, gradePyramid, hardestGrade, isLive, meanRest,
+  numberGrades, openProjects, outcomeOf, scaleTypeOf, sessionFocus, stylesText, tagCounts,
 } from '../js/climbing.js';
 import { formatDuration, formatLength, ordinal } from '../js/format.js';
 import { assertEqual, test } from './harness.js';
 
 const MINUTE = 60000;
-const DAY = 24 * 60 * MINUTE;
+const DAY_MINUTES = 24 * 60;
 const START = Date.UTC(2026, 10, 2, 17);
 
 const attempt = (minutes, fields) => ({
@@ -19,47 +19,72 @@ const attempt = (minutes, fields) => ({
   ...fields,
 });
 
+const tries = (climb, results, fields = {}, startMinutes = 0) => [...results]
+  .map((result, i) => attempt(startMinutes + i * 3, { climb, result: result === 'T' ? 'top' : 'attempt', ...fields }));
+
 const grades = numberGrades(9);
 
 test('a gym change or three quiet hours starts a new session', () => {
   const sessions = climbingSessions([
     attempt(0, { climb: 'a' }),
-    attempt(170, { climb: 'b' }),
+    attempt(179, { climb: 'b' }),
     attempt(360, { climb: 'c' }),
     attempt(365, { climb: 'd', gym: 'Cave' }),
+    attempt(370, { climb: 'e' }),
   ]);
-  assertEqual(sessions.map((session) => session.attempts.length), [2, 1, 1]);
+  assertEqual(sessions.map((session) => [session.gym, session.attempts.length]), [['Wall', 2], ['Wall', 1], ['Cave', 1], ['Wall', 1]]);
+  assertEqual(sessions[0].id, attempt(0, {}).timestamp, 'id is the first attempt');
 });
 
-test('each climb in a session reads as a flash, a send, a repeat, a project or no top', () => {
-  const first = [attempt(0, { climb: 'f', result: 'top' })];
-  assertEqual(outcomeOf(first, first), 'Flash', 'flash');
-  const worked = [attempt(0, { climb: 'w' }), attempt(3, { climb: 'w' }), attempt(6, { climb: 'w', result: 'top' })];
+test('a session stays live for three hours after its last attempt', () => {
+  const [session] = climbingSessions([attempt(0, { climb: 'a' })]);
+  assertEqual([isLive(session, START + 179 * MINUTE), isLive(session, START + 180 * MINUTE)], [true, false]);
+});
+
+test('climbs read as flash, sent on an attempt, sent in a session, repeat, project or no top', () => {
+  const flash = tries('f', 'T');
+  assertEqual(outcomeOf(flash, flash), 'Flash', 'flash');
+  const worked = tries('w', 'AAT');
   assertEqual(outcomeOf(worked, worked), 'Sent · 3rd attempt', 'sent in one session');
-  const project = [attempt(0, { climb: 'p', name: 'Pink' }), attempt(DAY / MINUTE, { climb: 'p', name: 'Pink' })];
-  assertEqual(outcomeOf(project, project.slice(1)), 'Project · 2nd session', 'project');
-  const sentLater = [...project, attempt(2 * DAY / MINUTE, { climb: 'p', name: 'Pink', result: 'top' })];
-  assertEqual(outcomeOf(sentLater, sentLater.slice(2)), 'Sent · 3rd session', 'sent in a later session');
-  assertEqual(outcomeOf(sentLater, [attempt(3 * DAY / MINUTE, { climb: 'p', result: 'top' })]), 'Repeat', 'repeat');
-  assertEqual(outcomeOf([attempt(0, { climb: 'u' })], [attempt(0, { climb: 'u' })]), 'No top', 'unnamed');
+  const project = [...tries('p', 'AA', { name: 'Pink' }), ...tries('p', 'A', { name: 'Pink' }, DAY_MINUTES)];
+  assertEqual(outcomeOf(project, project.slice(2)), 'Project · 2nd session', 'project');
+  assertEqual(outcomeOf(project.slice(0, 2), project.slice(0, 2)), 'Project', 'project in its first session');
+  const sentLater = [...project, ...tries('p', 'AT', { name: 'Pink' }, 2 * DAY_MINUTES)];
+  assertEqual(outcomeOf(sentLater, sentLater.slice(3)), 'Sent · 3rd session', 'sent in a later session');
+  const repeated = [...sentLater, ...tries('p', 'AT', {}, 3 * DAY_MINUTES)];
+  assertEqual(outcomeOf(repeated, repeated.slice(5)), 'Repeat', 'repeat');
+  const failedRepeat = [...sentLater, ...tries('p', 'A', {}, 3 * DAY_MINUTES)];
+  assertEqual(outcomeOf(failedRepeat, failedRepeat.slice(5)), 'No top', 'failed repeat');
+  const unnamed = tries('u', 'AA');
+  assertEqual(outcomeOf(unnamed, unnamed), 'No top', 'unnamed');
 });
 
-test('a top rope top is no send, so it neither flashes nor counts as the hardest send', () => {
-  const rope = [attempt(0, { climb: 'r', style: 'toprope', grade: '6b', result: 'top' })];
-  assertEqual(outcomeOf(rope, rope), 'Top rope top', 'outcome');
+test('a top rope top is no send, but a clean lead after it is', () => {
+  const rope = tries('r', 'T', { style: 'toprope', grade: '6b' });
+  assertEqual(outcomeOf(rope, rope), 'Top rope top', 'top rope');
+  const autoBelay = tries('b', 'T', { style: 'auto', grade: '6b' });
+  assertEqual(outcomeOf(autoBelay, autoBelay), 'Auto-belay top', 'auto-belay');
+  const thenLead = [...rope, attempt(5, { climb: 'r', style: 'lead', grade: '6b', result: 'top' })];
+  assertEqual(outcomeOf(thenLead, thenLead), 'Sent · 2nd attempt', 'lead after top rope');
   const stats = climbStats(rope, rope, ['6a', '6b']);
   assertEqual([stats.tops, stats.hardestSend, stats.hardestFlash, stats.flashRate], [1, null, null, null], 'stats');
 });
 
-test('the flash rate compares flashed climbs with every climb first sent in the range', () => {
-  const attempts = [
-    attempt(0, { climb: 'a', grade: '4', result: 'top' }),
-    attempt(3, { climb: 'b', grade: '6' }),
-    attempt(6, { climb: 'b', grade: '6', result: 'top' }),
-    attempt(9, { climb: 'a', grade: '4', result: 'top' }),
+test('the flash rate compares flashed climbs with climbs first sent in the range, so repeats do not count', () => {
+  const earlier = tries('old', 'T', { grade: '7' }, -DAY_MINUTES);
+  const range = [
+    ...tries('a', 'T', { grade: '4' }),
+    ...tries('b', 'AT', { grade: '6' }, 10),
+    ...tries('old', 'T', { grade: '7' }, 20),
   ];
-  const stats = climbStats(attempts, attempts, grades);
-  assertEqual([stats.hardestSend, stats.hardestFlash, stats.flashRate], ['6', '4', 0.5]);
+  const stats = climbStats(range, [...earlier, ...range], grades);
+  assertEqual([stats.attempts, stats.tops, stats.hardestSend, stats.hardestFlash, stats.flashRate], [4, 3, '7', '4', 0.5]);
+});
+
+test('the hardest grade follows the scale and skips grades the scale no longer has', () => {
+  const attempts = [attempt(0, { grade: '6A+' }), attempt(3, { grade: '7A' }), attempt(6, { grade: 'Purple' })];
+  assertEqual(hardestGrade(attempts, FONT_GRADES), '7A');
+  assertEqual(hardestGrade([], FONT_GRADES), null);
 });
 
 test('rest between attempts skips attempts logged in one go and long breaks', () => {
@@ -68,41 +93,63 @@ test('rest between attempts skips attempts logged in one go and long breaks', ()
   assertEqual(meanRest(times.slice(0, 1)), null);
 });
 
-test('projects are named climbs at the gym that have not been sent yet', () => {
+test('a session is read by its main discipline', () => {
+  const session = { attempts: [attempt(0, { style: 'lead' }), attempt(3, {}), attempt(6, { style: 'toprope' })] };
+  const { kind, attempts } = sessionFocus(session);
+  assertEqual([kind, attempts.map((each) => each.style)], ['rope', ['lead', 'toprope']]);
+  assertEqual(sessionFocus({ attempts: [attempt(0, {}), attempt(3, { style: 'lead' })] }).kind, 'boulder', 'a tie goes to boulders');
+  assertEqual(stylesText(session.attempts), 'Lead, Boulder, Top rope');
+});
+
+test('projects are named climbs at the gym not sent yet, latest first', () => {
   const attempts = [
     attempt(0, { climb: 'p', name: 'Pink' }),
     attempt(3, { climb: 's', name: 'Sent', result: 'top' }),
     attempt(6, { climb: 'u' }),
     attempt(9, { climb: 'r', name: 'Rope', style: 'lead', grade: '6a' }),
     attempt(12, { climb: 'o', name: 'Other gym', gym: 'Cave' }),
+    attempt(15, { climb: 't', name: 'Topped on rope', style: 'toprope', result: 'top' }),
+    attempt(18, { climb: 'b', name: 'Blue' }),
   ];
-  assertEqual(openProjects(attempts, 'Wall', 'boulder').map((project) => project.name), ['Pink']);
+  assertEqual(openProjects(attempts, 'Wall', 'boulder').map((project) => project.name), ['Blue', 'Pink']);
+  assertEqual(openProjects(attempts, 'Wall', 'rope').map((project) => project.name), ['Topped on rope', 'Rope']);
 });
 
-test('the pyramid counts climbs per grade and the tags count sends per climb', () => {
-  const attempts = [
-    attempt(0, { climb: 'a', grade: '6', tags: 'Slab' }),
-    attempt(3, { climb: 'b', grade: '6', tags: 'Slab|Crimps', result: 'top' }),
-    attempt(6, { climb: 'c', grade: '7', tags: 'Crimps' }),
+test('the pyramid and the tags count a climb as sent once it was sent by its last attempt in the range', () => {
+  const sentBefore = tries('before', 'T', { grade: '6', tags: 'Slab' }, -DAY_MINUTES);
+  const range = [
+    ...tries('before', 'A', { grade: '6', tags: 'Slab' }),
+    ...tries('now', 'AT', { grade: '6', tags: 'Slab|Crimps' }, 10),
+    ...tries('later', 'A', { grade: '7', tags: 'Crimps' }, 20),
   ];
-  assertEqual(gradePyramid(attempts, attempts, grades), [{ grade: '7', sent: 0, total: 1 }, { grade: '6', sent: 1, total: 2 }]);
-  assertEqual(tagCounts(attempts), [{ tag: 'Crimps', sent: 1, total: 2 }, { tag: 'Slab', sent: 1, total: 2 }]);
+  const sentAfter = tries('later', 'T', { grade: '7', tags: 'Crimps' }, DAY_MINUTES);
+  const all = [...sentBefore, ...range, ...sentAfter];
+  assertEqual(gradePyramid(range, all, grades), [{ grade: '7', sent: 0, total: 1 }, { grade: '6', sent: 2, total: 2 }]);
+  assertEqual(tagCounts(range, all), [{ tag: 'Crimps', sent: 1, total: 2 }, { tag: 'Slab', sent: 2, total: 2 }]);
+});
+
+test('attempts group by grade, hardest first', () => {
+  const byGrade = attemptsByGrade([attempt(0, { grade: '4' }), attempt(3, { grade: '6' }), attempt(6, { grade: '4' })], grades);
+  assertEqual(byGrade.map(({ grade, attempts }) => [grade, attempts.length]), [['6', 1], ['4', 2]]);
 });
 
 test('a gym scale reads back as Font, numbers or a custom list', () => {
   assertEqual(scaleTypeOf(FONT_GRADES), 'font');
   assertEqual(scaleTypeOf(numberGrades(13)), 'numbers');
   assertEqual(scaleTypeOf(['Yellow', 'Green']), 'custom');
+  assertEqual(scaleTypeOf(['2', '3', '4']), 'custom', 'numbers not from one');
 });
 
-test('calendar weeks start on Monday and pad the month with blanks', () => {
-  const weeks = calendarWeeks(new Date(2026, 10, 1));
-  assertEqual(weeks[0].map((day) => day?.getDate() ?? null), [null, null, null, null, null, null, 1]);
-  assertEqual([weeks.length, weeks.at(-1).filter(Boolean).at(-1).getDate()], [6, 30]);
+test('calendar days start on Monday and fill whole weeks', () => {
+  const days = calendarDays(new Date(2026, 10, 1));
+  assertEqual(days.slice(0, 7).map((day) => day?.getDate() ?? null), [null, null, null, null, null, null, 1]);
+  assertEqual([days.length, days.filter(Boolean).at(-1).getDate()], [42, 30]);
+  assertEqual(calendarDays(new Date(2027, 1, 1)).length, 28, 'February 2027 starts on a Monday');
+  assertEqual(monthValue(parseMonthValue('2026-03')), '2026-03');
 });
 
 test('durations grow to hours, lengths read as hours and minutes, and ordinals get their suffix', () => {
-  assertEqual(formatDuration(65 * MINUTE + 3000), '1:05:03');
+  assertEqual([formatDuration(59 * MINUTE + 59000), formatDuration(65 * MINUTE + 3000)], ['59:59', '1:05:03']);
   assertEqual([formatLength(48 * MINUTE), formatLength(102 * MINUTE)], ['48m', '1h 42m']);
-  assertEqual([1, 2, 3, 4, 11, 12, 13, 21, 22].map(ordinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd']);
+  assertEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 111].map(ordinal), ['1st', '2nd', '3rd', '4th', '11th', '12th', '13th', '21st', '22nd', '111th']);
 });

@@ -1,5 +1,5 @@
 import { parseCsv } from '../js/csv.js';
-import { bodyWeights, notes, sets } from '../js/store.js';
+import { bodyWeights, climbs, gyms, notes, sets } from '../js/store.js';
 import { mergeEntries, sync, syncState } from '../js/sync.js';
 import { assertEqual, test } from './harness.js';
 import { handleFetch } from './setup.js';
@@ -126,4 +126,14 @@ test('a note spanning several lines reaches notes.csv intact', async () => {
   await sync();
   assertEqual(parseCsv(files['notes.csv']).map((entry) => entry.note), ['Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9']);
   assertEqual(notes.hasChanges(), false);
+});
+
+test('climbs reach climbs.csv and gym scales reach gyms.csv, names with commas and quotes intact', async () => {
+  gyms.add({ gym: 'The "Cave", Wola', grades: '1|2|3' });
+  climbs.add({ gym: 'The "Cave", Wola', style: 'boulder', grade: '2', climb: 'c1', name: 'Pink, arete', tags: 'Slab|Dyno', result: 'top' });
+  await sync();
+  const [remoteClimb] = parseCsv(files['climbs.csv']);
+  assertEqual([remoteClimb.gym, remoteClimb.name, remoteClimb.tags], ['The "Cave", Wola', 'Pink, arete', 'Slab|Dyno']);
+  assertEqual(parseCsv(files['gyms.csv'])[0].grades, '1|2|3');
+  assertEqual(climbs.hasChanges() || gyms.hasChanges(), false);
 });

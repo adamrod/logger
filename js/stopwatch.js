@@ -22,11 +22,13 @@ export const expireStopwatch = (state, now) => (elapsedOf(state, now) >= LIMIT_M
   ? { ...state, startedAt: null, elapsed: 0 }
   : state);
 
-export const restartAfterLog = (state, now) => (state.restartOnLog ? { ...state, startedAt: now, elapsed: 0 } : state);
+const restart = (state, now) => ({ ...state, startedAt: now, elapsed: 0 });
 
-export const startIfStopped = (state, now) => (isRunning(state) ? state : { ...state, startedAt: now, elapsed: 0 });
+export const restartAfterLog = (state, now) => (state.restartOnLog ? restart(state, now) : state);
 
-export const startFreshOrStop = (state, now) => (isRunning(state) ? toggleStopwatch(state, now) : startIfStopped(state, now));
+export const restartUnlessStartedSince = (time) => (state, now) => (isRunning(state) && state.startedAt > time ? state : restart(state, now));
+
+export const startFreshOrStop = (state, now) => (isRunning(state) ? toggleStopwatch(state, now) : restart(state, now));
 
 export function createStopwatch({ id, name, storageKey, toggle = toggleStopwatch, stopIcon = PAUSE_ICON }) {
   const stopwatchEl = document.getElementById(id);

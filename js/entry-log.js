@@ -14,6 +14,8 @@ export const isAddedHere = ({ lastSyncAt, addedIds }, entry) => !lastSyncAt
 
 const idsOf = (entries) => entries.map((entry) => entry.timestamp);
 
+const differsFrom = (changes) => (entry) => Object.entries(changes).some(([key, value]) => (entry[key] ?? '') !== value);
+
 function combineChanges(first, second) {
   const laterRemoved = new Set(idsOf(second.before));
   const earlierAdded = new Set(idsOf(first.after));
@@ -124,8 +126,8 @@ export function createEntryLog({ file, columns, numbers, keys }) {
     },
 
     updateWhere(matches, changes) {
-      const matched = entries.filter(matches);
-      commit(matched, matched.map((entry) => ({ ...entry, ...changes })));
+      const changed = entries.filter(matches).filter(differsFrom(changes));
+      commit(changed, changed.map((entry) => ({ ...entry, ...changes })));
     },
 
     remove(timestamp) {

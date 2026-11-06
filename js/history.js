@@ -43,9 +43,9 @@ export function editAttributes(entry, description, editingId) {
     aria-label="Edit ${escapeHtml(description)}, ${whenText(entry)}"${current}`;
 }
 
-export const unsyncedHtml = (entry, isUnsynced) => (isUnsynced(entry)
-  ? '<span class="set-unsynced" role="img" aria-label="Not synced"></span>'
-  : '');
+export const UNSYNCED_HTML = '<span class="set-unsynced" role="img" aria-label="Not synced"></span>';
+
+export const unsyncedHtml = (entry, isUnsynced) => (isUnsynced(entry) ? UNSYNCED_HTML : '');
 
 export const currentDateAttribute = (date) => (isToday(date) ? ' aria-current="date"' : '');
 

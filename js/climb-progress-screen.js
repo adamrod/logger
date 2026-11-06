@@ -4,10 +4,10 @@ import {
   CELLS_LEGEND, flashRateText, pyramidHtml, sectionHtml, statTilesHtml, tagBarsHtml, topsDetail,
 } from './climb-report.js';
 import { currentGym, currentKind } from './climb-screen.js';
-import { climbStats, climbingSessions, gradePyramid, gradesFor, kindOf, sessionHighs, tagCounts } from './climbing.js';
+import { climbStats, climbingSessions, gradePyramid, kindOf, sessionHighs, tagCounts } from './climbing.js';
 import { onAction } from './events.js';
 import { countText } from './format.js';
-import { gymGrades } from './gyms.js';
+import { gradesAt } from './gyms.js';
 import { climbs } from './store.js';
 
 const LEGEND = '<span class="legend"><span class="dot is-top"></span>send<span class="dot"></span>flash</span>';
@@ -40,7 +40,7 @@ export function renderClimbProgress() {
   titleEl.textContent = gym ?? 'Progress';
   summaryEl.textContent = `${countText(sessions.length, 'session')} · ${countText(attempts.length, 'attempt')}`;
   bodyEl.innerHTML = attempts.length
-    ? progressHtml(attempts, sessions, all, gradesFor(gymGrades(gym), kind))
+    ? progressHtml(attempts, sessions, all, gradesAt(gym, kind))
     : '<p class="empty analysis-empty">Nothing logged in this range.</p>';
 }
 
@@ -58,5 +58,5 @@ function progressHtml(attempts, sessions, all, grades) {
     <div class="climb-section">${tiles}</div>
     ${sectionHtml('Hardest per session', sessionHighsSvg(sessionHighs(sessions, all, grades), grades), LEGEND)}
     ${sectionHtml('Pyramid', pyramidHtml(gradePyramid(attempts, all, grades)), CELLS_LEGEND)}
-    ${sectionHtml('Sends by tag', tagBarsHtml(tagCounts(attempts)))}`;
+    ${sectionHtml('Sends by tag', tagBarsHtml(tagCounts(attempts, all)))}`;
 }

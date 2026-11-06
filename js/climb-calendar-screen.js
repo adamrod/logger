@@ -1,12 +1,11 @@
-import { addMonths, calendarWeeks, monthValue, parseMonthValue, startOfMonth } from './calendar.js';
-import { sessionKindText } from './climb-history.js';
-import { climbingSessions, gradesFor, hardestGrade, isSend, isTop, kindOf, sessionKind } from './climbing.js';
+import { addMonths, calendarDays, monthValue, parseMonthValue, startOfMonth } from './calendar.js';
+import { climbingSessions, hardestGrade, isSend, isTop, sessionFocus, stylesText } from './climbing.js';
 import { onAction } from './events.js';
-import { countText, dayKey, escapeHtml, formatLength, formatMonthYear, formatWeekday, isToday } from './format.js';
-import { gymGrades } from './gyms.js';
+import { countText, dayKey, escapeHtml, formatLength, formatLongDay, formatMonthYear, formatWeekday, isToday } from './format.js';
+import { gradesAt } from './gyms.js';
 import { climbs } from './store.js';
 
-const WEEKDAYS = calendarWeeks(new Date(2024, 0, 1))[0];
+const WEEK_FROM_MONDAY = Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i));
 const CHEVRON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
 const stepsEl = document.getElementById('climb-calendar-steps');
@@ -54,8 +53,8 @@ const isInMonth = (time) => monthValue(new Date(time)) === monthValue(month);
 
 function gridHtml(sessions) {
   const byDay = Map.groupBy(sessions, (session) => dayKey(new Date(session.startAt)));
-  const head = WEEKDAYS.map((day) => `<span class="calendar-weekday">${formatWeekday(day).slice(0, 2)}</span>`).join('');
-  const cells = calendarWeeks(month).flat().map((day) => dayHtml(day, byDay)).join('');
+  const head = WEEK_FROM_MONDAY.map((day) => `<span class="calendar-weekday">${formatWeekday(day).slice(0, 2)}</span>`).join('');
+  const cells = calendarDays(month).map((day) => dayHtml(day, byDay)).join('');
   return `<div class="calendar-grid">${head}${cells}</div>`;
 }
 
@@ -65,14 +64,12 @@ function dayHtml(day, byDay) {
   const [session] = byDay.get(dayKey(day)) ?? [];
   if (!session) return `<span class="calendar-day"${today}>${day.getDate()}</span>`;
   return `<button type="button" class="calendar-day has-session" data-action="session" data-id="${escapeHtml(session.id)}"${today}
-    aria-label="Session on ${escapeHtml(day.toDateString())}">${day.getDate()}</button>`;
+    aria-label="Session on ${escapeHtml(formatLongDay(day))}">${day.getDate()}</button>`;
 }
 
 function sessionRowHtml(session) {
-  const kind = sessionKind(session);
-  const grades = gradesFor(gymGrades(session.gym), kind);
-  const attempts = session.attempts.filter((attempt) => kindOf(attempt.style) === kind);
-  const hardest = hardestGrade(attempts.filter(isSend), grades);
+  const { kind, attempts } = sessionFocus(session);
+  const hardest = hardestGrade(attempts.filter(isSend), gradesAt(session.gym, kind));
   const start = new Date(session.startAt);
   const meta = [
     formatLength(session.endAt - session.startAt),
@@ -84,7 +81,7 @@ function sessionRowHtml(session) {
     <button type="button" class="session-row" data-action="session" data-id="${escapeHtml(session.id)}">
       <span class="session-date">${formatWeekday(start).slice(0, 2)} ${start.getDate()}</span>
       <span class="session-info">
-        <span class="session-title">${escapeHtml(`${session.gym} · ${sessionKindText(session.attempts)}`)}</span>
+        <span class="session-title">${escapeHtml(`${session.gym} · ${stylesText(session.attempts)}`)}</span>
         <span class="session-meta">${escapeHtml(meta)}</span>
       </span>
       ${CHEVRON}

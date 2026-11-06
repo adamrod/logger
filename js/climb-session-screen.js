@@ -1,14 +1,14 @@
 import { monthValue } from './calendar.js';
 import { attemptTimelineSvg } from './climb-charts.js';
-import { climbListHtml, sessionKindText } from './climb-history.js';
+import { climbListHtml } from './climb-history.js';
 import {
   DOTS_LEGEND, attemptRowsHtml, sectionHtml, statTilesHtml, tagBarsHtml, topsDetail,
 } from './climb-report.js';
 import { editClimbAttempt } from './climb-screen.js';
-import { attemptsByGrade, climbStats, climbingSessions, gradesFor, kindOf, meanRest, sessionKind, tagCounts } from './climbing.js';
+import { attemptsByGrade, climbStats, climbingSessions, meanRest, sessionFocus, stylesText, tagCounts } from './climbing.js';
 import { onAction } from './events.js';
 import { formatDuration, formatLength, formatLongDay, formatTime } from './format.js';
-import { gymGrades } from './gyms.js';
+import { gradesAt } from './gyms.js';
 import { climbs } from './store.js';
 
 const stepsEl = document.getElementById('climb-session-steps');
@@ -69,15 +69,14 @@ function showSession(session) {
 
 const summaryText = (session) => [
   session.gym,
-  sessionKindText(session.attempts),
+  stylesText(session.attempts),
   `${formatTime(new Date(session.startAt))}–${formatTime(new Date(session.endAt))}`,
 ].join(' · ');
 
 function sessionHtml(session) {
   const all = climbs.getEntries();
-  const kind = sessionKind(session);
-  const grades = gradesFor(gymGrades(session.gym), kind);
-  const attempts = session.attempts.filter((attempt) => kindOf(attempt.style) === kind);
+  const { kind, attempts } = sessionFocus(session);
+  const grades = gradesAt(session.gym, kind);
   const stats = climbStats(attempts, all, grades);
   const rest = meanRest(session.attempts);
   const tiles = statTilesHtml([
@@ -93,6 +92,6 @@ function sessionHtml(session) {
     <div class="climb-section">${tiles}</div>
     ${sectionHtml('Attempts by grade', attemptRowsHtml(attemptsByGrade(attempts, grades)), DOTS_LEGEND)}
     ${sectionHtml('Timeline', attemptTimelineSvg(attempts, grades))}
-    ${sectionHtml('Sends by tag', tagBarsHtml(tagCounts(session.attempts)))}
+    ${sectionHtml('Sends by tag', tagBarsHtml(tagCounts(session.attempts, all)))}
     ${sectionHtml('Climbs', climbsHtml)}`;
 }

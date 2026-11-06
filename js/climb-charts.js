@@ -1,6 +1,6 @@
 import { isTop } from './climbing.js';
 import { entryDate } from './entry-log.js';
-import { escapeHtml, formatShortDay, formatTime } from './format.js';
+import { countText, escapeHtml, formatShortDay, formatTime } from './format.js';
 
 const WIDTH = 350;
 const HEIGHT = 160;
@@ -67,5 +67,5 @@ export function sessionHighsSvg(highs, grades) {
     + line(flashes, 'line-flash') + line(sends, 'line-send')
     + dots(flashes, 'dot-attempt') + dots(sends, 'dot-top')
     + edgeLabels(formatShortDay(highs[0].date), formatShortDay(highs.at(-1).date));
-  return svg(`Hardest send and flash in ${highs.length} sessions`, content);
+  return svg(`Hardest send and flash in ${countText(highs.length, 'session')}`, content);
 }
