@@ -8,5 +8,6 @@
 - Do not add comments in code, it should be self-explanatory.
 - UI design: https://claude.ai/artifact/FTrGm5nAX9uh6nRGzRLWob (Claude Design canvas). Read it before UI work. It is a reference: translate it to vanilla HTML/CSS/JS, don't copy its runtime (support.js, DCLogic, <x-dc>, {{holes}}).
 - Commit and push directly to `main` (GitHub Pages serves it), even when a session assigns a `claude/...` branch; no feature branches.
+- Never create a new branch on the remote. Never push any branch except `main`. This applies to `adamrod/logger` and `adamrod/logger-data`.
 - Tests: `tests/run.sh` runs `tests/*.test.js` on macOS's built-in JavaScriptCore (`jsc`), or on Node where `jsc` is missing; `tests/setup.js` stubs the browser globals. Add tests for logic changes.
 - The `.githooks/pre-commit` hook (enable once per clone: `git config core.hooksPath .githooks`) runs the tests and checks `sw.js`: every app file is in `APP_SHELL` and `VERSION` is bumped when app files change.
