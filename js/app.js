@@ -10,6 +10,7 @@ import { onChange } from './events.js';
 import { forgetLoggedNames } from './exercises.js';
 import { initKeepAwake } from './keep-awake.js';
 import { currentExercise, initLog, renderLog, revealSets } from './log-screen.js';
+import { initPortraitLock } from './portrait-lock.js';
 import { initSettings, renderSettings } from './settings-screen.js';
 import { initAutoSync } from './sync.js';
 import { initSyncStatus, renderSyncStatus } from './sync-status.js';
@@ -115,3 +116,4 @@ route();
 
 initAutoSync();
 initKeepAwake();
+initPortraitLock();

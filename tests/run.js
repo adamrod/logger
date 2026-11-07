@@ -15,6 +15,7 @@ import './screens.test.js';
 import './climbing.test.js';
 import './climb-screen.test.js';
 import './keep-awake.test.js';
+import './portrait-lock.test.js';
 import './sw.test.js';
 import { runTests } from './harness.js';
 
