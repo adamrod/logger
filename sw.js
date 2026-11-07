@@ -1,4 +1,4 @@
-const VERSION = 90;
+const VERSION = 91;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -46,7 +46,6 @@ const APP_SHELL = [
   'js/name-list.js',
   'js/number-field.js',
   'js/picker-menu.js',
-  'js/portrait-lock.js',
   'js/set-history.js',
   'js/settings-screen.js',
   'js/settings.js',

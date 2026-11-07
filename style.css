@@ -11,7 +11,6 @@
   --fill: #262626;
   --gutter: 20px;
   --bottom-gap: max(20px, env(safe-area-inset-bottom));
-  --top-inset: env(safe-area-inset-top);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
@@ -31,12 +30,6 @@ html, body {
 }
 
 body { position: fixed; inset: 0; }
-
-@media (orientation: landscape) {
-  [data-turn="90"] body, [data-turn="270"] body { inset: 0 auto auto 0; width: 100vh; height: 100vw; transform-origin: top left; }
-  [data-turn="90"] body { --top-inset: env(safe-area-inset-left); transform: rotate(-90deg) translateX(-100%); }
-  [data-turn="270"] body { --top-inset: env(safe-area-inset-right); transform: rotate(90deg) translateY(-100%); }
-}
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
@@ -71,7 +64,7 @@ ul { padding: 0; list-style: none; }
   flex: none;
   display: flex;
   align-items: flex-end;
-  padding: calc(12px + var(--top-inset)) var(--gutter) 0;
+  padding: calc(12px + env(safe-area-inset-top)) var(--gutter) 0;
   border-bottom: 1px solid var(--divider);
 }
 
