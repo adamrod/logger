@@ -4,6 +4,9 @@ import { enterClimbAnalysis, initClimbAnalysis, renderClimbAnalysis } from './cl
 import { enterClimbCalendar, initClimbCalendar, renderClimbCalendar } from './climb-calendar-screen.js';
 import { climbPlace, enterClimb, initClimb, renderClimb, revealClimbs } from './climb-screen.js';
 import { enterClimbSession, initClimbSession, renderClimbSession } from './climb-session-screen.js';
+import {
+  competitionPlace, enterCompetition, hasLiveCompetition, initCompetition, renderCompetition, revealCompetition,
+} from './competition-screen.js';
 import { enterDayCalendar, initDayCalendar, renderDayCalendar } from './day-calendar-screen.js';
 import { enterDay, initDay, renderDay } from './day-screen.js';
 import { onChange } from './events.js';
@@ -22,6 +25,7 @@ const RENDERERS = {
   'climb-session': renderClimbSession,
   'climb-calendar': renderClimbCalendar,
   'climb-analysis': renderClimbAnalysis,
+  competition: renderCompetition,
   settings: renderSettings,
   'body-weight': renderBodyWeight,
   analysis: renderAnalysis,
@@ -36,6 +40,7 @@ const ENTER_HANDLERS = {
   'climb-session': enterClimbSession,
   'climb-calendar': enterClimbCalendar,
   'climb-analysis': enterClimbAnalysis,
+  competition: enterCompetition,
 };
 const PARENT_TABS = {
   analysis: 'log',
@@ -45,14 +50,16 @@ const PARENT_TABS = {
   'climb-calendar': 'climb',
   'climb-analysis': 'climb',
 };
-const REVEALERS = { log: revealSets, climb: revealClimbs, 'body-weight': revealWeights };
+const REVEALERS = { log: revealSets, climb: revealClimbs, competition: revealCompetition, 'body-weight': revealWeights };
 
 let current = null;
 let enteredHash = null;
 
+const homeScreen = () => (hasLiveCompetition() ? 'competition' : 'log');
+
 function route() {
   const [name, param] = location.hash.slice(1).split('/');
-  const next = name in RENDERERS ? name : 'log';
+  const next = name in RENDERERS ? name : homeScreen();
   if (next !== current || location.hash !== enteredHash) ENTER_HANDLERS[next]?.(param);
   current = next;
   enteredHash = location.hash;
@@ -64,6 +71,7 @@ function route() {
     if (tab.hash === `#${currentTab}`) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   });
+  document.querySelector('.tab[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   render();
 }
 
@@ -98,6 +106,7 @@ initClimb();
 initClimbSession();
 initClimbCalendar();
 initClimbAnalysis();
+initCompetition();
 initBodyWeight();
 initAnalysis();
 initDay();
@@ -105,7 +114,7 @@ initDayCalendar();
 initSettings();
 initSyncStatus();
 initUndoButtons(showReplayed);
-trackPlace(() => ({ screen: current, exercise: currentExercise(), ...climbPlace() }));
+trackPlace(() => ({ screen: current, exercise: currentExercise(), ...climbPlace(), ...competitionPlace() }));
 onChange(render);
 window.addEventListener('hashchange', route);
 window.addEventListener('resize', render);

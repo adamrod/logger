@@ -70,21 +70,33 @@ ul { padding: 0; list-style: none; }
   border-bottom: 1px solid var(--divider);
 }
 
-.tabs { flex: 1; display: flex; }
+.tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  margin: calc(-12px - env(safe-area-inset-top)) 0 -6px;
+  padding: calc(12px + env(safe-area-inset-top)) 8px 5px 0;
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, #000 calc(100% - 8px), transparent);
+}
+.tabs::-webkit-scrollbar { display: none; }
 
-.undo-actions { flex: none; display: flex; margin: 0 -13px 0 4px; }
+.undo-actions { flex: none; display: flex; margin: 0 -11px 0 4px; }
 .undo-button, .icon-button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: none; background: none; color: var(--muted); }
+.top-bar :is(.undo-button, .icon-button) { width: 40px; }
 .settings-link[aria-current="page"] { color: var(--text); }
 .top-bar :is(.tab, .undo-button, .icon-button) { position: relative; }
 .top-bar :is(.tab, .undo-button, .icon-button)::after { content: ''; position: absolute; inset: calc(-12px - env(safe-area-inset-top)) 0 -5px; }
 
 .tab {
-  flex: 1;
+  flex: 1 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 44px;
-  margin-bottom: -1px;
+  padding: 0 6px;
   border-bottom: 2px solid transparent;
   font-size: 16px;
   color: var(--muted);
@@ -618,8 +630,8 @@ li:first-child > .option-new { border-top: none; }
 .style-select .input:disabled { opacity: 1; color: var(--muted); }
 .style-select .icon { top: 15px; right: 12px; }
 
-.gym-form { display: flex; flex-direction: column; gap: 12px; }
-.gym-count { display: grid; place-items: center; }
+.gym-form, .competition-form { display: flex; flex-direction: column; gap: 12px; }
+.gym-count, .competition-minutes { display: grid; place-items: center; }
 .form-error { font-size: 14px; }
 
 .grade-chips { margin: 0 calc(-1 * var(--gutter)); }
@@ -694,6 +706,7 @@ li:first-child > .option-new { border-top: none; }
 .dot.is-top { border-color: var(--text); background: var(--text); }
 .cell { width: 12px; height: 12px; border: 1.5px solid var(--muted); border-radius: 3px; }
 .cell.is-sent { border-color: var(--text); background: var(--text); }
+.cell.is-zone { background: linear-gradient(to top, var(--bar) 50%, transparent 50%); }
 
 .grade-row, .tag-bar { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 32px; }
 .grade-row .climb-grade { justify-self: start; }
@@ -738,3 +751,31 @@ li:first-child > .option-new { border-top: none; }
 .calendar-entry-title { overflow: hidden; font-size: 16px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .calendar-entry-meta { font-size: 13px; color: var(--muted); }
 .calendar-entry .icon { color: var(--muted); }
+
+.competition { padding-bottom: var(--bottom-gap); }
+.field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-pair .input { width: 100%; }
+
+.competition-clock { display: flex; flex-direction: column; gap: 6px; }
+.competition-times { display: flex; align-items: flex-end; justify-content: space-between; }
+.competition-time { display: flex; flex-direction: column; gap: 2px; }
+.competition-time .stopwatch-time { line-height: 36px; }
+.competition-time-side { align-items: flex-end; }
+.competition-time-side .stopwatch-time { font-size: 22px; color: var(--muted); }
+.competition-progress { height: 4px; overflow: hidden; border-radius: 2px; background: var(--fill); }
+.competition-progress-fill { display: block; height: 100%; background: var(--text); }
+
+.competition-score .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+.boulder { position: relative; height: 46px; padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font-size: 17px; font-weight: 600; color: var(--muted); }
+.boulder.is-tried { border-color: var(--muted); color: var(--text); }
+.boulder.is-zone { border-color: var(--muted); background: linear-gradient(to top, var(--bar) 50%, var(--bg) 50%); color: var(--text); }
+.boulder.is-top { border-color: var(--text); background: var(--text); color: var(--bg); }
+.boulder[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
+.boulder-tries { position: absolute; top: 3px; right: 6px; font-size: 10px; line-height: 12px; color: var(--muted); }
+.boulder.is-top .boulder-tries { color: var(--bar); }
+
+.attempt-time { font-size: 16px; }
+.competition-log-buttons { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.competition-log-buttons .btn { height: 56px; padding: 0; }

@@ -1,4 +1,4 @@
-const VERSION = 98;
+const VERSION = 101;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -22,6 +22,10 @@ const APP_SHELL = [
   'js/climb-screen.js',
   'js/climb-session-screen.js',
   'js/climbing.js',
+  'js/competition-form.js',
+  'js/competition-screen.js',
+  'js/competition.js',
+  'js/competitions.js',
   'js/csv.js',
   'js/day-calendar-screen.js',
   'js/day-screen.js',

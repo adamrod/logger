@@ -22,6 +22,7 @@
     <nav class="tabs" aria-label="Sections">
       <a class="tab" href="#log">Sets</a>
       <a class="tab" href="#climb">Climb</a>
+      <a class="tab" href="#competition">Comp</a>
       <a class="tab" href="#body-weight">Weight</a>
     </nav>
     <div class="undo-actions">
@@ -387,6 +388,123 @@
       </div>
       <div class="history-list" id="climb-history"></div>
     </section>
+  </section>
+
+  <section class="screen" id="screen-competition" hidden>
+    <div class="log-form competition">
+      <div class="field">
+        <div class="label-row">
+          <span class="label" id="competition-label">Competition</span>
+          <div class="label-actions" id="competition-actions">
+            <button type="button" class="btn-text" data-action="edit">Edit</button>
+          </div>
+        </div>
+        <div id="competition-picker">
+          <div class="picker">
+            <button type="button" class="picker-button" id="competition-button" data-action="toggle"
+              aria-labelledby="competition-label competition-button" aria-controls="competition-menu" aria-expanded="false"></button>
+            <div class="picker-menu" id="competition-menu" hidden>
+              <form class="picker-search" id="competition-search">
+                <input class="picker-query" id="competition-query" type="search" aria-label="Search or add competition"
+                  placeholder="Search or add" autocomplete="off" enterkeyhint="go">
+              </form>
+              <ul class="picker-options" id="competition-options"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="competition-form" id="competition-form" hidden>
+        <input class="input" id="competition-name" aria-labelledby="competition-label" placeholder="Competition name" autocomplete="off" enterkeyhint="done">
+        <div class="field">
+          <label class="label" for="competition-start">Start</label>
+          <input class="input when-input" id="competition-start" type="datetime-local">
+        </div>
+        <div class="field">
+          <span class="label" id="competition-minutes-label">Length</span>
+          <div class="stepper">
+            <button type="button" class="step-btn" data-action="minutes" data-steps="-1" aria-label="Shorter">−</button>
+            <span class="input step-value competition-minutes" id="competition-minutes" aria-labelledby="competition-minutes-label competition-minutes" aria-live="polite"></span>
+            <button type="button" class="step-btn" data-action="minutes" data-steps="1" aria-label="Longer">+</button>
+          </div>
+        </div>
+        <div class="field-pair">
+          <div class="field">
+            <label class="label" for="competition-first">First boulder</label>
+            <input class="input" id="competition-first" inputmode="numeric" autocomplete="off" enterkeyhint="done">
+          </div>
+          <div class="field">
+            <label class="label" for="competition-last">Last boulder</label>
+            <input class="input" id="competition-last" inputmode="numeric" autocomplete="off" enterkeyhint="done">
+          </div>
+        </div>
+        <div class="field-pair">
+          <div class="field">
+            <label class="label" for="competition-top-points">Points per top</label>
+            <input class="input" id="competition-top-points" inputmode="numeric" autocomplete="off" enterkeyhint="done">
+          </div>
+          <div class="field">
+            <label class="label" for="competition-zone-points">Points per zone</label>
+            <input class="input" id="competition-zone-points" inputmode="numeric" autocomplete="off" enterkeyhint="done">
+          </div>
+        </div>
+        <p class="form-error" id="competition-error" role="alert" hidden></p>
+        <div class="edit-actions" id="competition-form-actions">
+          <button type="button" class="btn btn-secondary" id="competition-cancel" data-action="cancel">Cancel</button>
+          <button type="button" class="btn btn-secondary" id="competition-delete" data-action="delete">Delete</button>
+          <button class="btn btn-primary">Save</button>
+        </div>
+        <div class="edit-actions" id="competition-delete-actions" hidden>
+          <button type="button" class="btn btn-secondary" data-action="cancel-delete">Keep</button>
+          <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete with its attempts</button>
+        </div>
+      </form>
+
+      <div class="log-controls" id="competition-controls">
+        <p class="chart-meta" id="competition-meta"></p>
+
+        <div class="competition-clock" id="competition-clock">
+          <div class="competition-times">
+            <div class="competition-time">
+              <span class="label" id="competition-main-label"></span>
+              <span class="stopwatch-time" id="competition-main-time" role="timer" aria-labelledby="competition-main-label"></span>
+            </div>
+            <div class="competition-time competition-time-side">
+              <span class="label" id="competition-side-label"></span>
+              <span class="stopwatch-time" id="competition-side-time" aria-labelledby="competition-side-label"></span>
+            </div>
+          </div>
+          <div class="competition-progress"><span class="competition-progress-fill" id="competition-progress"></span></div>
+        </div>
+
+        <div class="competition-score" id="competition-score"></div>
+
+        <div class="field">
+          <div class="label-row">
+            <span class="label" id="competition-board-label">Boulders</span>
+            <span class="legend"><span class="cell"></span>tried<span class="cell is-zone"></span>zone<span class="cell is-sent"></span>top</span>
+          </div>
+          <div class="board" id="competition-board" role="group" aria-labelledby="competition-board-label"></div>
+        </div>
+
+        <section class="climb-card" id="competition-boulder" aria-label="Boulder">
+          <div class="climb-head">
+            <button type="button" class="climb-text" id="competition-boulder-open" data-action="toggle-attempts"
+              aria-controls="competition-attempts" aria-expanded="false">
+              <span class="climb-title" id="competition-boulder-title"></span>
+              <span class="climb-meta" id="competition-boulder-meta"></span>
+            </button>
+          </div>
+          <ol class="attempt-edits" id="competition-attempts" aria-label="Attempts" hidden></ol>
+        </section>
+
+        <div class="log-buttons competition-log-buttons">
+          <button type="button" class="btn btn-secondary" id="competition-log-attempt" data-action="log" data-result="attempt">Attempt</button>
+          <button type="button" class="btn btn-secondary" id="competition-log-zone" data-action="log" data-result="zone">Zone</button>
+          <button type="button" class="btn btn-primary" id="competition-log-top" data-action="log" data-result="top">Top</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <section class="screen" id="screen-climb-session" hidden>

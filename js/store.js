@@ -45,7 +45,21 @@ export const gyms = createEntryLog({
   keys: { entries: 'logger.v2.gyms.csv', sync: 'logger.v2.gyms-sync' },
 });
 
-export const entryLogs = [sets, bodyWeights, notes, climbs, gyms];
+export const competitions = createEntryLog({
+  file: 'competitions.csv',
+  columns: ['timestamp', 'name', 'start', 'minutes', 'first', 'last', 'topPoints', 'zonePoints'],
+  numbers: ['minutes', 'first', 'last', 'topPoints', 'zonePoints'],
+  keys: { entries: 'logger.v2.competitions.csv', sync: 'logger.v2.competitions-sync' },
+});
+
+export const competitionAttempts = createEntryLog({
+  file: 'competition-attempts.csv',
+  columns: ['timestamp', 'competition', 'boulder', 'result'],
+  numbers: ['boulder'],
+  keys: { entries: 'logger.v2.competition-attempts.csv', sync: 'logger.v2.competition-attempts-sync' },
+});
+
+export const entryLogs = [sets, bodyWeights, notes, climbs, gyms, competitions, competitionAttempts];
 
 const exerciseList = createUndoableValue(KEYS.exercises, EMPTY_LIST);
 const variantLists = createUndoableValue(KEYS.variants, {});
