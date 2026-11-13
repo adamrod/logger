@@ -5,7 +5,7 @@ import {
   openProjects, tagsOf,
 } from './climbing.js';
 import { onAction } from './events.js';
-import { countText, escapeHtml, formatDuration, formatShortDay, formatTime } from './format.js';
+import { countText, escapeHtml, formatClock, formatDuration, formatIsoDate } from './format.js';
 import { initGymForm, isGymFormOpen, openGymForm, showFirstGymForm } from './gym-form.js';
 import { allGyms, gradesAt, gymGrades } from './gyms.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
@@ -167,7 +167,7 @@ export function editClimb(id) {
     tags,
     style,
     loggedStyle: style,
-    attempts: attempts.map(({ timestamp, result }) => ({ timestamp, result, time: formatTime(new Date(timestamp)) })),
+    attempts: attempts.map(({ timestamp, result }) => ({ timestamp, result, time: formatClock(new Date(timestamp)) })),
   };
   isConfirmingDelete = false;
   openPanel = null;
@@ -456,8 +456,8 @@ function attemptEditHtml({ timestamp, result, time }, i) {
   return `
     <li class="attempt-edit">
       <span class="attempt-number">${i + 1}</span>
-      <span class="attempt-day">${formatShortDay(new Date(timestamp))}</span>
-      <input class="input attempt-time" type="time" data-id="${id}" value="${escapeHtml(time)}" aria-label="Time of attempt ${i + 1}">
+      <span class="attempt-day">${formatIsoDate(new Date(timestamp))}</span>
+      <input class="input attempt-time" type="time" step="1" data-id="${id}" value="${escapeHtml(time)}" aria-label="Time of attempt ${i + 1}">
       <button type="button" class="chip result-chip" data-action="toggle-result" data-id="${id}" aria-pressed="${isTopped}">${isTopped ? 'Top' : 'Attempt'}</button>
       <button type="button" class="option-icon" data-action="remove-attempt" data-id="${id}" aria-label="Remove attempt ${i + 1}">${REMOVE_ICON}</button>
     </li>`;

@@ -1,4 +1,4 @@
-import { formatDateTimeValue, formatTime, parseDateTimeValue } from './format.js';
+import { formatClock, formatDateTimeValue, parseDateTimeValue } from './format.js';
 
 export function showWhen(input, timestamp) {
   input.value = formatDateTimeValue(new Date(timestamp));
@@ -13,8 +13,8 @@ export function readWhen(input, timestamp) {
 
 export function readTime(timestamp, value) {
   const date = new Date(timestamp);
-  if (!value || value === formatTime(date)) return timestamp;
-  const [hours, minutes] = value.split(':').map(Number);
-  date.setHours(hours, minutes, 0, 0);
+  if (!value || value === formatClock(date)) return timestamp;
+  const [hours, minutes, seconds = 0] = value.split(':').map(Number);
+  date.setHours(hours, minutes, seconds, 0);
   return new Date(Math.min(date.getTime(), Date.now())).toISOString();
 }

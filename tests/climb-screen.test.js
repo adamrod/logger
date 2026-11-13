@@ -6,11 +6,10 @@ import { enterClimbSession, initClimbSession, renderClimbSession } from '../js/c
 import { enterDayCalendar, initDayCalendar, renderDayCalendar } from '../js/day-calendar-screen.js';
 import { climbingSessions, numberGrades, openProjects } from '../js/climbing.js';
 import { onChange } from '../js/events.js';
-import { formatIsoDate, formatShortDay, formatTime } from '../js/format.js';
+import { formatClock, formatIsoDate } from '../js/format.js';
 import { saveGym } from '../js/gyms.js';
 import { climbs } from '../js/store.js';
 import { nextRedo, nextUndo, trackPlace } from '../js/undo.js';
-import { readTime } from '../js/when-field.js';
 import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
 
@@ -146,16 +145,17 @@ test('the climb editor changes the grade and name of every attempt, and each att
   editTheClimb(first.climb);
   assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [true, false], 'while editing');
   assertEqual(isShown('climb-attempts', 'aria-label="Time of attempt 2"'), true, 'lists attempts');
-  assertEqual(isShown('climb-attempts', `<span class="attempt-day">${formatShortDay(new Date(second.timestamp))}</span>`), true, 'shows the day');
+  assertEqual(isShown('climb-attempts', `<span class="attempt-day">${formatIsoDate(new Date(second.timestamp))}</span>`), true, 'shows the day');
   controls({ action: 'grade', grade: '8' });
   change('climb-name', 'Crack');
   controls({ action: 'toggle-result', id: second.timestamp });
-  const earlier = formatTime(new Date(Date.parse(first.timestamp) - 60000));
+  const earlierAt = new Date(Math.floor((Date.parse(first.timestamp) - 61000) / 1000) * 1000);
+  const earlier = formatClock(earlierAt);
   element('climb-attempts').dispatch('change', { target: { dataset: { id: first.timestamp }, value: earlier } });
   controls({ action: 'save' });
   const edited = attemptsOf(first.climb);
   assertEqual(edited.map((attempt) => [attempt.grade, attempt.name, attempt.result]), [['8', 'Crack', 'attempt'], ['8', 'Crack', 'top']], 'saved');
-  assertEqual(edited[0].timestamp, readTime(first.timestamp, earlier), 'moved');
+  assertEqual(edited[0].timestamp, earlierAt.toISOString(), 'moved to the second');
   assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [false, true], 'after saving');
 });
 

@@ -25,6 +25,8 @@ export const describeSet = (set) => [set.variant, formatSet(set)].filter(Boolean
 
 export const formatTime = (date) => TIME.format(date);
 
+export const formatClock = (date) => [date.getHours(), date.getMinutes(), date.getSeconds()].map(pad).join(':');
+
 export function formatWhen(date) {
   const day = date.getFullYear() === new Date().getFullYear() ? DAY_MONTH : DAY_MONTH_YEAR;
   return `${day.format(date)} · ${formatTime(date)}`;
