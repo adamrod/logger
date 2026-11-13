@@ -102,7 +102,6 @@ const actions = {
     renderClimb();
   },
   save: () => saveClimb(),
-  'cancel-edit': () => cancelEditing(),
   'toggle-editor': () => (editing ? cancelEditing() : editClimb(place.selected)),
   delete: () => {
     isConfirmingDelete = true;
