@@ -27,6 +27,7 @@ function createElement() {
     querySelector: () => null,
     querySelectorAll: () => [],
     scrollTo: () => {},
+    scrollIntoView: () => {},
     getBoundingClientRect: () => ({ top: 0 }),
     style: {},
     classList: { add: () => {}, remove: () => {}, toggle: () => {} },

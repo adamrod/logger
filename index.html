@@ -476,14 +476,7 @@
         <div class="competition-score" id="competition-score"></div>
 
         <div class="field">
-          <div class="label-row">
-            <span class="label" id="competition-board-label">Boulders</span>
-            <div class="history-sync" hidden>
-              <span class="sync-text"></span>
-              <button type="button" class="btn-text sync-button">Sync</button>
-            </div>
-          </div>
-          <div class="board" id="competition-board" role="group" aria-labelledby="competition-board-label"></div>
+          <div class="board" id="competition-board" role="group" aria-label="Boulders"></div>
           <div class="label-row board-options">
             <span class="legend"><span class="cell"></span>tried<span class="cell is-zone"></span>zone<span class="cell is-sent"></span>top</span>
             <label class="stopwatch-option"><input type="checkbox" class="check" id="competition-rest-restart-on-log"> Restart rest on log</label>
@@ -518,6 +511,17 @@
         </div>
       </div>
     </div>
+
+    <section class="history competition-history" id="competition-history-section" aria-labelledby="competition-history-heading">
+      <div class="section-head">
+        <h2 class="label" id="competition-history-heading">History</h2>
+        <div class="history-sync" hidden>
+          <span class="sync-text"></span>
+          <button type="button" class="btn-text sync-button">Sync</button>
+        </div>
+      </div>
+      <div class="history-list" id="competition-history"></div>
+    </section>
   </section>
 
   <section class="screen" id="screen-climb-session" hidden>

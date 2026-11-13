@@ -492,8 +492,6 @@ li:first-child > .option-new { border-top: none; }
   transform: rotate(45deg);
 }
 .sync-button { font-weight: 600; color: var(--text); }
-.label-row .history-sync { min-width: 0; }
-.label-row .sync-text { overflow: hidden; text-overflow: ellipsis; }
 
 .history-list {
   flex: 1;
@@ -754,7 +752,6 @@ li:first-child > .option-new { border-top: none; }
 .calendar-entry-meta { font-size: 13px; color: var(--muted); }
 .calendar-entry .icon { color: var(--muted); }
 
-.competition { padding-bottom: var(--bottom-gap); }
 .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-pair .input { width: 100%; }
 
@@ -784,6 +781,14 @@ li:first-child > .option-new { border-top: none; }
 .competition-rest .stopwatch-time { font-size: 22px; line-height: 26px; }
 
 .attempt-time { font-size: 16px; }
+
+.competition-history { flex: none; }
+.competition-history .history-list { overflow: visible; }
+.competition-history .set-row { min-height: 36px; }
+.try { display: flex; align-items: center; gap: 8px; font-weight: 400; }
+.try-boulder { min-width: 3ch; font-weight: 600; }
+.try.is-attempt .try-result { color: var(--muted); }
+.try.is-top .try-result { font-weight: 600; }
 .competition-log-buttons { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .competition-log-buttons .btn { height: 56px; padding: 0; }
 .competition-log-buttons [data-result="zone"][aria-pressed="true"] { border-color: var(--muted); background: linear-gradient(to top, var(--bar) 50%, var(--bg) 50%); }

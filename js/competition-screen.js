@@ -4,6 +4,7 @@ import { initCompetitionForm, isCompetitionFormOpen, openCompetitionForm } from 
 import { allCompetitions, competitionById, competitionNamed } from './competitions.js';
 import { onAction } from './events.js';
 import { countText, escapeHtml, formatDuration, formatTime, formatWhen } from './format.js';
+import { historyHtml } from './history.js';
 import { createPickerMenu } from './picker-menu.js';
 import { createStopwatch, restartAfterLog } from './stopwatch.js';
 import { competitionAttempts } from './store.js';
@@ -13,6 +14,7 @@ const STATE_KEY = 'logger.v2.competition';
 const TICK_MS = 1000;
 const SECOND_MS = 1000;
 const REVERSIBLE_RESULTS = ['zone', 'top'];
+const RESULT_CELLS = { attempt: 'cell', zone: 'cell is-zone', top: 'cell is-sent' };
 const STATE_NAMES = { untouched: 'not tried', tried: 'tried', zone: 'zone', top: 'top' };
 const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
@@ -33,6 +35,8 @@ const cardOpen = document.getElementById('competition-boulder-open');
 const cardTitle = document.getElementById('competition-boulder-title');
 const cardMeta = document.getElementById('competition-boulder-meta');
 const attemptsEl = document.getElementById('competition-attempts');
+const historySection = document.getElementById('competition-history-section');
+const historyEl = document.getElementById('competition-history');
 const logButtons = Object.fromEntries(Object.keys(RESULTS).map((result) => [result, document.getElementById(`competition-log-${result}`)]));
 
 let place = { competition: null, boulder: null, ...JSON.parse(localStorage.getItem(STATE_KEY) ?? '{}') };
@@ -66,6 +70,7 @@ export function initCompetition() {
   initCompetitionForm(closeForm);
   onAction([controls], actions);
   onAction([actionsEl], { edit: () => editCompetition({ competition: currentCompetition() }) });
+  onAction([historyEl], { edit: ({ id }) => showBoulderOf(id) });
   restStopwatch.init();
   setInterval(renderClock, TICK_MS);
 }
@@ -92,12 +97,14 @@ export function renderCompetition() {
   pickerEl.hidden = isFormOpen;
   actionsEl.hidden = isFormOpen;
   controls.hidden = isFormOpen;
+  historySection.hidden = isFormOpen;
   if (isFormOpen) return;
   const board = boardOf(competition, competitionAttempts.getEntries());
   renderClock();
   renderScore(scoreOf(competition, board));
   renderBoard(board);
   renderBoulder(board.find(({ number }) => number === place.boulder) ?? null);
+  renderHistory(competition);
 }
 
 function currentCompetition() {
@@ -136,6 +143,14 @@ function logOrReverse(result) {
 function logTry(result) {
   competitionAttempts.add({ competition: currentCompetition().timestamp, boulder: place.boulder, result });
   restStopwatch.update(restartAfterLog);
+}
+
+function showBoulderOf(id) {
+  const { boulder } = competitionAttempts.getEntries().find((attempt) => attempt.timestamp === id);
+  savePlace({ boulder });
+  isShowingAttempts = true;
+  renderCompetition();
+  cardEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 function triesWith(result) {
@@ -214,4 +229,19 @@ function attemptHtml({ timestamp, result }, i) {
         aria-pressed="${result !== 'attempt'}" aria-label="Attempt ${i + 1}: ${RESULTS[result]}, tap to change">${RESULTS[result]}</button>
       <button type="button" class="option-icon" data-action="remove-attempt" data-id="${id}" aria-label="Remove attempt ${i + 1}">${REMOVE_ICON}</button>
     </li>`;
+}
+
+function renderHistory(competition) {
+  historyEl.innerHTML = historyHtml(attemptsIn(competitionAttempts.getEntries(), competition), {
+    lead: [(attempt) => formatTime(new Date(attempt.timestamp))],
+    valueHtml: tryHtml,
+    describe: ({ boulder, result }) => `boulder ${boulder}, ${RESULTS[result]}`,
+    isUnsynced: competitionAttempts.isUnsynced,
+    editingId: null,
+    empty: 'Nothing logged yet.',
+  });
+}
+
+function tryHtml({ boulder, result }) {
+  return `<span class="try is-${result}"><span class="try-boulder">${boulder}</span><span class="${RESULT_CELLS[result]}"></span><span class="try-result">${RESULTS[result]}</span></span>`;
 }

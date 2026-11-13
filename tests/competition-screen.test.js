@@ -140,6 +140,22 @@ test('logging a try restarts the rest stopwatch while restart on log is ticked, 
   tickRestart(true);
 });
 
+test('the history lists the tries of the shown competition, newest first, and tapping one opens its boulder', () => {
+  openCompetitions();
+  addCompetition('Earlier Open');
+  logOn(9, 'T');
+  addCompetition('History Open');
+  assertEqual(isShown('competition-history', 'Nothing logged yet.'), true, 'empty');
+  logOn(2, 'A');
+  logOn(5, 'Z');
+  const [first, second] = attemptsOf('History Open');
+  const position = (attempt) => element('competition-history').innerHTML.indexOf(`data-id="${attempt.timestamp}"`);
+  assertEqual([position(first) > position(second), position(second) > -1], [true, true], 'newest first');
+  assertEqual(position(attemptsOf('Earlier Open')[0]), -1, 'other competitions left out');
+  click('competition-history', { action: 'edit', id: first.timestamp });
+  assertEqual([element('competition-boulder-title').textContent, element('competition-attempts').hidden], ['Boulder 2', false], 'opened');
+});
+
 test('a logged try can be changed to another result or removed', () => {
   openCompetitions();
   addCompetition('Fix Open');
