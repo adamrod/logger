@@ -96,17 +96,14 @@ const actions = {
     tagInput.focus();
   },
   'edit-climb': ({ climb }) => editClimb(climb),
-  'edit-current': () => editClimb(place.selected),
   'toggle-result': ({ id }) => changeAttempt(id, (attempt) => ({ ...attempt, result: attempt.result === 'top' ? 'attempt' : 'top' })),
   'remove-attempt': ({ id }) => {
     editing.attempts = editing.attempts.filter((attempt) => attempt.timestamp !== id);
     renderClimb();
   },
   save: () => saveClimb(),
-  'cancel-edit': () => {
-    stopEditing();
-    renderClimb();
-  },
+  'cancel-edit': () => cancelEditing(),
+  'toggle-editor': () => (editing ? cancelEditing() : editClimb(place.selected)),
   delete: () => {
     isConfirmingDelete = true;
     renderClimb();
@@ -345,6 +342,11 @@ function stopEditing() {
   isConfirmingDelete = false;
 }
 
+function cancelEditing() {
+  stopEditing();
+  renderClimb();
+}
+
 function changeAttempt(id, change) {
   editing.attempts = editing.attempts.map((attempt) => (attempt.timestamp === id ? change(attempt) : attempt));
   renderClimb();
@@ -399,9 +401,10 @@ function renderCard() {
   const climb = shownClimb();
   const isTagsOpen = openPanel === 'tags' || openPanel === 'new-tag';
   cardEl.classList.toggle('is-current', Boolean(edited || selected));
-  cardTitle.textContent = edited ? 'Editing climb' : climb.name || (selected ? 'Climb' : 'New climb');
+  cardTitle.textContent = climb.name || (edited || selected ? 'Climb' : 'New climb');
   cardMeta.textContent = cardMetaText(edited, selected);
-  cardOpen.disabled = Boolean(edited || !selected);
+  cardOpen.disabled = !edited && !selected;
+  cardOpen.setAttribute('aria-expanded', Boolean(edited));
   newButton.hidden = Boolean(edited || !selected);
   renderProjects(edited ? [] : openProjects(allAttempts(), currentGym(), currentKind()));
   nameToggle.textContent = climb.name ? 'Rename' : '+ Name';

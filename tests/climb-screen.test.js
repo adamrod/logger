@@ -160,15 +160,18 @@ test('the climb editor changes the grade and name of every attempt, and each att
   assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [false, true], 'after saving');
 });
 
-test('tapping the current climb\'s title opens its attempts, a new climb\'s title does nothing', () => {
+test('tapping the current climb\'s name opens its attempts under that name, tapping it again closes them', () => {
   openClimb();
   startFresh('3');
   assertEqual(element('climb-open').disabled, true, 'new climb');
+  change('climb-name', 'Arete');
   log('attempt');
   assertEqual(element('climb-open').disabled, false, 'current climb');
-  controls({ action: 'edit-current' });
-  assertEqual([element('climb-attempts').hidden, element('climb-open').disabled], [false, true], 'editing');
+  controls({ action: 'toggle-editor' });
+  assertEqual([element('climb-attempts').hidden, element('climb-title').textContent], [false, 'Arete'], 'editing');
   assertEqual(isShown('climb-attempts', 'aria-label="Date and time of attempt 1"'), true, 'lists its attempt');
+  controls({ action: 'toggle-editor' });
+  assertEqual([element('climb-attempts').hidden, element('climb-log-buttons').hidden], [true, false], 'closed');
 });
 
 test('an attempt removed in the editor is gone once saved, and undo brings it back', async () => {
