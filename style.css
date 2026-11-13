@@ -492,6 +492,8 @@ li:first-child > .option-new { border-top: none; }
   transform: rotate(45deg);
 }
 .sync-button { font-weight: 600; color: var(--text); }
+.label-row .history-sync { min-width: 0; }
+.label-row .sync-text { overflow: hidden; text-overflow: ellipsis; }
 
 .history-list {
   flex: 1;
