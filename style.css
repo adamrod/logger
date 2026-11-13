@@ -793,5 +793,5 @@ li:first-child > .option-new { border-top: none; }
 .competition-log-buttons { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .competition-log-buttons .btn { height: 56px; padding: 0; }
 .competition-log-buttons [data-result="zone"][aria-pressed="true"] { border-color: var(--muted); background: linear-gradient(to top, var(--bar) 50%, var(--bg) 50%); }
-.competition-log-buttons [data-result="top"][aria-pressed="true"] { background: var(--bar); }
+.competition-log-buttons [data-result="top"][aria-pressed="true"] { border-color: var(--muted); background: var(--bar); }
 .competition-log-buttons [aria-pressed="true"]:disabled { opacity: 1; }
