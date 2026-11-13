@@ -14,7 +14,7 @@ const STATE_KEY = 'logger.v2.competition';
 const TICK_MS = 1000;
 const SECOND_MS = 1000;
 const REVERSIBLE_RESULTS = ['zone', 'top'];
-const RESULT_CELLS = { attempt: 'cell', zone: 'cell is-zone', top: 'cell is-sent' };
+const RESULT_CELLS = { attempt: 'cell', zone: 'cell is-zone', top: 'cell is-top' };
 const STATE_NAMES = { untouched: 'not tried', tried: 'tried', zone: 'zone', top: 'top' };
 const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 

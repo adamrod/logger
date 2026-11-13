@@ -707,6 +707,7 @@ li:first-child > .option-new { border-top: none; }
 .cell { width: 12px; height: 12px; border: 1.5px solid var(--muted); border-radius: 3px; }
 .cell.is-sent { border-color: var(--text); background: var(--text); }
 .cell.is-zone { background: linear-gradient(to top, var(--bar) 50%, transparent 50%); }
+.cell.is-top { background: var(--bar); }
 
 .grade-row, .tag-bar { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 32px; }
 .grade-row .climb-grade { justify-self: start; }
@@ -770,10 +771,10 @@ li:first-child > .option-new { border-top: none; }
 .boulder { position: relative; height: 46px; padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font-size: 17px; font-weight: 600; color: var(--muted); }
 .boulder.is-tried { border-color: var(--muted); color: var(--text); }
 .boulder.is-zone { border-color: var(--muted); background: linear-gradient(to top, var(--bar) 50%, var(--bg) 50%); color: var(--text); }
-.boulder.is-top { border-color: var(--text); background: var(--text); color: var(--bg); }
+.boulder.is-top { border-color: var(--muted); background: var(--bar); color: var(--text); }
 .boulder[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
 .boulder-tries { position: absolute; top: 3px; right: 6px; font-size: 10px; line-height: 12px; color: var(--muted); }
-.boulder.is-top .boulder-tries { color: var(--bar); }
+.boulder.is-top .boulder-tries { color: var(--text); }
 
 .board-options .stopwatch-option { height: 30px; }
 .competition-rest { flex-direction: row; align-items: center; gap: 0; }
@@ -792,5 +793,5 @@ li:first-child > .option-new { border-top: none; }
 .competition-log-buttons { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .competition-log-buttons .btn { height: 56px; padding: 0; }
 .competition-log-buttons [data-result="zone"][aria-pressed="true"] { border-color: var(--muted); background: linear-gradient(to top, var(--bar) 50%, var(--bg) 50%); }
-.competition-log-buttons [data-result="top"][aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.competition-log-buttons [data-result="top"][aria-pressed="true"] { background: var(--bar); }
 .competition-log-buttons [aria-pressed="true"]:disabled { opacity: 1; }
