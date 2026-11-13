@@ -756,6 +756,8 @@ li:first-child > .option-new { border-top: none; }
 .field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-pair .input { width: 100%; }
 
+.competition .label-row > .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .competition-clock { display: flex; flex-direction: column; gap: 6px; }
 .competition-times { display: flex; align-items: flex-end; justify-content: space-between; }
 .competition-time { display: flex; flex-direction: column; gap: 2px; }
@@ -768,7 +770,7 @@ li:first-child > .option-new { border-top: none; }
 .competition-score .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 .board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
-.boulder { position: relative; height: 46px; padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font-size: 17px; font-weight: 600; color: var(--muted); }
+.boulder { position: relative; height: 44px; padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font-size: 17px; font-weight: 600; color: var(--muted); }
 .boulder.is-tried { border-color: var(--muted); color: var(--text); }
 .boulder.is-zone { border-color: var(--muted); background: linear-gradient(to top, var(--bar) 50%, var(--bg) 50%); color: var(--text); }
 .boulder.is-top { border-color: var(--muted); background: var(--bar); color: var(--text); }

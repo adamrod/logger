@@ -11,6 +11,7 @@ import { competitionAttempts } from './store.js';
 import { undoable } from './undo.js';
 
 const STATE_KEY = 'logger.v2.competition';
+const FORM_LABEL = 'Competition';
 const TICK_MS = 1000;
 const SECOND_MS = 1000;
 const REVERSIBLE_RESULTS = ['zone', 'top'];
@@ -21,7 +22,7 @@ const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><p
 const pickerEl = document.getElementById('competition-picker');
 const actionsEl = document.getElementById('competition-actions');
 const controls = document.getElementById('competition-controls');
-const metaEl = document.getElementById('competition-meta');
+const labelEl = document.getElementById('competition-label');
 const clockEl = document.getElementById('competition-clock');
 const mainLabel = document.getElementById('competition-main-label');
 const mainTime = document.getElementById('competition-main-time');
@@ -98,6 +99,7 @@ export function renderCompetition() {
   actionsEl.hidden = isFormOpen;
   controls.hidden = isFormOpen;
   historySection.hidden = isFormOpen;
+  if (isFormOpen) labelEl.textContent = FORM_LABEL;
   if (isFormOpen) return;
   const board = boardOf(competition, competitionAttempts.getEntries());
   renderClock();
@@ -165,8 +167,7 @@ function renderClock() {
   if (!competition || controls.hidden) return;
   const clock = clockOf(competition, Date.now());
   const isLive = clock.phase === 'live';
-  metaEl.hidden = isLive;
-  metaEl.textContent = metaText(competition, clock);
+  labelEl.textContent = whenText(competition, clock);
   clockEl.hidden = clock.phase === 'after';
   mainLabel.textContent = isLive ? 'Left' : 'Starts in';
   mainTime.textContent = formatDuration(wholeSeconds(isLive ? clock.left : clock.startsIn ?? 0));
@@ -175,9 +176,9 @@ function renderClock() {
   progressEl.style.width = `${isLive ? (clock.elapsed / clock.length) * 100 : 0}%`;
 }
 
-function metaText(competition, { phase }) {
+function whenText(competition, { phase }) {
   const when = `${formatWhen(new Date(competition.start))}–${formatTime(new Date(endOf(competition)))}`;
-  return [phase === 'after' && 'Finished', when, `Boulders ${competition.first}–${competition.last}`].filter(Boolean).join(' · ');
+  return phase === 'after' ? `Finished · ${when}` : when;
 }
 
 function renderScore({ tops, zones, tried, total, points }) {
