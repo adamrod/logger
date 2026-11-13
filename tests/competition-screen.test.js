@@ -228,8 +228,8 @@ test('a running competition shows the time left and counts as live', () => {
   click('competition-picker', { action: 'add', name: 'Live Open' });
   assertEqual(element('competition-label').textContent, 'Competition', 'label while setting up');
   form({ action: 'cancel' });
-  assertEqual([element('competition-label').textContent.includes('10:00–12:00'), element('competition-main-label').textContent], [true, 'Starts in'], 'before the start');
+  assertEqual([element('competition-label').textContent.includes('10:00–12:00'), element('competition-main-label').textContent], [true, 'to start'], 'before the start');
   addCompetition('Live Open', { start: when(-30), end: when(90) });
   assertEqual(hasLiveCompetition(), true, 'running');
-  assertEqual(element('competition-main-label').textContent, 'Left', 'clock');
+  assertEqual(element('competition-main-label').textContent, 'left', 'clock');
 });

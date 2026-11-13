@@ -169,9 +169,9 @@ function renderClock() {
   const isLive = clock.phase === 'live';
   labelEl.textContent = whenText(competition, clock);
   clockEl.hidden = clock.phase === 'after';
-  mainLabel.textContent = isLive ? 'Left' : 'Starts in';
+  mainLabel.textContent = isLive ? 'left' : 'to start';
   mainTime.textContent = formatDuration(wholeSeconds(isLive ? clock.left : clock.startsIn ?? 0));
-  sideLabel.textContent = isLive ? 'Elapsed' : 'Length';
+  sideLabel.textContent = isLive ? 'elapsed' : 'length';
   sideTime.textContent = formatDuration(isLive ? clock.elapsed : clock.length);
   progressEl.style.width = `${isLive ? (clock.elapsed / clock.length) * 100 : 0}%`;
 }

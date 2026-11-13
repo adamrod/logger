@@ -759,15 +759,17 @@ li:first-child > .option-new { border-top: none; }
 .competition .label-row > .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .competition-clock { display: flex; flex-direction: column; gap: 6px; }
-.competition-times { display: flex; align-items: flex-end; justify-content: space-between; }
-.competition-time { display: flex; flex-direction: column; gap: 2px; }
+.competition-times { display: flex; align-items: baseline; justify-content: space-between; }
+.competition-time { display: flex; align-items: baseline; gap: 6px; }
 .competition-time .stopwatch-time { line-height: 36px; }
-.competition-time-side { align-items: flex-end; }
 .competition-time-side .stopwatch-time { font-size: 22px; color: var(--muted); }
 .competition-progress { height: 4px; overflow: hidden; border-radius: 2px; background: var(--fill); }
 .competition-progress-fill { display: block; height: 100%; background: var(--text); }
 
-.competition-score .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.competition-score .stats { display: flex; justify-content: space-between; }
+.competition-score .stat { flex-direction: row; align-items: baseline; gap: 5px; }
+
+.competition .climb-card { padding-top: 0; }
 
 .board { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
 .boulder { position: relative; height: 44px; padding: 0; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); font-size: 17px; font-weight: 600; color: var(--muted); }
