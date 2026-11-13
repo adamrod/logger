@@ -26,13 +26,13 @@ export function boardOf(competition, attempts) {
 export function scoreOf(competition, board) {
   const count = (state) => board.filter((boulder) => boulder.state === state).length;
   const tops = count('top');
-  const zones = count('zone');
+  const zonesOnly = count('zone');
   return {
     tops,
-    zones,
+    zones: tops + zonesOnly,
     tried: board.length - count('untouched'),
     total: board.length,
-    points: tops * competition.topPoints + zones * competition.zonePoints,
+    points: tops * competition.topPoints + zonesOnly * competition.zonePoints,
   };
 }
 

@@ -31,9 +31,9 @@ test('the board holds only the tries of its own competition', () => {
   assertEqual(board.find(({ number }) => number === 12).attempts.length, 2, 'tries on 12');
 });
 
-test('a topped boulder scores its top only, a zone scores when the top is missing', () => {
+test('a topped boulder counts as a zone too but scores its top only', () => {
   const attempts = [...tries(OPEN, 11, 'ZT'), ...tries(OPEN, 12, 'T'), ...tries(OPEN, 13, 'AZ'), ...tries(OPEN, 14, 'AA')];
-  assertEqual(scoreOf(OPEN, boardOf(OPEN, attempts)), { tops: 2, zones: 1, tried: 4, total: 30, points: 21 });
+  assertEqual(scoreOf(OPEN, boardOf(OPEN, attempts)), { tops: 2, zones: 3, tried: 4, total: 30, points: 21 });
 });
 
 test('the clock counts down to the start, then shows time gone and left, then finishes', () => {
