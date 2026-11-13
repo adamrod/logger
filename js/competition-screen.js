@@ -209,8 +209,16 @@ function renderBoulder(boulder) {
   cardOpen.setAttribute('aria-expanded', isOpen);
   attemptsEl.hidden = !isOpen;
   attemptsEl.innerHTML = isOpen ? boulder.attempts.map(attemptHtml).join('') : '';
-  Object.values(logButtons).forEach((button) => { button.disabled = !boulder; });
-  REVERSIBLE_RESULTS.forEach((result) => logButtons[result].setAttribute('aria-pressed', Boolean(boulder) && triesWith(result).length > 0));
+  renderLogButtons(boulder);
+}
+
+function renderLogButtons(boulder) {
+  const has = (result) => Boolean(boulder?.attempts.some((attempt) => attempt.result === result));
+  logButtons.attempt.disabled = !boulder;
+  logButtons.zone.disabled = !boulder || has('top');
+  logButtons.zone.setAttribute('aria-pressed', has('zone') || has('top'));
+  logButtons.top.disabled = !boulder;
+  logButtons.top.setAttribute('aria-pressed', has('top'));
 }
 
 function boulderText({ attempts, state }) {

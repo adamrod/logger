@@ -109,6 +109,11 @@ test('tapping Zone or Top again on a boulder that has it takes it back', () => {
   nextUndo().apply();
   nextUndo().apply();
   logOn(4, 'T');
+  assertEqual([pressed(), element('competition-log-zone').disabled], [['true', 'true'], true], 'a top holds the zone on');
+  logOn(6, 'T');
+  assertEqual([resultsOf('Toggle Open').filter(([boulder]) => boulder === 6), pressed()], [[[6, 'top']], ['true', 'true']], 'a top alone switches the zone on');
+  logOn(6, 'T');
+  assertEqual([pressed(), element('competition-log-zone').disabled], [['false', 'false'], false], 'taking the top back frees the zone');
   logOn(6, 'T');
   assertEqual(resultsOf('Toggle Open').filter(([, result]) => result === 'top'), [[4, 'top'], [6, 'top']], 'other boulders keep theirs');
 });
