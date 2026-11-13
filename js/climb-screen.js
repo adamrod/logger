@@ -1,8 +1,8 @@
 import { revealPressedChip } from './chip-row.js';
-import { climbContext, climbHistoryHtml } from './climb-history.js';
+import { climbContext, climbHistoryHtml, projectListHtml } from './climb-history.js';
 import {
   DEFAULT_TAGS, STYLES, UNGRADED, attemptsOfClimb, climbOf, climbingSessions, isLive, joinTags, kindOf, lastGradeAt, lastStyleAt,
-  tagsOf,
+  openProjects, tagsOf,
 } from './climbing.js';
 import { onAction } from './events.js';
 import { countText, escapeHtml, formatDuration, formatTime } from './format.js';
@@ -29,6 +29,8 @@ const cardEl = document.getElementById('climb-card');
 const cardTitle = document.getElementById('climb-title');
 const cardMeta = document.getElementById('climb-meta');
 const newButton = document.getElementById('climb-new');
+const projectsToggle = document.getElementById('climb-projects-toggle');
+const projectsEl = document.getElementById('climb-projects');
 const nameToggle = document.getElementById('climb-name-toggle');
 const tagsToggle = document.getElementById('climb-tags-toggle');
 const nameInput = document.getElementById('climb-name');
@@ -54,6 +56,7 @@ let draft = NEW_CLIMB;
 let editing = null;
 let isConfirmingDelete = false;
 let openPanel = null;
+let removingProject = null;
 let isGradeRevealDue = true;
 
 const gymPicker = createPickerMenu('gym', {
@@ -82,6 +85,7 @@ const actions = {
   },
   pick: ({ climb }) => pickClimb(climb),
   session: ({ id }) => { location.hash = `#climb-session/${id}`; },
+  'toggle-projects': () => togglePanel('projects'),
   'toggle-name': () => togglePanel('name'),
   'toggle-tags': () => togglePanel('tags'),
   tag: ({ tag }) => toggleTag(tag),
@@ -110,6 +114,14 @@ const actions = {
     renderClimb();
   },
   'confirm-delete': () => deleteClimb(),
+  'remove-project': ({ climb }) => {
+    removingProject = climb;
+    renderClimb();
+  },
+  'confirm-remove-project': ({ climb }) => {
+    removingProject = null;
+    climbs.updateWhere((attempt) => attempt.climb === climb, { name: '' });
+  },
 };
 
 export function initClimb() {
@@ -159,6 +171,7 @@ export function editClimb(id) {
   };
   isConfirmingDelete = false;
   openPanel = null;
+  removingProject = null;
   renderClimb();
 }
 
@@ -260,6 +273,7 @@ function pickClimb(id) {
   const latest = attemptsOfClimb(allAttempts(), id).at(-1);
   const style = kindOf(currentStyle()) === kindOf(latest.style) ? currentStyle() : latest.style;
   stopEditing();
+  removingProject = null;
   openPanel = null;
   savePlace({ gym: latest.gym, styles: { ...place.styles, [latest.gym]: style }, selected: id });
   isGradeRevealDue = true;
@@ -304,6 +318,7 @@ const asColumns = (changes) => ('tags' in changes ? { ...changes, tags: joinTags
 function togglePanel(panel) {
   const isOpen = openPanel === panel || (panel === 'tags' && openPanel === 'new-tag');
   openPanel = isOpen ? null : panel;
+  removingProject = null;
   renderClimb();
   if (openPanel === 'name') nameInput.focus();
 }
@@ -385,6 +400,7 @@ function renderCard() {
   cardTitle.textContent = edited ? 'Editing climb' : climb.name || (selected ? 'Climb' : 'New climb');
   cardMeta.textContent = cardMetaText(edited, selected);
   newButton.hidden = Boolean(edited || !selected);
+  renderProjects(edited ? [] : openProjects(allAttempts(), currentGym(), currentKind()));
   nameToggle.textContent = climb.name ? 'Rename' : '+ Name';
   nameToggle.setAttribute('aria-expanded', openPanel === 'name');
   tagsToggle.textContent = climb.tags.join(', ') || '+ Tags';
@@ -395,6 +411,14 @@ function renderCard() {
   tagChips.hidden = !isTagsOpen;
   tagForm.hidden = openPanel !== 'new-tag';
   setHtml(tagChips, tagChipsHtml(climb.tags));
+}
+
+function renderProjects(projects) {
+  const isOpen = openPanel === 'projects' && projects.length > 0;
+  projectsToggle.hidden = !projects.length;
+  projectsToggle.setAttribute('aria-expanded', isOpen);
+  projectsEl.hidden = !isOpen;
+  if (isOpen) setHtml(projectsEl, projectListHtml(projects, { selectedId: place.selected, removingId: removingProject }));
 }
 
 function cardMetaText(edited, selected) {

@@ -155,6 +155,12 @@ export function tagCounts(attempts, allAttempts) {
     .sort((a, b) => b.total - a.total || a.tag.localeCompare(b.tag));
 }
 
+export function openProjects(attempts, gym, kind) {
+  return climbsIn(attempts.filter((attempt) => attempt.gym === gym && kindOf(attempt.style) === kind))
+    .filter((climb) => climb.name && !climb.attempts.some(isSend))
+    .sort((a, b) => b.attempts.at(-1).timestamp.localeCompare(a.attempts.at(-1).timestamp));
+}
+
 export const lastGradeAt = (attempts, gym, kind) => attempts
   .findLast((attempt) => attempt.gym === gym && kindOf(attempt.style) === kind)?.grade ?? null;
 

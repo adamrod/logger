@@ -626,12 +626,13 @@ li:first-child > .option-new { border-top: none; }
 .grade-chip { min-width: 48px; padding: 0 14px; }
 
 .climb-card { display: flex; flex-direction: column; padding: 12px 12px 0; border: 1px solid var(--border); border-radius: 16px; }
-.climb-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px; min-height: 52px; }
+.climb-head { display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-columns: auto; grid-auto-flow: column; align-items: center; gap: 4px; min-height: 52px; margin-right: -8px; }
 .climb-card.is-current { border-color: var(--muted); }
 .climb-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .climb-title { overflow: hidden; font-size: 17px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .climb-meta { overflow: hidden; font-size: 13px; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
-.climb-action { margin-right: -8px; padding: 0 10px; font-weight: 600; }
+.climb-action { padding: 0 10px; font-weight: 600; }
+.climb-projects { margin-top: 4px; border-top: 1px solid var(--divider); }
 .climb-extras { display: flex; margin: 8px -12px 0; border-top: 1px solid var(--divider); }
 .climb-extra { flex: 1; min-width: 0; overflow: hidden; font-size: 14px; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
 .climb-extra.is-set, .climb-extra[aria-expanded="true"] { color: var(--text); }

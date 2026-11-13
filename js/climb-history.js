@@ -1,9 +1,10 @@
-import { STYLES, climbsIn, isTop, outcomeOf, recordSends } from './climbing.js';
-import { daysBetween, escapeHtml, formatDay } from './format.js';
+import { STYLES, climbsIn, isTop, outcomeOf, recordSends, sessionCount } from './climbing.js';
+import { countText, daysBetween, escapeHtml, formatDay, formatShortDay } from './format.js';
 import { gradesAt } from './gyms.js';
 import { UNSYNCED_HTML, currentDateAttribute, gapHtml, sinceLastHtml } from './history.js';
 import { climbs } from './store.js';
 
+const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const RECORD_HTML = '<span class="set-record">PR</span>';
 
 const metaText = (parts) => parts.filter(Boolean).map(escapeHtml).join(' · ');
@@ -62,4 +63,31 @@ export function climbHistoryHtml(sessions, context, view) {
       </section>`;
   };
   return sinceLastHtml(daysBetween(dateOf(newestFirst[0]), new Date())) + newestFirst.map(sessionHtml).join('');
+}
+
+export function projectListHtml(projects, { selectedId, removingId }) {
+  const rowHtml = (project) => {
+    const id = escapeHtml(project.id);
+    const name = escapeHtml(project.name);
+    const lastTried = formatShortDay(new Date(project.attempts.at(-1).timestamp));
+    const meta = metaText([
+      ...project.tags,
+      countText(project.attempts.length, 'attempt'),
+      countText(sessionCount(project.attempts), 'session'),
+      `last ${lastTried}`,
+    ]);
+    const remove = project.id === removingId
+      ? `<button type="button" class="option-confirm" data-action="confirm-remove-project" data-climb="${id}"
+          aria-label="Confirm remove ${name} from projects">Remove</button>`
+      : `<button type="button" class="option-icon" data-action="remove-project" data-climb="${id}"
+          aria-label="Remove ${name} from projects">${REMOVE_ICON}</button>`;
+    return `
+      <li class="climb-row"${project.id === selectedId ? ' aria-current="true"' : ''}>
+        <button type="button" class="climb-pick" data-action="pick" data-climb="${id}" aria-label="Work on ${name}">
+          ${climbHtml(project.grade, name, meta)}
+        </button>
+        ${remove}
+      </li>`;
+  };
+  return `<ul class="climb-list">${projects.map(rowHtml).join('')}</ul>`;
 }

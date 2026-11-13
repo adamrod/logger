@@ -4,7 +4,7 @@ import { enterClimbAnalysis, initClimbAnalysis, renderClimbAnalysis } from '../j
 import { climbPlace, initClimb, renderClimb, revealClimbs } from '../js/climb-screen.js';
 import { enterClimbSession, initClimbSession, renderClimbSession } from '../js/climb-session-screen.js';
 import { enterDayCalendar, initDayCalendar, renderDayCalendar } from '../js/day-calendar-screen.js';
-import { climbingSessions, numberGrades } from '../js/climbing.js';
+import { climbingSessions, numberGrades, openProjects } from '../js/climbing.js';
 import { onChange } from '../js/events.js';
 import { formatIsoDate, formatTime } from '../js/format.js';
 import { saveGym } from '../js/gyms.js';
@@ -233,7 +233,7 @@ test('Lead starts a new climb on French grades, and top rope after lead stays on
   assertEqual(attemptsOf(climb).map((attempt) => [attempt.style, attempt.grade]), [['lead', '6b'], ['toprope', '6b']]);
 });
 
-test('picking a named climb from another day goes back to its gym and style and continues it', () => {
+test('picking a project from another day goes back to its gym and style and continues it', () => {
   openClimb();
   startFresh('9');
   change('climb-name', 'Moon');
@@ -244,6 +244,35 @@ test('picking a named climb from another day goes back to its gym and style and 
   click('climb-history', { action: 'pick', climb });
   log('attempt');
   assertEqual([last().climb, last().style, attemptsOf(climb).length], [climb, 'boulder', 2]);
+});
+
+test('projects open from the climb card, not the history, and close once one is picked', () => {
+  openClimb();
+  startFresh('9');
+  change('climb-name', 'Slab');
+  log('attempt');
+  const { climb } = last();
+  controls({ action: 'new-climb' });
+  assertEqual([isShown('climb-history', 'Work on Slab'), element('climb-projects-toggle').hidden, element('climb-projects').hidden],
+    [false, false, true], 'closed');
+  controls({ action: 'toggle-projects' });
+  assertEqual([element('climb-projects').hidden, isShown('climb-projects', 'Work on Slab')], [false, true], 'open');
+  controls({ action: 'pick', climb });
+  assertEqual([climbPlace().selected, element('climb-projects').hidden], [climb, true], 'picked');
+});
+
+test('removing a project from the card clears its name, so it leaves the projects', () => {
+  openClimb();
+  startFresh('9');
+  change('climb-name', 'Roof crack');
+  log('attempt');
+  const { climb } = last();
+  const isProject = () => openProjects(climbs.getEntries(), GYM, 'boulder').some((project) => project.id === climb);
+  assertEqual(isProject(), true, 'named');
+  controls({ action: 'toggle-projects' });
+  controls({ action: 'remove-project', climb });
+  controls({ action: 'confirm-remove-project', climb });
+  assertEqual([isProject(), last().name], [false, ''], 'removed');
 });
 
 test('adding a gym from the menu opens its form in place of the climbing controls and picks it once saved', () => {
