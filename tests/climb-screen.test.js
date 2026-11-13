@@ -198,7 +198,7 @@ test('deleting a climb removes all its attempts after asking, and cancelling cha
     const { climb } = last();
     editTheClimb(climb);
     controls({ action: 'grade', grade: '9' });
-    controls({ action: 'toggle-editor' });
+    controls({ action: 'cancel-edit' });
     assertEqual(attemptsOf(climb).map((attempt) => attempt.grade), ['2', '2', '2'], 'cancelled');
     editTheClimb(climb);
     controls({ action: 'delete' });
@@ -365,7 +365,7 @@ test('the session report shows the latest session, steps back, and edits a climb
   assertEqual(location.hash, `#climb-session/${previous.id}`, 'stepped back');
   click('climb-session-body', { action: 'edit-climb', climb });
   assertEqual([location.hash, element('climb-log-buttons').hidden], ['#climb', true], 'editing on Climb');
-  controls({ action: 'toggle-editor' });
+  controls({ action: 'cancel-edit' });
 });
 
 test('the calendar marks days with a session and steps through months', () => {
