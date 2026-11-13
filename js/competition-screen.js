@@ -1,15 +1,17 @@
 import { statTilesHtml } from './climb-report.js';
-import { RESULTS, boardOf, clockOf, endOf, liveCompetition, nextResult, scoreOf } from './competition.js';
+import { RESULTS, attemptsIn, boardOf, clockOf, endOf, liveCompetition, nextResult, scoreOf } from './competition.js';
 import { initCompetitionForm, isCompetitionFormOpen, openCompetitionForm } from './competition-form.js';
 import { allCompetitions, competitionById, competitionNamed } from './competitions.js';
 import { onAction } from './events.js';
 import { countText, escapeHtml, formatDuration, formatTime, formatWhen } from './format.js';
 import { createPickerMenu } from './picker-menu.js';
 import { competitionAttempts } from './store.js';
+import { undoable } from './undo.js';
 
 const STATE_KEY = 'logger.v2.competition';
 const TICK_MS = 1000;
 const SECOND_MS = 1000;
+const REVERSIBLE_RESULTS = ['zone', 'top'];
 const STATE_NAMES = { untouched: 'not tried', tried: 'tried', zone: 'zone', top: 'top' };
 const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
@@ -30,7 +32,7 @@ const cardOpen = document.getElementById('competition-boulder-open');
 const cardTitle = document.getElementById('competition-boulder-title');
 const cardMeta = document.getElementById('competition-boulder-meta');
 const attemptsEl = document.getElementById('competition-attempts');
-const logButtons = Object.keys(RESULTS).map((result) => document.getElementById(`competition-log-${result}`));
+const logButtons = Object.fromEntries(Object.keys(RESULTS).map((result) => [result, document.getElementById(`competition-log-${result}`)]));
 
 let place = { competition: null, boulder: null, ...JSON.parse(localStorage.getItem(STATE_KEY) ?? '{}') };
 let isShowingAttempts = false;
@@ -47,7 +49,7 @@ const actions = {
     isShowingAttempts = false;
     renderCompetition();
   },
-  log: ({ result }) => logAttempt(result),
+  log: ({ result }) => logOrReverse(result),
   'toggle-attempts': () => {
     isShowingAttempts = !isShowingAttempts;
     renderCompetition();
@@ -120,8 +122,15 @@ function closeForm(savedName) {
   else renderCompetition();
 }
 
-function logAttempt(result) {
-  competitionAttempts.add({ competition: currentCompetition().timestamp, boulder: place.boulder, result });
+function logOrReverse(result) {
+  const logged = REVERSIBLE_RESULTS.includes(result) ? triesWith(result) : [];
+  if (logged.length) undoable(() => logged.forEach(({ timestamp }) => competitionAttempts.remove(timestamp)));
+  else competitionAttempts.add({ competition: currentCompetition().timestamp, boulder: place.boulder, result });
+}
+
+function triesWith(result) {
+  return attemptsIn(competitionAttempts.getEntries(), currentCompetition())
+    .filter((attempt) => attempt.boulder === place.boulder && attempt.result === result);
 }
 
 const wholeSeconds = (ms) => Math.ceil(ms / SECOND_MS) * SECOND_MS;
@@ -175,7 +184,8 @@ function renderBoulder(boulder) {
   cardOpen.setAttribute('aria-expanded', isOpen);
   attemptsEl.hidden = !isOpen;
   attemptsEl.innerHTML = isOpen ? boulder.attempts.map(attemptHtml).join('') : '';
-  logButtons.forEach((button) => { button.disabled = !boulder; });
+  Object.values(logButtons).forEach((button) => { button.disabled = !boulder; });
+  REVERSIBLE_RESULTS.forEach((result) => logButtons[result].setAttribute('aria-pressed', Boolean(boulder) && triesWith(result).length > 0));
 }
 
 function boulderText({ attempts, state }) {

@@ -93,6 +93,25 @@ test('each try is logged on the picked boulder and the board and score follow', 
   assertEqual(element('competition-boulder-meta').textContent, '2 attempts · zone', 'picked boulder');
 });
 
+test('tapping Zone or Top again on a boulder that has it takes it back', () => {
+  openCompetitions();
+  addCompetition('Toggle Open');
+  const pressed = () => ['zone', 'top'].map((result) => element(`competition-log-${result}`).getAttribute('aria-pressed'));
+  logOn(4, 'AZ');
+  assertEqual([resultsOf('Toggle Open'), pressed()], [[[4, 'attempt'], [4, 'zone']], ['true', 'false']], 'zone logged');
+  logOn(4, 'Z');
+  assertEqual([resultsOf('Toggle Open'), pressed(), tileIs(4, 'tried')], [[[4, 'attempt']], ['false', 'false'], true], 'zone taken back');
+  logOn(4, 'ZTT');
+  assertEqual([resultsOf('Toggle Open'), pressed(), tileIs(4, 'zone')], [[[4, 'attempt'], [4, 'zone']], ['true', 'false'], true], 'top taken back');
+  logOn(4, 'AA');
+  assertEqual(resultsOf('Toggle Open').length, 4, 'attempts always add');
+  nextUndo().apply();
+  nextUndo().apply();
+  logOn(4, 'T');
+  logOn(6, 'T');
+  assertEqual(resultsOf('Toggle Open').filter(([, result]) => result === 'top'), [[4, 'top'], [6, 'top']], 'other boulders keep theirs');
+});
+
 test('a logged try can be changed to another result or removed', () => {
   openCompetitions();
   addCompetition('Fix Open');
