@@ -631,7 +631,7 @@ li:first-child > .option-new { border-top: none; }
 .style-select .icon { top: 15px; right: 12px; }
 
 .gym-form, .competition-form { display: flex; flex-direction: column; gap: 12px; }
-.gym-count, .competition-minutes { display: grid; place-items: center; }
+.gym-count { display: grid; place-items: center; }
 .form-error { font-size: 14px; }
 
 .grade-chips { margin: 0 calc(-1 * var(--gutter)); }

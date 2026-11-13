@@ -4,8 +4,8 @@ import { assertEqual, test } from './harness.js';
 const MINUTE = 60000;
 const START = '2026-11-14T13:00:00.000Z';
 const STARTED_AT = Date.parse(START);
-const OPEN = { timestamp: 'open', start: START, minutes: 150, first: 11, last: 40, topPoints: 10, zonePoints: 1 };
-const OTHER = { ...OPEN, timestamp: 'other', start: '2026-11-21T13:00:00.000Z' };
+const OPEN = { timestamp: 'open', start: START, end: '2026-11-14T15:30:00.000Z', first: 11, last: 40, topPoints: 10, zonePoints: 1 };
+const OTHER = { ...OPEN, timestamp: 'other', start: '2026-11-21T13:00:00.000Z', end: '2026-11-21T15:30:00.000Z' };
 
 const tries = (competition, boulder, results) => [...results].map((letter) => ({
   competition: competition.timestamp,

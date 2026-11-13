@@ -47,8 +47,8 @@ export const gyms = createEntryLog({
 
 export const competitions = createEntryLog({
   file: 'competitions.csv',
-  columns: ['timestamp', 'name', 'start', 'minutes', 'first', 'last', 'topPoints', 'zonePoints'],
-  numbers: ['minutes', 'first', 'last', 'topPoints', 'zonePoints'],
+  columns: ['timestamp', 'name', 'start', 'end', 'first', 'last', 'topPoints', 'zonePoints'],
+  numbers: ['first', 'last', 'topPoints', 'zonePoints'],
   keys: { entries: 'logger.v2.competitions.csv', sync: 'logger.v2.competitions-sync' },
 });
 

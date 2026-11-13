@@ -1,13 +1,10 @@
-const MINUTE_MS = 60000;
 const SCORING_RESULTS = ['top', 'zone'];
 
 export const RESULTS = { attempt: 'Attempt', zone: 'Zone', top: 'Top' };
 
 const startOf = (competition) => Date.parse(competition.start);
 
-const lengthOf = (competition) => competition.minutes * MINUTE_MS;
-
-export const endOf = (competition) => startOf(competition) + lengthOf(competition);
+export const endOf = (competition) => Date.parse(competition.end);
 
 export const boulderNumbers = ({ first, last }) => Array.from({ length: last - first + 1 }, (_, i) => first + i);
 
@@ -41,10 +38,11 @@ export function scoreOf(competition, board) {
 
 export function clockOf(competition, now) {
   const startAt = startOf(competition);
-  const length = lengthOf(competition);
+  const endAt = endOf(competition);
+  const length = endAt - startAt;
   if (now < startAt) return { phase: 'before', startsIn: startAt - now, length };
-  if (now >= startAt + length) return { phase: 'after', length };
-  return { phase: 'live', elapsed: now - startAt, left: startAt + length - now, length };
+  if (now >= endAt) return { phase: 'after', length };
+  return { phase: 'live', elapsed: now - startAt, left: endAt - now, length };
 }
 
 export const liveCompetition = (competitions, now) => competitions

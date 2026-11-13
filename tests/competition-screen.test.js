@@ -40,9 +40,16 @@ const tileIs = (boulder, state) => isShown('competition-board', `class="boulder 
 
 function addCompetition(name, fields = {}) {
   click('competition-picker', { action: 'add', name });
-  fillForm({ start: `${NEXT_YEAR}-03-07T10:00`, ...fields });
+  fillForm({ start: `${NEXT_YEAR}-03-07T10:00`, end: `${NEXT_YEAR}-03-07T12:00`, ...fields });
   submit();
 }
+
+function change(id, value) {
+  element(id).value = value;
+  element(id).dispatch('change', {});
+}
+
+const when = (minutesFromNow) => formatDateTimeValue(new Date(Date.now() + minutesFromNow * MINUTE));
 
 function fillForm(fields) {
   Object.entries(fields).forEach(([field, value]) => { element(`competition-${field}`).value = value; });
@@ -56,12 +63,11 @@ function logOn(boulder, results) {
 test('with no competition yet the form opens, and saving it shows a board of its boulders', () => {
   openCompetitions();
   assertEqual([element('competition-form').hidden, element('competition-controls').hidden], [false, true], 'form shown first');
-  fillForm({ name: ' Spring Open ', start: `${NEXT_YEAR}-03-01T14:00`, first: '11', last: '40' });
-  click('competition-form', { action: 'minutes', steps: '2' });
+  fillForm({ name: ' Spring Open ', start: `${NEXT_YEAR}-03-01T14:00`, end: `${NEXT_YEAR}-03-01T16:30`, first: '11', last: '40' });
   submit();
-  const { name, start, minutes, first, last, topPoints, zonePoints } = named('Spring Open');
-  assertEqual([name, minutes, first, last, topPoints, zonePoints], ['Spring Open', 150, 11, 40, 10, 1], 'saved');
-  assertEqual(formatDateTimeValue(new Date(start)), `${NEXT_YEAR}-03-01T14:00`, 'start');
+  const { name, start, end, first, last, topPoints, zonePoints } = named('Spring Open');
+  assertEqual([name, first, last, topPoints, zonePoints], ['Spring Open', 11, 40, 10, 1], 'saved');
+  assertEqual([start, end].map((time) => formatDateTimeValue(new Date(time))), [`${NEXT_YEAR}-03-01T14:00`, `${NEXT_YEAR}-03-01T16:30`], 'times');
   assertEqual([element('competition-form').hidden, element('competition-controls').hidden], [true, false], 'board shown');
   assertEqual([tileIs(11, 'untouched'), tileIs(40, 'untouched'), isShown('competition-board', 'data-boulder="41"')], [true, true, false], 'tiles');
 });
@@ -109,6 +115,20 @@ test('two competitions cannot share a name', () => {
   assertEqual(competitions.getEntries().filter((competition) => competition.name.toLowerCase() === 'twin open').length, 1, 'kept one');
 });
 
+test('moving the start moves the end with it, and an end before the start is refused', () => {
+  openCompetitions();
+  addCompetition('Late Open');
+  click('competition-actions', { action: 'edit' });
+  change('competition-start', `${NEXT_YEAR}-03-08T10:30`);
+  assertEqual(element('competition-end').value, `${NEXT_YEAR}-03-08T12:30`, 'end moved');
+  fillForm({ end: `${NEXT_YEAR}-03-08T10:30` });
+  submit();
+  assertEqual(element('competition-error').hidden, false, 'refused');
+  fillForm({ end: `${NEXT_YEAR}-03-08T13:00` });
+  submit();
+  assertEqual(formatDateTimeValue(new Date(named('Late Open').end)), `${NEXT_YEAR}-03-08T13:00`, 'saved');
+});
+
 test('editing a competition keeps the tries logged in it', () => {
   openCompetitions();
   addCompetition('Edit Open');
@@ -138,7 +158,7 @@ test('a running competition shows the time left and counts as live', () => {
   openCompetitions();
   assertEqual(hasLiveCompetition(), false, 'none running');
   assertEqual([element('competition-meta').hidden, element('competition-main-label').textContent], [false, 'Starts in'], 'before the start');
-  addCompetition('Live Open', { start: formatDateTimeValue(new Date(Date.now() - 30 * MINUTE)) });
+  addCompetition('Live Open', { start: when(-30), end: when(90) });
   assertEqual(hasLiveCompetition(), true, 'running');
   assertEqual([element('competition-meta').hidden, element('competition-main-label').textContent], [true, 'Left'], 'clock');
 });
