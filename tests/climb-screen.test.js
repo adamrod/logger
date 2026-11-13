@@ -6,7 +6,7 @@ import { enterClimbSession, initClimbSession, renderClimbSession } from '../js/c
 import { enterDayCalendar, initDayCalendar, renderDayCalendar } from '../js/day-calendar-screen.js';
 import { climbingSessions, numberGrades, openProjects } from '../js/climbing.js';
 import { onChange } from '../js/events.js';
-import { formatClock, formatIsoDate } from '../js/format.js';
+import { formatDateTimeSecondsValue, formatIsoDate } from '../js/format.js';
 import { saveGym } from '../js/gyms.js';
 import { climbs } from '../js/store.js';
 import { nextRedo, nextUndo, trackPlace } from '../js/undo.js';
@@ -14,6 +14,7 @@ import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
 
 const GYM = 'Boulder hall';
+const DAY_MS = 86400000;
 
 let isOpen = false;
 
@@ -137,26 +138,37 @@ test('renaming and tagging the chosen climb changes every attempt on it', () => 
   assertEqual(attemptsOf(climb).map((attempt) => [attempt.name, attempt.tags]), [['Arete', 'Roof'], ['Arete', 'Roof']]);
 });
 
-test('the climb editor changes the grade and name of every attempt, and each attempt\'s result and time', () => {
+test('the climb editor changes the grade and name of every attempt, and each attempt\'s result, date and time', () => {
   openClimb();
   startFresh('3');
   logAll('AA');
   const [first, second] = attemptsOf(last().climb);
   editTheClimb(first.climb);
   assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [true, false], 'while editing');
-  assertEqual(isShown('climb-attempts', 'aria-label="Time of attempt 2"'), true, 'lists attempts');
-  assertEqual(isShown('climb-attempts', `<span class="attempt-day">${formatIsoDate(new Date(second.timestamp))}</span>`), true, 'shows the day');
+  assertEqual(isShown('climb-attempts', 'aria-label="Date and time of attempt 2"'), true, 'lists attempts');
+  assertEqual(isShown('climb-attempts', `value="${formatDateTimeSecondsValue(new Date(second.timestamp))}"`), true, 'shows the date and time');
   controls({ action: 'grade', grade: '8' });
   change('climb-name', 'Crack');
   controls({ action: 'toggle-result', id: second.timestamp });
-  const earlierAt = new Date(Math.floor((Date.parse(first.timestamp) - 61000) / 1000) * 1000);
-  const earlier = formatClock(earlierAt);
+  const earlierAt = new Date(Math.floor((Date.parse(first.timestamp) - DAY_MS - 61000) / 1000) * 1000);
+  const earlier = formatDateTimeSecondsValue(earlierAt);
   element('climb-attempts').dispatch('change', { target: { dataset: { id: first.timestamp }, value: earlier } });
   controls({ action: 'save' });
   const edited = attemptsOf(first.climb);
   assertEqual(edited.map((attempt) => [attempt.grade, attempt.name, attempt.result]), [['8', 'Crack', 'attempt'], ['8', 'Crack', 'top']], 'saved');
-  assertEqual(edited[0].timestamp, earlierAt.toISOString(), 'moved to the second');
+  assertEqual(edited[0].timestamp, earlierAt.toISOString(), 'moved to the day and second');
   assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [false, true], 'after saving');
+});
+
+test('tapping the current climb\'s title opens its attempts, a new climb\'s title does nothing', () => {
+  openClimb();
+  startFresh('3');
+  assertEqual(element('climb-open').disabled, true, 'new climb');
+  log('attempt');
+  assertEqual(element('climb-open').disabled, false, 'current climb');
+  controls({ action: 'edit-current' });
+  assertEqual([element('climb-attempts').hidden, element('climb-open').disabled], [false, true], 'editing');
+  assertEqual(isShown('climb-attempts', 'aria-label="Date and time of attempt 1"'), true, 'lists its attempt');
 });
 
 test('an attempt removed in the editor is gone once saved, and undo brings it back', async () => {

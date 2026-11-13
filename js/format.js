@@ -25,8 +25,6 @@ export const describeSet = (set) => [set.variant, formatSet(set)].filter(Boolean
 
 export const formatTime = (date) => TIME.format(date);
 
-export const formatClock = (date) => [date.getHours(), date.getMinutes(), date.getSeconds()].map(pad).join(':');
-
 export function formatWhen(date) {
   const day = date.getFullYear() === new Date().getFullYear() ? DAY_MONTH : DAY_MONTH_YEAR;
   return `${day.format(date)} · ${formatTime(date)}`;
@@ -93,9 +91,11 @@ export function parseDateValue(value) {
 
 export const formatDateTimeValue = (date) => `${formatIsoDate(date)}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 
+export const formatDateTimeSecondsValue = (date) => `${formatDateTimeValue(date)}:${pad(date.getSeconds())}`;
+
 export function parseDateTimeValue(value) {
-  const [year, month, day, hours, minutes] = value.split(/\D/).map(Number);
-  return new Date(year, month - 1, day, hours, minutes);
+  const [year, month, day, hours, minutes, seconds = 0] = value.split(/\D/).map(Number);
+  return new Date(year, month - 1, day, hours, minutes, seconds);
 }
 
 export function formatIsoDate(date) {

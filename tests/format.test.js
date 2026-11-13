@@ -1,5 +1,5 @@
-import { formatDateTimeValue, formatDay, formatDuration, formatIsoDate, parseDateTimeValue, parseDateValue } from '../js/format.js';
-import { readWhen, showWhen } from '../js/when-field.js';
+import { formatDateTimeSecondsValue, formatDateTimeValue, formatDay, formatDuration, formatIsoDate, parseDateTimeValue, parseDateValue } from '../js/format.js';
+import { readSecondsValue, readWhen, showWhen } from '../js/when-field.js';
 import { assertEqual, test } from './harness.js';
 
 const MINUTE = 60000;
@@ -19,6 +19,15 @@ test('date-time values round-trip in local time', () => {
   const date = new Date(2026, 9, 30, 7, 4);
   assertEqual(formatDateTimeValue(date), '2026-10-30T07:04');
   assertEqual(parseDateTimeValue('2026-10-30T07:04').getTime(), date.getTime());
+});
+
+test('date-time values with seconds round-trip in local time, and an untouched one keeps the exact timestamp', () => {
+  const date = new Date(2026, 9, 30, 7, 4, 9);
+  assertEqual(formatDateTimeSecondsValue(date), '2026-10-30T07:04:09');
+  assertEqual(parseDateTimeValue('2026-10-30T07:04:09').getTime(), date.getTime());
+  const timestamp = new Date(2026, 9, 30, 7, 4, 9, 123).toISOString();
+  assertEqual(readSecondsValue(timestamp, '2026-10-30T07:04:09'), timestamp);
+  assertEqual(readSecondsValue(timestamp, '2026-10-29T07:04:09'), new Date(2026, 9, 29, 7, 4, 9).toISOString());
 });
 
 test('an untouched date field keeps the exact timestamp', () => {

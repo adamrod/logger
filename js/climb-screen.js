@@ -5,7 +5,7 @@ import {
   openProjects, tagsOf,
 } from './climbing.js';
 import { onAction } from './events.js';
-import { countText, escapeHtml, formatClock, formatDuration, formatIsoDate } from './format.js';
+import { countText, escapeHtml, formatDateTimeSecondsValue, formatDuration } from './format.js';
 import { initGymForm, isGymFormOpen, openGymForm, showFirstGymForm } from './gym-form.js';
 import { allGyms, gradesAt, gymGrades } from './gyms.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
@@ -13,7 +13,7 @@ import { createPickerMenu } from './picker-menu.js';
 import { createStopwatch, restartUnlessStartedSince } from './stopwatch.js';
 import { climbs } from './store.js';
 import { undoable } from './undo.js';
-import { readTime } from './when-field.js';
+import { readSecondsValue } from './when-field.js';
 
 const STATE_KEY = 'logger.v2.climb';
 const TICK_MS = 1000;
@@ -26,6 +26,7 @@ const controls = document.getElementById('climb-controls');
 const styleSelect = document.getElementById('climb-style');
 const gradeChips = document.getElementById('grade-chips');
 const cardEl = document.getElementById('climb-card');
+const cardOpen = document.getElementById('climb-open');
 const cardTitle = document.getElementById('climb-title');
 const cardMeta = document.getElementById('climb-meta');
 const newButton = document.getElementById('climb-new');
@@ -95,6 +96,7 @@ const actions = {
     tagInput.focus();
   },
   'edit-climb': ({ climb }) => editClimb(climb),
+  'edit-current': () => editClimb(place.selected),
   'toggle-result': ({ id }) => changeAttempt(id, (attempt) => ({ ...attempt, result: attempt.result === 'top' ? 'attempt' : 'top' })),
   'remove-attempt': ({ id }) => {
     editing.attempts = editing.attempts.filter((attempt) => attempt.timestamp !== id);
@@ -131,7 +133,7 @@ export function initClimb() {
   nameInput.addEventListener('change', () => changeClimb({ name: nameInput.value.trim() }));
   nameInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') nameInput.blur(); });
   tagForm.addEventListener('submit', addTag);
-  attemptsEl.addEventListener('change', ({ target }) => changeAttempt(target.dataset.id, (attempt) => ({ ...attempt, time: target.value })));
+  attemptsEl.addEventListener('change', ({ target }) => changeAttempt(target.dataset.id, (attempt) => ({ ...attempt, when: target.value })));
   sessionStopwatch.init();
   setInterval(renderRest, TICK_MS);
 }
@@ -167,7 +169,7 @@ export function editClimb(id) {
     tags,
     style,
     loggedStyle: style,
-    attempts: attempts.map(({ timestamp, result }) => ({ timestamp, result, time: formatClock(new Date(timestamp)) })),
+    attempts: attempts.map(({ timestamp, result }) => ({ timestamp, result, when: formatDateTimeSecondsValue(new Date(timestamp)) })),
   };
   isConfirmingDelete = false;
   openPanel = null;
@@ -355,7 +357,7 @@ function saveClimb() {
   stopEditing();
   undoable(() => attemptsOfClimb(allAttempts(), id).forEach(({ timestamp }) => {
     const attempt = edited.get(timestamp);
-    if (attempt) climbs.update(timestamp, { ...climbFields, result: attempt.result, timestamp: readTime(timestamp, attempt.time) });
+    if (attempt) climbs.update(timestamp, { ...climbFields, result: attempt.result, timestamp: readSecondsValue(timestamp, attempt.when) });
     else climbs.remove(timestamp);
   }));
 }
@@ -399,6 +401,7 @@ function renderCard() {
   cardEl.classList.toggle('is-current', Boolean(edited || selected));
   cardTitle.textContent = edited ? 'Editing climb' : climb.name || (selected ? 'Climb' : 'New climb');
   cardMeta.textContent = cardMetaText(edited, selected);
+  cardOpen.disabled = Boolean(edited || !selected);
   newButton.hidden = Boolean(edited || !selected);
   renderProjects(edited ? [] : openProjects(allAttempts(), currentGym(), currentKind()));
   nameToggle.textContent = climb.name ? 'Rename' : '+ Name';
@@ -450,14 +453,14 @@ function renderEditing() {
   if (editing) setHtml(attemptsEl, editing.attempts.map(attemptEditHtml).join(''));
 }
 
-function attemptEditHtml({ timestamp, result, time }, i) {
+function attemptEditHtml({ timestamp, result, when }, i) {
   const id = escapeHtml(timestamp);
   const isTopped = result === 'top';
   return `
     <li class="attempt-edit">
       <span class="attempt-number">${i + 1}</span>
-      <span class="attempt-day">${formatIsoDate(new Date(timestamp))}</span>
-      <input class="input attempt-time" type="time" step="1" data-id="${id}" value="${escapeHtml(time)}" aria-label="Time of attempt ${i + 1}">
+      <input class="input attempt-when" type="datetime-local" step="1" data-id="${id}" value="${escapeHtml(when)}"
+        max="${formatDateTimeSecondsValue(new Date())}" aria-label="Date and time of attempt ${i + 1}">
       <button type="button" class="chip result-chip" data-action="toggle-result" data-id="${id}" aria-pressed="${isTopped}">${isTopped ? 'Top' : 'Attempt'}</button>
       <button type="button" class="option-icon" data-action="remove-attempt" data-id="${id}" aria-label="Remove attempt ${i + 1}">${REMOVE_ICON}</button>
     </li>`;
