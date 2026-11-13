@@ -1,8 +1,8 @@
 import { revealPressedChip } from './chip-row.js';
-import { climbContext, climbHistoryHtml, projectListHtml } from './climb-history.js';
+import { climbContext, climbHistoryHtml } from './climb-history.js';
 import {
   DEFAULT_TAGS, STYLES, UNGRADED, attemptsOfClimb, climbOf, climbingSessions, isLive, joinTags, kindOf, lastGradeAt, lastStyleAt,
-  openProjects, tagsOf,
+  tagsOf,
 } from './climbing.js';
 import { onAction } from './events.js';
 import { countText, escapeHtml, formatDuration, formatTime } from './format.js';
@@ -54,7 +54,6 @@ let draft = NEW_CLIMB;
 let editing = null;
 let isConfirmingDelete = false;
 let openPanel = null;
-let removingProject = null;
 let isGradeRevealDue = true;
 
 const gymPicker = createPickerMenu('gym', {
@@ -111,14 +110,6 @@ const actions = {
     renderClimb();
   },
   'confirm-delete': () => deleteClimb(),
-  'remove-project': ({ climb }) => {
-    removingProject = climb;
-    renderClimb();
-  },
-  'confirm-remove-project': ({ climb }) => {
-    removingProject = null;
-    climbs.updateWhere((attempt) => attempt.climb === climb, { name: '' });
-  },
 };
 
 export function initClimb() {
@@ -168,7 +159,6 @@ export function editClimb(id) {
   };
   isConfirmingDelete = false;
   openPanel = null;
-  removingProject = null;
   renderClimb();
 }
 
@@ -270,7 +260,6 @@ function pickClimb(id) {
   const latest = attemptsOfClimb(allAttempts(), id).at(-1);
   const style = kindOf(currentStyle()) === kindOf(latest.style) ? currentStyle() : latest.style;
   stopEditing();
-  removingProject = null;
   openPanel = null;
   savePlace({ gym: latest.gym, styles: { ...place.styles, [latest.gym]: style }, selected: id });
   isGradeRevealDue = true;
@@ -453,11 +442,5 @@ function renderHistory() {
   const sessions = climbingSessions(allAttempts()).filter((session) => session.gym === currentGym());
   const view = { selectedId: editing?.id ?? place.selected, action: 'pick' };
   analysisLink.hidden = !sessions.length;
-  setHtml(historyEl, projectsHtml() + climbHistoryHtml(sessions, climbContext(), view));
-}
-
-function projectsHtml() {
-  const live = new Set(liveSession()?.attempts.map((attempt) => attempt.climb));
-  const projects = openProjects(allAttempts(), currentGym(), currentKind()).filter((project) => !live.has(project.id));
-  return projects.length ? `<h2 class="label climb-subhead">Projects</h2>${projectListHtml(projects, removingProject)}` : '';
+  setHtml(historyEl, climbHistoryHtml(sessions, climbContext(), view));
 }

@@ -1,7 +1,7 @@
 import { calendarDays, parseMonthValue, monthValue } from '../js/calendar.js';
 import {
   FONT_GRADES, UNGRADED, attemptsByGrade, climbStats, climbingSessions, gradePyramid, hardestGrade, isLive, meanRest,
-  numberGrades, openProjects, outcomeOf, recordSends, scaleTypeOf, sessionFocus, stylesText, tagCounts,
+  numberGrades, outcomeOf, recordSends, scaleTypeOf, sessionFocus, stylesText, tagCounts,
 } from '../js/climbing.js';
 import { formatDuration, formatLength, ordinal } from '../js/format.js';
 import { assertEqual, test } from './harness.js';
@@ -99,20 +99,6 @@ test('a session is read by its main discipline', () => {
   assertEqual([kind, attempts.map((each) => each.style)], ['rope', ['lead', 'toprope']]);
   assertEqual(sessionFocus({ attempts: [attempt(0, {}), attempt(3, { style: 'lead' })] }).kind, 'boulder', 'a tie goes to boulders');
   assertEqual(stylesText(session.attempts), 'Lead, Boulder, Top rope');
-});
-
-test('projects are named climbs at the gym not sent yet, latest first', () => {
-  const attempts = [
-    attempt(0, { climb: 'p', name: 'Pink' }),
-    attempt(3, { climb: 's', name: 'Sent', result: 'top' }),
-    attempt(6, { climb: 'u' }),
-    attempt(9, { climb: 'r', name: 'Rope', style: 'lead', grade: '6a' }),
-    attempt(12, { climb: 'o', name: 'Other gym', gym: 'Cave' }),
-    attempt(15, { climb: 't', name: 'Topped on rope', style: 'toprope', result: 'top' }),
-    attempt(18, { climb: 'b', name: 'Blue' }),
-  ];
-  assertEqual(openProjects(attempts, 'Wall', 'boulder').map((project) => project.name), ['Blue', 'Pink']);
-  assertEqual(openProjects(attempts, 'Wall', 'rope').map((project) => project.name), ['Topped on rope', 'Rope']);
 });
 
 test('the pyramid and the tags count a climb as sent once it was sent by its last attempt in the range', () => {

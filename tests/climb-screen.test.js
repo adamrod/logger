@@ -4,7 +4,7 @@ import { enterClimbAnalysis, initClimbAnalysis, renderClimbAnalysis } from '../j
 import { climbPlace, initClimb, renderClimb, revealClimbs } from '../js/climb-screen.js';
 import { enterClimbSession, initClimbSession, renderClimbSession } from '../js/climb-session-screen.js';
 import { enterDayCalendar, initDayCalendar, renderDayCalendar } from '../js/day-calendar-screen.js';
-import { climbingSessions, numberGrades, openProjects } from '../js/climbing.js';
+import { climbingSessions, numberGrades } from '../js/climbing.js';
 import { onChange } from '../js/events.js';
 import { formatIsoDate, formatTime } from '../js/format.js';
 import { saveGym } from '../js/gyms.js';
@@ -233,7 +233,7 @@ test('Lead starts a new climb on French grades, and top rope after lead stays on
   assertEqual(attemptsOf(climb).map((attempt) => [attempt.style, attempt.grade]), [['lead', '6b'], ['toprope', '6b']]);
 });
 
-test('picking a project from another day goes back to its gym and style and continues it', () => {
+test('picking a named climb from another day goes back to its gym and style and continues it', () => {
   openClimb();
   startFresh('9');
   change('climb-name', 'Moon');
@@ -244,19 +244,6 @@ test('picking a project from another day goes back to its gym and style and cont
   click('climb-history', { action: 'pick', climb });
   log('attempt');
   assertEqual([last().climb, last().style, attemptsOf(climb).length], [climb, 'boulder', 2]);
-});
-
-test('removing a project clears its name, so it leaves the projects', () => {
-  openClimb();
-  startFresh('9');
-  change('climb-name', 'Roof crack');
-  log('attempt');
-  const { climb } = last();
-  const isProject = () => openProjects(climbs.getEntries(), GYM, 'boulder').some((project) => project.id === climb);
-  assertEqual(isProject(), true, 'named');
-  click('climb-history', { action: 'remove-project', climb });
-  click('climb-history', { action: 'confirm-remove-project', climb });
-  assertEqual([isProject(), last().name], [false, ''], 'removed');
 });
 
 test('adding a gym from the menu opens its form in place of the climbing controls and picks it once saved', () => {

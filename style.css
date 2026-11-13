@@ -653,7 +653,6 @@ li:first-child > .option-new { border-top: none; }
 
 .history-calendar { width: 36px; height: 34px; margin: 0 auto 0 0; }
 .history-calendar:has(+ .history-filter:not([hidden])) { margin-right: 0; }
-.climb-subhead { padding: 12px 0 4px; }
 .climb-day { display: block; }
 .climb-day .history-date { display: block; }
 
