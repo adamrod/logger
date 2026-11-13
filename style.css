@@ -671,8 +671,8 @@ li:first-child > .option-new { border-top: none; }
 .attempt-dot.is-top::after { border-color: var(--text); background: var(--text); }
 
 .attempt-edits { margin: 0 0 12px; padding: 0; list-style: none; }
-.attempt-edit { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--divider); }
-.attempt-number { font-size: 13px; color: var(--muted); }
+.attempt-edit { display: grid; grid-template-columns: 20px max-content minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--divider); }
+.attempt-number, .attempt-day { font-size: 13px; color: var(--muted); }
 .attempt-time { height: 40px; padding: 0 10px; font-size: 16px; -webkit-appearance: none; appearance: none; }
 .result-chip { min-width: 84px; height: 36px; padding: 0 12px; font-size: 14px; }
 .attempt-edit .option-icon { margin-right: -10px; }
