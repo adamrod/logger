@@ -7,6 +7,7 @@ import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
 
 const MINUTE = 60000;
+const REST_KEY = 'logger.v2.competition-rest';
 const NEXT_YEAR = new Date().getFullYear() + 1;
 
 let isOpen = false;
@@ -110,6 +111,33 @@ test('tapping Zone or Top again on a boulder that has it takes it back', () => {
   logOn(4, 'T');
   logOn(6, 'T');
   assertEqual(resultsOf('Toggle Open').filter(([, result]) => result === 'top'), [[4, 'top'], [6, 'top']], 'other boulders keep theirs');
+});
+
+test('logging a try restarts the rest stopwatch while restart on log is ticked, taking one back does not', () => {
+  openCompetitions();
+  addCompetition('Rest Open');
+  const isResting = () => JSON.parse(localStorage.getItem(REST_KEY)).startedAt !== null;
+  const stopRest = () => { if (isResting()) controls({ action: 'competition-rest-toggle' }); };
+  const tickRestart = (isTicked) => {
+    element('competition-rest-restart-on-log').checked = isTicked;
+    element('competition-rest-restart-on-log').dispatch('change', {});
+  };
+  logOn(3, 'A');
+  stopRest();
+  controls({ action: 'competition-rest-toggle' });
+  assertEqual(isResting(), true, 'started by hand');
+  stopRest();
+  logOn(3, 'A');
+  assertEqual(isResting(), true, 'restarted by a try');
+  stopRest();
+  logOn(3, 'T');
+  stopRest();
+  logOn(3, 'T');
+  assertEqual(isResting(), false, 'left alone when a top is taken back');
+  tickRestart(false);
+  logOn(3, 'A');
+  assertEqual(isResting(), false, 'left alone when unticked');
+  tickRestart(true);
 });
 
 test('a logged try can be changed to another result or removed', () => {

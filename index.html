@@ -484,7 +484,10 @@
             </div>
           </div>
           <div class="board" id="competition-board" role="group" aria-labelledby="competition-board-label"></div>
-          <span class="legend"><span class="cell"></span>tried<span class="cell is-zone"></span>zone<span class="cell is-sent"></span>top</span>
+          <div class="label-row board-options">
+            <span class="legend"><span class="cell"></span>tried<span class="cell is-zone"></span>zone<span class="cell is-sent"></span>top</span>
+            <label class="stopwatch-option"><input type="checkbox" class="check" id="competition-rest-restart-on-log"> Restart rest on log</label>
+          </div>
         </div>
 
         <section class="climb-card" id="competition-boulder" aria-label="Boulder">
@@ -494,6 +497,16 @@
               <span class="climb-title" id="competition-boulder-title"></span>
               <span class="climb-meta" id="competition-boulder-meta"></span>
             </button>
+            <div class="stopwatch competition-rest" id="competition-rest">
+              <button type="button" class="stopwatch-button" data-action="competition-rest-reset" aria-label="Reset rest"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v4h4"/></svg></button>
+              <div class="competition-rest-time">
+                <span class="label" id="competition-rest-label">Rest</span>
+                <span class="stopwatch-time" id="competition-rest-time" role="timer" aria-labelledby="competition-rest-label">0:00</span>
+              </div>
+              <button type="button" class="stopwatch-button" id="competition-rest-toggle" data-action="competition-rest-toggle" aria-label="Start rest">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path id="competition-rest-icon" d="M8 5.5v13l10.5-6.5z"/></svg>
+              </button>
+            </div>
           </div>
           <ol class="attempt-edits" id="competition-attempts" aria-label="Attempts" hidden></ol>
         </section>

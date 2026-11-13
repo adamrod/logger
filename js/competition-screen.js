@@ -5,6 +5,7 @@ import { allCompetitions, competitionById, competitionNamed } from './competitio
 import { onAction } from './events.js';
 import { countText, escapeHtml, formatDuration, formatTime, formatWhen } from './format.js';
 import { createPickerMenu } from './picker-menu.js';
+import { createStopwatch, restartAfterLog } from './stopwatch.js';
 import { competitionAttempts } from './store.js';
 import { undoable } from './undo.js';
 
@@ -37,6 +38,8 @@ const logButtons = Object.fromEntries(Object.keys(RESULTS).map((result) => [resu
 let place = { competition: null, boulder: null, ...JSON.parse(localStorage.getItem(STATE_KEY) ?? '{}') };
 let isShowingAttempts = false;
 
+const restStopwatch = createStopwatch({ id: 'competition-rest', name: 'rest', storageKey: 'logger.v2.competition-rest' });
+
 const picker = createPickerMenu('competition', {
   names: () => allCompetitions().map((competition) => competition.name),
   onPick: (name) => showCompetition(competitionNamed(name)),
@@ -44,6 +47,7 @@ const picker = createPickerMenu('competition', {
 });
 
 const actions = {
+  ...restStopwatch.actions,
   boulder: ({ boulder }) => {
     savePlace({ boulder: Number(boulder) });
     isShowingAttempts = false;
@@ -62,6 +66,7 @@ export function initCompetition() {
   initCompetitionForm(closeForm);
   onAction([controls], actions);
   onAction([actionsEl], { edit: () => editCompetition({ competition: currentCompetition() }) });
+  restStopwatch.init();
   setInterval(renderClock, TICK_MS);
 }
 
@@ -125,7 +130,12 @@ function closeForm(savedName) {
 function logOrReverse(result) {
   const logged = REVERSIBLE_RESULTS.includes(result) ? triesWith(result) : [];
   if (logged.length) undoable(() => logged.forEach(({ timestamp }) => competitionAttempts.remove(timestamp)));
-  else competitionAttempts.add({ competition: currentCompetition().timestamp, boulder: place.boulder, result });
+  else logTry(result);
+}
+
+function logTry(result) {
+  competitionAttempts.add({ competition: currentCompetition().timestamp, boulder: place.boulder, result });
+  restStopwatch.update(restartAfterLog);
 }
 
 function triesWith(result) {
@@ -179,7 +189,7 @@ function renderBoulder(boulder) {
   const isOpen = isShowingAttempts && hasAttempts;
   cardEl.classList.toggle('is-current', Boolean(boulder));
   cardTitle.textContent = boulder ? `Boulder ${boulder.number}` : 'Pick a boulder';
-  cardMeta.textContent = boulder ? boulderText(boulder) : 'Tap its number, then log each try';
+  cardMeta.textContent = boulder ? boulderText(boulder) : 'Tap its number to log';
   cardOpen.disabled = !hasAttempts;
   cardOpen.setAttribute('aria-expanded', isOpen);
   attemptsEl.hidden = !isOpen;
