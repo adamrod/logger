@@ -32,3 +32,14 @@ test('the line reaches the label column fitted to whole-number labels', () => {
 test('the line leaves room for wider decimal labels', () => {
   assertEqual(lineEnd([60, 62]), 375 - 8 - 4 * 7);
 });
+
+test('a goal band stretches the scale to show its dashed edges beside the weights', () => {
+  const plot = element('chart-band');
+  plot.clientWidth = 375;
+  const dates = [new Date(2026, 9, 1), new Date(2026, 9, 31)];
+  createLineChart(plot, () => {}).draw(dates.map((date, i) => ({ date, value: 66 + i })), { band: { low: 62, high: 64 } });
+  const edges = [...plot.innerHTML.matchAll(/class="band-edge"[^>]*y1="([\d.]+)"/g)].map(([, y]) => Number(y));
+  const labels = [...plot.innerHTML.matchAll(/dy="0.35em">([\d.]+)</g)].map(([, label]) => Number(label));
+  assertEqual([labels[0], labels.at(-1)], [62, 67], 'scale');
+  assertEqual(edges, [8 + (3 / 5) * 132, 140], 'edges');
+});

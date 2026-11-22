@@ -59,7 +59,7 @@ function entryHtml(entry, view) {
   return `
     <li class="set"${currentDateAttribute(entryDate(entry))}>
       <button type="button" class="set-row" ${editAttributes(entry, view.describe(entry), view.editingId)}>
-        ${leadHtml}<span class="set-info"><span class="set-text">${view.valueHtml(entry)}</span>${unsyncedHtml(entry, view.isUnsynced)}</span>
+        ${leadHtml}<span class="set-info"><span class="set-text">${view.valueHtml(entry)}</span>${unsyncedHtml(entry, view.isUnsynced)}${view.trailHtml?.(entry) ?? ''}</span>
         <span class="set-editing">${isEditing ? 'Editing' : ''}</span>
       </button>
     </li>`;

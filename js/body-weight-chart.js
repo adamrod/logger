@@ -1,9 +1,10 @@
+import { currentGoal, goalText } from './body-weight-goal.js';
 import { createRangePicker } from './chart-controls.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
 import { formatChange, formatDay, roundValue } from './format.js';
 import { createLineChart } from './line-chart.js';
-import { bodyWeights } from './store.js';
+import { bodyWeightGoals, bodyWeights } from './store.js';
 
 const section = document.getElementById('chart');
 const valueEl = document.getElementById('chart-value');
@@ -12,14 +13,19 @@ const changeEl = document.getElementById('chart-change');
 const extremesEl = document.getElementById('chart-extremes');
 const minEl = document.getElementById('chart-min');
 const maxEl = document.getElementById('chart-max');
+const goalButton = document.getElementById('chart-goal');
 const chart = createLineChart(document.getElementById('chart-plot'), showPoint);
 
 let rangePicker;
 let extremes = { min: 0, max: 0 };
 
-export function initChart() {
+export function initChart(openGoal) {
   rangePicker = createRangePicker('chart', renderChart);
-  onAction([extremesEl], { min: () => chart.selectAt(extremes.min), max: () => chart.selectAt(extremes.max) });
+  onAction([extremesEl], {
+    min: () => chart.selectAt(extremes.min),
+    max: () => chart.selectAt(extremes.max),
+    goal: openGoal,
+  });
 }
 
 export function renderChart() {
@@ -29,7 +35,9 @@ export function renderChart() {
   const entries = rangePicker.filter(all);
   changeEl.textContent = changeText(entries);
   showExtremes(entries);
-  chart.draw(entries.map((entry) => ({ date: entryDate(entry), value: entry.weight })));
+  const goal = currentGoal(bodyWeightGoals.getEntries());
+  goalButton.textContent = goal ? `Goal ${goalText(goal)}` : 'Set goal';
+  chart.draw(entries.map((entry) => ({ date: entryDate(entry), value: entry.weight })), { band: goal });
 }
 
 function changeText(entries) {

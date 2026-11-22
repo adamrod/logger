@@ -356,6 +356,9 @@ li:first-child > .option-new { border-top: none; }
 .date-input::-webkit-date-and-time-value { text-align: center; }
 .range-dash { color: var(--muted); }
 
+.goal-range { display: flex; align-items: center; gap: 8px; }
+.goal-range .input { min-width: 0; }
+
 .chart-readout { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 4px; }
 .readout-stacked { white-space: nowrap; }
 .readout-stacked > .chart-meta { flex: none; }
@@ -375,6 +378,8 @@ li:first-child > .option-new { border-top: none; }
 .chart-plot .axis-label { font-size: 11px; fill: var(--muted); }
 .chart-plot .line { fill: none; stroke: var(--text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .chart-plot .points { fill: none; stroke: var(--text); stroke-width: 5; stroke-linecap: round; }
+.chart-plot .band { fill: var(--text); fill-opacity: 0.06; }
+.chart-plot .band-edge { stroke: var(--muted); stroke-dasharray: 4 4; }
 .chart-plot .crosshair { stroke: var(--border); }
 .chart-plot .marker { fill: var(--text); stroke: var(--bg); stroke-width: 2; }
 
@@ -593,6 +598,18 @@ li:first-child > .option-new { border-top: none; }
 .set-weight { display: inline-block; min-width: 5ch; }
 :is(.set-delta, .set-days) { font-size: 13px; font-weight: 400; color: var(--muted); }
 .set-delta { display: inline-block; min-width: 5ch; margin-left: 8px; }
+
+.set-goal { flex: none; margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.set-goal.is-met::before {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 10px;
+  margin: 0 5px 3px;
+  border: solid var(--text);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
 
 .set-unsynced { flex: none; display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
 .set-unsynced::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--text); }

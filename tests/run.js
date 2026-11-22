@@ -8,6 +8,7 @@ import './stopwatch.test.js';
 import './picker-menu.test.js';
 import './history.test.js';
 import './analysis.test.js';
+import './body-weight-goal.test.js';
 import './line-chart.test.js';
 import './set-history.test.js';
 import './day-summary.test.js';

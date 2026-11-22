@@ -620,6 +620,23 @@
           <button type="button" class="btn btn-primary" data-action="confirm-delete">Delete</button>
         </div>
       </div>
+      <div class="log-controls" id="body-weight-goal" hidden>
+        <div class="field">
+          <label class="label" for="body-weight-goal-low">Goal</label>
+          <div class="goal-range">
+            <input class="input step-value" id="body-weight-goal-low" inputmode="decimal" enterkeyhint="done"
+              autocomplete="off" placeholder="from" aria-label="Goal from">
+            <span class="range-dash" aria-hidden="true">–</span>
+            <input class="input step-value" id="body-weight-goal-high" inputmode="decimal" enterkeyhint="done"
+              autocomplete="off" placeholder="to" aria-label="Goal to">
+          </div>
+        </div>
+        <div class="edit-actions">
+          <button type="button" class="btn btn-secondary" data-action="goal-cancel">Cancel</button>
+          <button type="button" class="btn btn-secondary" id="body-weight-goal-remove" data-action="goal-remove">Remove</button>
+          <button type="button" class="btn btn-primary" id="body-weight-goal-save" data-action="goal-save">Save</button>
+        </div>
+      </div>
     </div>
 
     <section class="chart" id="chart" aria-labelledby="chart-heading" hidden>
@@ -646,6 +663,8 @@
         <button type="button" class="btn-text readout-max" data-action="min">Min <span id="chart-min"></span></button>
         <span aria-hidden="true">·</span>
         <button type="button" class="btn-text readout-max" data-action="max">Max <span id="chart-max"></span></button>
+        <span aria-hidden="true">·</span>
+        <button type="button" class="btn-text readout-max" id="chart-goal" data-action="goal">Set goal</button>
       </p>
       <svg class="chart-plot" id="chart-plot" aria-hidden="true"></svg>
     </section>

@@ -15,13 +15,13 @@ const TICK_LENGTH = 4;
 export function createLineChart(plot, onSelect) {
   let points = [];
 
-  function draw(series, { minStep = 0 } = {}) {
+  function draw(series, { minStep = 0, band = null } = {}) {
     const width = plot.clientWidth;
     if (!width) return;
-    const scale = series.length ? createScale(series, width, minStep) : null;
+    const scale = series.length ? createScale(series, width, minStep, band) : null;
     points = series.map((item) => ({ ...item, x: round(scale.x(item.date.getTime())), y: round(scale.y(item.value)) }));
     plot.setAttribute('viewBox', `0 0 ${width} ${HEIGHT}`);
-    plot.innerHTML = scale ? plotHtml(points, scale) : '';
+    plot.innerHTML = scale ? plotHtml(points, scale, band) : '';
     select(points.at(-1));
   }
 
@@ -42,8 +42,8 @@ export function createLineChart(plot, onSelect) {
   return { draw, selectAt: (index) => select(points[index]) };
 }
 
-function createScale(series, width, minStep) {
-  const ticks = yTicks(series.map((item) => item.value), minStep);
+function createScale(series, width, minStep, band) {
+  const ticks = yTicks([...series.map((item) => item.value), ...bandValues(band)], minStep);
   const first = series[0].date.getTime();
   const span = series.at(-1).date.getTime() - first;
   const right = width - LABEL_GAP - labelWidth(ticks);
@@ -57,6 +57,8 @@ function createScale(series, width, minStep) {
     y: (value) => bottom - ((value - low) / (high - low)) * (bottom - PLOT.top),
   };
 }
+
+const bandValues = (band) => (band ? [band.low, band.high] : []);
 
 const labelWidth = (ticks) => Math.max(...ticks.map((tick) => String(tick).length)) * LABEL_CHAR_WIDTH;
 
@@ -72,10 +74,10 @@ function yTicks(values, minStep) {
   return Array.from({ length: highIndex(step) - low + 1 }, (_, i) => roundValue((low + i) * step));
 }
 
-function plotHtml(points, scale) {
+function plotHtml(points, scale, band) {
   const line = points.map(({ x, y }, i) => `${i ? 'L' : 'M'}${x},${y}`).join('');
   const dots = points.map(({ x, y }) => `M${x},${y}h0`).join('');
-  return `${gridHtml(scale)}${dateLabelsHtml(points, scale)}<path class="line" d="${line}"/><path class="points" d="${dots}"/>
+  return `${gridHtml(scale)}${bandHtml(band, scale)}${dateLabelsHtml(points, scale)}<path class="line" d="${line}"/><path class="points" d="${dots}"/>
     <g class="selection"></g>`;
 }
 
@@ -85,6 +87,14 @@ function gridHtml({ ticks, right, y }) {
     return `<line class="grid" x1="0" x2="${right}" y1="${top}" y2="${top}"/>
       <text class="axis-label" x="${right + LABEL_GAP}" y="${top}" dy="0.35em">${tick}</text>`;
   }).join('');
+}
+
+function bandHtml(band, { right, y }) {
+  if (!band) return '';
+  const top = round(y(band.high));
+  const bottom = round(y(band.low));
+  const edges = [top, bottom].map((edge) => `<line class="band-edge" x1="0" x2="${right}" y1="${edge}" y2="${edge}"/>`);
+  return `<rect class="band" x="0" y="${top}" width="${right}" height="${round(bottom - top)}"/>${edges.join('')}`;
 }
 
 function dateLabelsHtml(points, scale) {

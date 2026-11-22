@@ -5,7 +5,7 @@ import { onChange } from '../js/events.js';
 import { noteOf } from '../js/exercises.js';
 import { formatIsoDate, roundValue } from '../js/format.js';
 import { currentExercise, currentVariant, initLog, renderLog, revealSets } from '../js/log-screen.js';
-import { bodyWeights, sets } from '../js/store.js';
+import { bodyWeightGoals, bodyWeights, sets } from '../js/store.js';
 import { nextUndo, trackPlace } from '../js/undo.js';
 import { assertEqual, test } from './harness.js';
 import { element } from './setup.js';
@@ -389,4 +389,29 @@ test('the day arrows step to the previous and next days with something logged', 
   assertEqual(location.hash, '#day/1990-01-09', 'next set day');
   click('day-steps', { action: 'latest' });
   assertEqual([location.hash, element('day-latest').disabled], [`#day/${formatIsoDate(new Date(sets.getEntries().at(-1).timestamp))}`, true], 'latest day');
+});
+
+test('a weight goal is set, shown on the chart and in the history, edited and removed', () => {
+  openScreens();
+  bodyWeights.add({ weight: 65.3 });
+  element('chart-plot').clientWidth = 350;
+  renderBodyWeight();
+  const shown = () => [element('chart-goal').textContent, element('body-weight-goal').hidden, element('body-weight-controls').hidden];
+  assertEqual(shown(), ['Set goal', true, false], 'no goal');
+  click('chart-extremes', { action: 'goal' });
+  assertEqual([...shown(), element('body-weight-goal-remove').hidden, element('body-weight-goal-save').disabled],
+    ['Set goal', false, true, true, true], 'empty form');
+  element('body-weight-goal-low').value = '64';
+  element('body-weight-goal-high').value = '62';
+  element('body-weight-goal-high').dispatch('input');
+  click('body-weight-goal', { action: 'goal-save' });
+  assertEqual(shown(), ['Goal 62–64', true, false], 'saved');
+  assertEqual(element('chart-plot').innerHTML.includes('band-edge'), true, 'band drawn');
+  assertEqual(element('body-weight-history').innerHTML.includes('<span class="set-goal">+1.3</span>'), true, 'gap in history');
+  click('chart-extremes', { action: 'goal' });
+  assertEqual([element('body-weight-goal-low').value, element('body-weight-goal-high').value], ['62', '64'], 'filled in goal');
+  click('body-weight-goal', { action: 'goal-remove' });
+  assertEqual(shown(), ['Set goal', true, false], 'removed');
+  assertEqual(bodyWeightGoals.getEntries().length, 2, 'goal history kept');
+  assertEqual(element('body-weight-history').innerHTML.includes('set-goal'), false, 'no gap without a goal');
 });
