@@ -1,4 +1,4 @@
-import { currentGoal, goalGapText, goalText, readGoal } from '../js/body-weight-goal.js';
+import { currentGoal, goalGapText, goalText, goalType, readGoal } from '../js/body-weight-goal.js';
 import { assertEqual, test } from './harness.js';
 
 const goal = { low: 62, high: 64 };
@@ -11,10 +11,15 @@ test('the latest goal entry is the goal, and an entry without bounds removes it'
   assertEqual(currentGoal([]), null, 'never set');
 });
 
-test('a goal reads from either order, from one number as a single target, and not from nothing', () => {
+test('a range goal reads from either order and needs both bounds, an exact goal reads from one number', () => {
   assertEqual(readGoal(['64', '62']), goal, 'swapped');
-  assertEqual(readGoal(['63,5', '']), { low: 63.5, high: 63.5 }, 'one number');
-  assertEqual(readGoal(['', '0']), null, 'nothing');
+  assertEqual(readGoal(['63,5', '']), null, 'range missing a bound');
+  assertEqual(readGoal(['63,5']), { low: 63.5, high: 63.5 }, 'exact');
+  assertEqual(readGoal(['0']), null, 'nothing');
+});
+
+test('a goal with matching bounds is exact, any other goal is a range', () => {
+  assertEqual([goalType(goal), goalType({ low: 63, high: 63 }), goalType(null)], ['range', 'exact', 'range']);
 });
 
 test('a goal shows as a range, or as one number when both bounds match', () => {

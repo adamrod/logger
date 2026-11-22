@@ -7,9 +7,11 @@ export function currentGoal(entries) {
 }
 
 export function readGoal(texts) {
-  const bounds = texts.map(DECIMAL.parse).filter((value) => value > 0);
-  return bounds.length ? { low: Math.min(...bounds), high: Math.max(...bounds) } : null;
+  const bounds = texts.map(DECIMAL.parse);
+  return bounds.every((value) => value > 0) ? { low: Math.min(...bounds), high: Math.max(...bounds) } : null;
 }
+
+export const goalType = (goal) => (goal && goal.low === goal.high ? 'exact' : 'range');
 
 export const isSameGoal = (a, b) => a?.low === b?.low && a?.high === b?.high;
 

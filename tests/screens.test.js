@@ -415,3 +415,21 @@ test('a weight goal is set, shown on the chart and in the history, edited and re
   assertEqual(bodyWeightGoals.getEntries().length, 2, 'goal history kept');
   assertEqual(element('body-weight-history').innerHTML.includes('set-goal'), false, 'no gap without a goal');
 });
+
+test('an exact weight goal reads one number and draws one dashed line', () => {
+  openScreens();
+  bodyWeights.add({ weight: 65.3 });
+  element('chart-plot').clientWidth = 350;
+  click('chart-extremes', { action: 'goal' });
+  click('body-weight-goal', { action: 'goal-type', type: 'exact' });
+  assertEqual([element('body-weight-goal-high').hidden, element('body-weight-goal-low').placeholder], [true, 'weight'], 'exact form');
+  element('body-weight-goal-low').value = '63';
+  element('body-weight-goal-low').dispatch('input');
+  click('body-weight-goal', { action: 'goal-save' });
+  const plot = element('chart-plot').innerHTML;
+  assertEqual([element('chart-goal').textContent, plot.match(/band-edge/g).length, plot.includes('class="band"')], ['Goal 63', 1, false]);
+  assertEqual(element('body-weight-history').innerHTML.includes('<span class="set-goal">+2.3</span>'), true, 'gap to the exact goal');
+  click('chart-extremes', { action: 'goal' });
+  assertEqual([element('body-weight-goal-high').hidden, element('body-weight-goal-low').value], [true, '63'], 'reopened as exact');
+  click('body-weight-goal', { action: 'goal-remove' });
+});

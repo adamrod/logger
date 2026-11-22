@@ -93,8 +93,9 @@ function bandHtml(band, { right, y }) {
   if (!band) return '';
   const top = round(y(band.high));
   const bottom = round(y(band.low));
-  const edges = [top, bottom].map((edge) => `<line class="band-edge" x1="0" x2="${right}" y1="${edge}" y2="${edge}"/>`);
-  return `<rect class="band" x="0" y="${top}" width="${right}" height="${round(bottom - top)}"/>${edges.join('')}`;
+  const edges = [...new Set([top, bottom])].map((edge) => `<line class="band-edge" x1="0" x2="${right}" y1="${edge}" y2="${edge}"/>`);
+  const fill = top === bottom ? '' : `<rect class="band" x="0" y="${top}" width="${right}" height="${round(bottom - top)}"/>`;
+  return fill + edges.join('');
 }
 
 function dateLabelsHtml(points, scale) {

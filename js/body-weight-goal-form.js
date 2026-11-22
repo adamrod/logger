@@ -1,22 +1,37 @@
-import { currentGoal, isSameGoal, readGoal } from './body-weight-goal.js';
+import { currentGoal, goalType, isSameGoal, readGoal } from './body-weight-goal.js';
+import { markPressed } from './chart-controls.js';
 import { onAction } from './events.js';
 import { roundValue } from './format.js';
 import { DECIMAL, bindNumberInput } from './number-field.js';
 import { bodyWeightGoals } from './store.js';
 
+const FIRST_INPUT = {
+  range: { placeholder: 'from', label: 'Goal from' },
+  exact: { placeholder: 'weight', label: 'Goal weight' },
+};
+
 const form = document.getElementById('body-weight-goal');
-const inputs = ['low', 'high'].map((bound) => document.getElementById(`body-weight-goal-${bound}`));
+const typeGroup = document.getElementById('body-weight-goal-types');
+const [lowInput, highInput] = ['low', 'high'].map((bound) => document.getElementById(`body-weight-goal-${bound}`));
+const rangeOnly = [document.getElementById('body-weight-goal-dash'), highInput];
 const saveButton = document.getElementById('body-weight-goal-save');
 const removeButton = document.getElementById('body-weight-goal-remove');
 
 let isOpen = false;
+let type = 'range';
 let render = () => {};
 
 const goal = () => currentGoal(bodyWeightGoals.getEntries());
 
-const readInputs = () => readGoal(inputs.map((input) => input.value));
+const shownInputs = () => (type === 'exact' ? [lowInput] : [lowInput, highInput]);
+
+const readInputs = () => readGoal(shownInputs().map((input) => input.value));
 
 const actions = {
+  'goal-type': ({ type: picked }) => {
+    type = picked;
+    render();
+  },
   'goal-cancel': () => {
     closeGoalForm();
     render();
@@ -39,15 +54,16 @@ export const isGoalFormOpen = () => isOpen;
 export function initGoalForm(onToggle) {
   render = onToggle;
   onAction([form], actions);
-  inputs.forEach((input) => bindNumberInput(input, DECIMAL, renderGoalForm));
+  [lowInput, highInput].forEach((input) => bindNumberInput(input, DECIMAL, renderGoalForm));
 }
 
 export function openGoalForm() {
   isOpen = true;
   const current = goal();
-  inputs[0].value = current ? roundValue(current.low) : '';
-  inputs[1].value = current ? roundValue(current.high) : '';
-  if (!current) inputs[0].focus();
+  type = goalType(current);
+  lowInput.value = current ? roundValue(current.low) : '';
+  highInput.value = current && type === 'range' ? roundValue(current.high) : '';
+  if (!current) lowInput.focus();
 }
 
 export function closeGoalForm() {
@@ -56,6 +72,10 @@ export function closeGoalForm() {
 
 export function renderGoalForm() {
   form.hidden = !isOpen;
+  markPressed(typeGroup, 'type', type);
+  rangeOnly.forEach((element) => { element.hidden = type === 'exact'; });
+  lowInput.placeholder = FIRST_INPUT[type].placeholder;
+  lowInput.setAttribute('aria-label', FIRST_INPUT[type].label);
   removeButton.hidden = !goal();
   saveButton.disabled = !readInputs();
 }
