@@ -347,7 +347,7 @@ li:first-child > .option-new { border-top: none; }
 
 .chart { flex: none; padding: 0 var(--gutter) 12px; border-top: 1px solid var(--divider); }
 
-.toggles { display: flex; margin-right: -10px; }
+.toggles { display: flex; margin-right: -10px; margin-left: auto; }
 .toggle { padding: 0 10px; color: var(--muted); }
 .toggle[aria-pressed="true"] { font-weight: 700; color: var(--text); }
 

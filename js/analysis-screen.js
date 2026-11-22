@@ -1,4 +1,4 @@
-import { bestDayIndex, dailySeries, defaultMetric, repRecords } from './analysis.js';
+import { bestDayIndex, dailySeries, defaultMetric, isEstimable, repRecords } from './analysis.js';
 import { createRangePicker, markPressed } from './chart-controls.js';
 import { revealPressedChip } from './chip-row.js';
 import { entryDate } from './entry-log.js';
@@ -9,17 +9,16 @@ import { createLineChart } from './line-chart.js';
 import { currentExercise, currentVariant } from './log-screen.js';
 import { bodyWeights, sets } from './store.js';
 
-const HEADINGS = { weight: 'Max weight', relative: 'Max %BW', reps: 'Max reps', volume: 'Volume' };
-const MIN_STEPS = { weight: 0, relative: 1, reps: 1, volume: 1 };
+const MIN_STEPS = { weight: 0, relative: 1, reps: 1, volume: 1, estimated: 0 };
 
 const titleEl = document.getElementById('analysis-title');
 const summaryEl = document.getElementById('analysis-summary');
 const variantsEl = document.getElementById('analysis-variants');
 const emptyEl = document.getElementById('analysis-empty');
 const chartsEl = document.getElementById('analysis-charts');
-const dailyHeading = document.getElementById('daily-heading');
 const metricGroup = document.getElementById('daily-metrics');
 const relativeToggle = document.getElementById('relative-toggle');
+const estimatedToggle = document.getElementById('estimated-toggle');
 const dailyValue = document.getElementById('daily-value');
 const dailyDetail = document.getElementById('daily-detail');
 const dailyDate = document.getElementById('daily-date');
@@ -66,7 +65,8 @@ export function renderAnalysis() {
   const exerciseSets = sets.getEntries().filter((set) => set.exercise === exercise && (!variant || set.variant === variant));
   const shownSets = rangePicker.filter(exerciseSets);
   const weighIns = bodyWeights.getEntries();
-  const metric = shownMetric(shownSets, weighIns);
+  const available = { relative: weighIns.length > 0, estimated: shownSets.some(isEstimable) };
+  const metric = shownMetric(shownSets, available);
   const daily = dailySeries(shownSets, metric, weighIns);
   titleEl.textContent = exercise ?? '';
   summaryEl.textContent = `${countText(daily.length, 'day')} · ${countText(shownSets.length, 'set')}`;
@@ -77,20 +77,20 @@ export function renderAnalysis() {
   isVariantPicked = false;
   emptyEl.hidden = shownSets.length > 0;
   chartsEl.hidden = shownSets.length === 0;
-  relativeToggle.hidden = weighIns.length === 0;
+  relativeToggle.hidden = !available.relative;
+  estimatedToggle.hidden = !available.estimated;
   if (!shownSets.length) return;
   renderDaily(daily, metric);
   renderRecords(shownSets);
 }
 
-function shownMetric(shownSets, weighIns) {
-  if (!chosenMetric || (chosenMetric === 'relative' && !weighIns.length)) return defaultMetric(shownSets);
+function shownMetric(shownSets, available) {
+  if (!chosenMetric || available[chosenMetric] === false) return defaultMetric(shownSets);
   return chosenMetric;
 }
 
 function renderDaily(daily, metric) {
   markPressed(metricGroup, 'metric', metric);
-  dailyHeading.textContent = HEADINGS[metric];
   dailyChange.textContent = daily.length < 2 ? '' : formatChange(daily.at(-1).value - daily[0].value, daily[0].date);
   bestDay = bestDayIndex(daily, metric);
   dailyMax.hidden = daily.length < 2;
@@ -100,13 +100,18 @@ function renderDaily(daily, metric) {
 
 function showDaily(point) {
   dailyValue.textContent = point ? valueText(point) : '';
-  dailyDetail.textContent = point?.bodyWeight ? `${formatSet(point.set)} · BW ${point.bodyWeight}` : '';
+  dailyDetail.textContent = point ? detailText(point) : '';
   dailyDate.textContent = point ? whenText(point.date, point.set) : '';
 }
 
 function valueText(point) {
   if (point.bodyWeight) return `${point.value}%`;
-  return point.set ? formatSet(point.set) : point.value;
+  return point.set && !point.isEstimate ? formatSet(point.set) : point.value;
+}
+
+function detailText(point) {
+  if (point.bodyWeight) return `${formatSet(point.set)} · BW ${point.bodyWeight}`;
+  return point.isEstimate ? formatSet(point.set) : '';
 }
 
 function renderRecords(shownSets) {

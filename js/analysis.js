@@ -1,6 +1,8 @@
 import { entryDate } from './entry-log.js';
 import { dayKey, roundValue } from './format.js';
 
+const MAX_ESTIMATED_REPS = 10;
+
 const COMPARE = {
   weight: (a, b) => a.weight - b.weight || a.reps - b.reps,
   reps: (a, b) => a.reps - b.reps || a.weight - b.weight,
@@ -18,10 +20,16 @@ const isMostlyUnweighted = (sets) => sets.filter((set) => set.weight === 0).leng
 
 export const defaultMetric = (sets) => (isMostlyUnweighted(sets) ? 'reps' : 'weight');
 
+export const isEstimable = ({ reps, weight }) => weight > 0 && reps <= MAX_ESTIMATED_REPS;
+
+export const estimatedMax = ({ reps, weight }) => (reps === 1 ? weight : weight * (1 + reps / 30));
+
 export function dailySeries(sets, metric, weighIns = []) {
-  return byDay(sets).map((day) => {
+  const counted = metric === 'estimated' ? sets.filter(isEstimable) : sets;
+  return byDay(counted).map((day) => {
     if (metric === 'volume') return { date: entryDate(day[0]), value: volume(day) };
     if (metric === 'relative') return relativePoint(topSet(day, 'weight'), weighIns);
+    if (metric === 'estimated') return estimatedPoint(day);
     const set = topSet(day, metric);
     return { set, date: entryDate(set), value: set[metric] };
   });
@@ -30,6 +38,11 @@ export function dailySeries(sets, metric, weighIns = []) {
 export function bestDayIndex(daily, metric) {
   const compare = COMPARE[metric] ? (a, b) => COMPARE[metric](a.set, b.set) : (a, b) => a.value - b.value;
   return daily.reduce((best, day, index) => (compare(day, daily[best]) > 0 ? index : best), 0);
+}
+
+function estimatedPoint(day) {
+  const set = day.reduce((best, candidate) => (estimatedMax(candidate) > estimatedMax(best) ? candidate : best));
+  return { set, date: entryDate(set), value: toTenth(estimatedMax(set)), isEstimate: true };
 }
 
 function relativePoint(set, weighIns) {

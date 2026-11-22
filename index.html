@@ -179,14 +179,15 @@
       <p class="empty analysis-empty" id="analysis-empty" hidden>No sets in this range.</p>
 
       <div id="analysis-charts">
-        <section class="analysis-section" aria-labelledby="daily-heading">
+        <section class="analysis-section" aria-label="Best per day">
           <div class="section-head">
-            <h2 class="label" id="daily-heading"></h2>
             <div class="toggles" id="daily-metrics" role="group" aria-label="Chart value">
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="weight">Weight</button>
               <button type="button" class="btn-text toggle" id="relative-toggle" data-action="metric" data-metric="relative">%BW</button>
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="reps">Reps</button>
               <button type="button" class="btn-text toggle" data-action="metric" data-metric="volume">Volume</button>
+              <button type="button" class="btn-text toggle" id="estimated-toggle" data-action="metric" data-metric="estimated"
+                aria-label="Estimated one rep max">1RM</button>
             </div>
           </div>
           <p class="chart-readout readout-grid" aria-live="polite">

@@ -77,3 +77,22 @@ test('each variant is compared only with its own sets', () => {
   const sets = lifts([1, 7, 35, 'Left'], [1, 6, 35, 'Right'], [2, 7, 35, 'Left'], [2, 7, 35, 'Right']);
   assertEqual(recordIndexes(sets), [3]);
 });
+
+test('the estimated 1RM series takes each day\'s best Epley estimate, a single at its weight', () => {
+  const sets = [
+    { timestamp: '2026-01-06T17:00:00.000Z', reps: 5, weight: 90 },
+    { timestamp: '2026-01-06T17:10:00.000Z', reps: 1, weight: 100 },
+    { timestamp: '2026-01-13T17:00:00.000Z', reps: 8, weight: 80 },
+  ];
+  const series = dailySeries(sets, 'estimated');
+  assertEqual(series.map(({ value, set }) => [value, set.reps]), [[105, 5], [101.3, 8]]);
+});
+
+test('the estimated 1RM series leaves out sets above ten reps, unweighted sets, and days with only those', () => {
+  const sets = [
+    { timestamp: '2026-01-06T17:00:00.000Z', reps: 12, weight: 200 },
+    { timestamp: '2026-01-06T17:10:00.000Z', reps: 3, weight: 60 },
+    { timestamp: '2026-01-13T17:00:00.000Z', reps: 5, weight: 0 },
+  ];
+  assertEqual(dailySeries(sets, 'estimated').map(({ value }) => value), [66]);
+});

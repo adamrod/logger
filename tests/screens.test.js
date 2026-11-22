@@ -1,4 +1,4 @@
-import { enterAnalysis, initAnalysis } from '../js/analysis-screen.js';
+import { enterAnalysis, initAnalysis, renderAnalysis } from '../js/analysis-screen.js';
 import { initBodyWeight, renderBodyWeight } from '../js/body-weight-screen.js';
 import { enterDay, initDay, renderDay } from '../js/day-screen.js';
 import { onChange } from '../js/events.js';
@@ -278,8 +278,8 @@ test('the %BW chart shows the top set as a percent of body weight, beside the se
   element('daily-plot').clientWidth = 350;
   enterAnalysis();
   click('daily-metrics', { action: 'metric', metric: 'relative' });
-  const readout = ['daily-heading', 'daily-value', 'daily-detail'].map((id) => element(id).textContent);
-  assertEqual(readout, ['Max %BW', '50%', '3 × 40 · BW 80']);
+  const readout = ['daily-value', 'daily-detail'].map((id) => element(id).textContent);
+  assertEqual(readout, ['50%', '3 × 40 · BW 80']);
 });
 
 test('tapping Max moves the readout from the latest day to the best day in the range', () => {
@@ -441,4 +441,22 @@ test('the weight chart draws the trend under the weigh-ins and reads it below th
   renderBodyWeight();
   assertEqual([element('chart-trend').hidden, element('chart-trend').textContent.startsWith('Trend ')], [false, true], 'readout');
   assertEqual(element('chart-plot').innerHTML.includes('class="trend"'), true, 'path');
+});
+
+test('the 1RM chart reads the best estimate with the set it came from, and hides for unweighted sets', () => {
+  openScreens();
+  const lastAt = Date.parse(sets.getEntries().at(-1).timestamp);
+  sets.add({ timestamp: new Date(lastAt + 86400000).toISOString(), exercise: 'Paused bench', reps: 5, weight: 90 });
+  sets.add({ timestamp: new Date(lastAt + 86460000).toISOString(), exercise: 'Air squats', reps: 30, weight: 0 });
+  click('exercise-picker', { action: 'pick', name: 'Paused bench' });
+  element('daily-plot').clientWidth = 350;
+  enterAnalysis();
+  click('analysis-ranges', { action: 'range', range: 'All' });
+  click('daily-metrics', { action: 'metric', metric: 'estimated' });
+  const readout = ['daily-value', 'daily-detail'].map((id) => element(id).textContent);
+  assertEqual([element('estimated-toggle').hidden, ...readout], [false, 105, '5 × 90']);
+  click('exercise-picker', { action: 'pick', name: 'Air squats' });
+  enterAnalysis();
+  renderAnalysis();
+  assertEqual(element('estimated-toggle').hidden, true, 'unweighted');
 });
