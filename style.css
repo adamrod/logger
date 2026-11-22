@@ -371,13 +371,14 @@ li:first-child > .option-new { border-top: none; }
 .goal-button { color: var(--text); }
 .chart-value { font-size: 24px; font-weight: 600; }
 .chart-meta { font-size: 14px; color: var(--muted); }
-.chart-extremes { margin-top: 2px; }
+:is(.chart-extremes, .chart-trend) { margin-top: 2px; }
 
 .chart-plot { display: block; width: 100%; height: 160px; margin-top: 8px; overflow: visible; touch-action: none; }
 .chart-plot .grid { stroke: var(--divider); }
 .chart-plot .date-tick { stroke: var(--border); }
 .chart-plot .axis-label { font-size: 11px; fill: var(--muted); }
 .chart-plot .line { fill: none; stroke: var(--text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-plot .trend { fill: none; stroke: var(--muted); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .chart-plot .points { fill: none; stroke: var(--text); stroke-width: 5; stroke-linecap: round; }
 .chart-plot .band { fill: var(--text); fill-opacity: 0.06; }
 .chart-plot .band-edge { stroke: var(--muted); stroke-dasharray: 4 4; }

@@ -433,3 +433,12 @@ test('an exact weight goal reads one number and draws one dashed line', () => {
   assertEqual([element('body-weight-goal-high').hidden, element('body-weight-goal-low').value], [true, '63'], 'reopened as exact');
   click('body-weight-goal', { action: 'goal-remove' });
 });
+
+test('the weight chart draws the trend under the weigh-ins and reads it below the extremes', () => {
+  openScreens();
+  [80, 79].forEach((weight) => bodyWeights.add({ weight }));
+  element('chart-plot').clientWidth = 350;
+  renderBodyWeight();
+  assertEqual([element('chart-trend').hidden, element('chart-trend').textContent.startsWith('Trend ')], [false, true], 'readout');
+  assertEqual(element('chart-plot').innerHTML.includes('class="trend"'), true, 'path');
+});

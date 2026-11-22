@@ -1,4 +1,5 @@
 import { currentGoal, goalText } from './body-weight-goal.js';
+import { trendSeries, trendText } from './body-weight-trend.js';
 import { createRangePicker } from './chart-controls.js';
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
@@ -14,6 +15,7 @@ const extremesEl = document.getElementById('chart-extremes');
 const minEl = document.getElementById('chart-min');
 const maxEl = document.getElementById('chart-max');
 const goalButton = document.getElementById('chart-goal');
+const trendEl = document.getElementById('chart-trend');
 const chart = createLineChart(document.getElementById('chart-plot'), showPoint);
 
 let rangePicker;
@@ -37,7 +39,18 @@ export function renderChart() {
   showExtremes(entries);
   const goal = currentGoal(bodyWeightGoals.getEntries());
   goalButton.textContent = goal ? `Goal ${goalText(goal)}` : 'Set goal';
-  chart.draw(entries.map((entry) => ({ date: entryDate(entry), value: entry.weight })), { band: goal });
+  const trend = trendSeries(all);
+  showTrend(trend, goal);
+  const shown = new Set(entries);
+  chart.draw(entries.map((entry) => ({ date: entryDate(entry), value: entry.weight })), {
+    band: goal,
+    trend: trend.filter((point, i) => shown.has(all[i])),
+  });
+}
+
+function showTrend(trend, goal) {
+  trendEl.hidden = trend.length < 2;
+  trendEl.textContent = trend.length < 2 ? '' : trendText(trend, goal);
 }
 
 function changeText(entries) {

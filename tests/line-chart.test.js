@@ -43,3 +43,14 @@ test('a goal band stretches the scale to show its dashed edges beside the weight
   assertEqual([labels[0], labels.at(-1)], [62, 67], 'scale');
   assertEqual(edges, [8 + (3 / 5) * 132, 140], 'edges');
 });
+
+test('a trend draws as its own path under the line', () => {
+  const plot = element('chart-trend');
+  plot.clientWidth = 375;
+  const dates = [new Date(2026, 9, 1), new Date(2026, 9, 31)];
+  const trend = dates.map((date, i) => ({ date, value: 64 + i }));
+  createLineChart(plot, () => {}).draw(dates.map((date, i) => ({ date, value: 66 + i })), { trend });
+  const html = plot.innerHTML;
+  assertEqual(html.indexOf('class="trend"') < html.indexOf('class="line"'), true, 'under the line');
+  assertEqual([...html.matchAll(/dy="0.35em">([\d.]+)</g)].map(([, label]) => Number(label))[0], 64, 'scale');
+});
