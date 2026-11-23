@@ -52,6 +52,7 @@ const PARENT_TABS = {
   'climb-session': 'climb',
   'climb-calendar': 'climb',
   'climb-analysis': 'climb',
+  competition: 'climb',
 };
 const REVEALERS = { log: revealSets, climb: revealClimbs, competition: revealCompetition, 'body-weight': revealWeights };
 
@@ -74,7 +75,6 @@ function route() {
     if (tab.hash === `#${currentTab}`) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   });
-  document.querySelector('.tab[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   render();
 }
 
