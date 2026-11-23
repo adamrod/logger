@@ -1,4 +1,4 @@
-import { dayPlan, weekPath } from '../js/plan.js';
+import { addWeeks, dayPlan, weekPath, weekStart } from '../js/plan.js';
 import { assertEqual, test } from './harness.js';
 
 const WEEK = `## 2026-11-23 Monday
@@ -16,6 +16,12 @@ test('a week plan is named by its Monday', () => {
   assertEqual(weekPath(new Date(2026, 10, 29)), 'plans/2026-11-23.md');
   assertEqual(weekPath(new Date(2026, 10, 30)), 'plans/2026-11-30.md');
   assertEqual(weekPath(new Date(2027, 0, 1)), 'plans/2026-12-28.md');
+});
+
+test('weeks start on Monday and step by seven days', () => {
+  assertEqual(weekStart(new Date(2026, 10, 29)).getTime(), new Date(2026, 10, 23).getTime());
+  assertEqual(addWeeks(new Date(2026, 10, 23), -1).getTime(), new Date(2026, 10, 16).getTime());
+  assertEqual(addWeeks(new Date(2026, 11, 28), 1).getTime(), new Date(2027, 0, 4).getTime());
 });
 
 test('the day plan is the section under that date heading', () => {
