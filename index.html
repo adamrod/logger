@@ -692,33 +692,31 @@
 
   <section class="screen" id="screen-plan" hidden>
     <main class="plan">
-      <div class="plan-head">
-        <h1 class="analysis-title" id="plan-title"></h1>
-        <div class="day-steps" id="plan-steps">
+      <div class="plan-bar">
+        <div class="plan-steps" id="plan-steps">
           <button type="button" class="icon-button" data-action="step" data-step="-1" aria-label="Previous week">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
           </button>
+          <label class="plan-pick">
+            <span id="plan-title"></span>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            <input type="date" class="plan-date" id="plan-date" aria-label="Choose a week">
+          </label>
           <button type="button" class="icon-button" data-action="step" data-step="1" aria-label="Next week">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
           </button>
-          <button type="button" class="btn-text" id="plan-this-week" data-action="this-week">This week</button>
+        </div>
+        <div class="sync-state" id="plan-sync" hidden>
+          <span class="sync-text" id="plan-sync-text"></span>
+          <button type="button" class="btn-text sync-button" id="plan-sync-button">Sync</button>
         </div>
       </div>
       <section class="plan-today" id="plan-today-section" aria-labelledby="plan-today-heading">
         <h2 class="label" id="plan-today-heading">Today</h2>
         <p class="plan-day" id="plan-today"></p>
       </section>
-      <section class="plan-week-section" aria-labelledby="plan-week-heading">
-        <div class="section-head">
-          <h2 class="label" id="plan-week-heading">Plan</h2>
-          <div class="sync-state" id="plan-sync" hidden>
-            <span class="sync-text" id="plan-sync-text"></span>
-            <button type="button" class="btn-text sync-button" id="plan-sync-button">Sync</button>
-          </div>
-        </div>
-        <textarea class="input plan-week" id="plan-week" aria-label="This week's plan"
-          placeholder="No plan for this week" spellcheck="false"></textarea>
-      </section>
+      <textarea class="input plan-week" id="plan-week" aria-label="Week plan"
+        placeholder="No plan for this week" spellcheck="false"></textarea>
     </main>
   </section>
 

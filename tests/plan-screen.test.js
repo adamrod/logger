@@ -93,3 +93,13 @@ test('leaving an edit for another week saves it to its own week, then shows the 
   await step(1);
   assertEqual(element('plan-week').value, 'This week, edited', 'back to this week');
 });
+
+test('picking any day in the calendar shows its week', async () => {
+  openPlan();
+  files[lastWeekPath] = 'Last week';
+  element('plan-date').value = formatIsoDate(addWeeks(new Date(), -1));
+  element('plan-date').dispatch('change', {});
+  await settle();
+  assertEqual(element('plan-week').value, 'Last week', 'shown');
+  assertEqual(element('plan-date').value, formatIsoDate(addWeeks(weekStart(new Date()), -1)), 'calendar starts on Monday');
+});

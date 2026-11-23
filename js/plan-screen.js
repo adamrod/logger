@@ -1,7 +1,7 @@
 import { notifyChange, onAction } from './events.js';
-import { formatShortDay } from './format.js';
+import { formatIsoDate, parseDateValue } from './format.js';
 import { isConflict, readFile, writeFile } from './github.js';
-import { addWeeks, dayPlan, weekPath, weekStart } from './plan.js';
+import { addWeeks, dayPlan, formatWeek, weekPath, weekStart } from './plan.js';
 import { getSettings, isSyncConfigured } from './settings.js';
 
 const STORAGE_KEY = 'logger.plans';
@@ -9,7 +9,7 @@ const EMPTY_PLAN = { text: '', draft: null };
 
 const titleEl = document.getElementById('plan-title');
 const stepsEl = document.getElementById('plan-steps');
-const thisWeekButton = document.getElementById('plan-this-week');
+const dateInput = document.getElementById('plan-date');
 const todaySection = document.getElementById('plan-today-section');
 const todayEl = document.getElementById('plan-today');
 const weekInput = document.getElementById('plan-week');
@@ -30,10 +30,8 @@ export function initPlan() {
   weekInput.addEventListener('input', editPlan);
   weekInput.addEventListener('change', syncPlan);
   syncButton.addEventListener('click', syncPlan);
-  onAction([stepsEl], {
-    step: ({ step }) => showWeek(addWeeks(monday, Number(step))),
-    'this-week': () => showWeek(weekStart(new Date())),
-  });
+  dateInput.addEventListener('change', () => dateInput.value && showWeek(weekStart(parseDateValue(dateInput.value))));
+  onAction([stepsEl], { step: ({ step }) => showWeek(addWeeks(monday, Number(step))) });
 }
 
 export function enterPlan() {
@@ -42,8 +40,8 @@ export function enterPlan() {
 
 export function renderPlan() {
   const { text, isSynced = false, canSync = false } = currentStatus();
-  titleEl.textContent = `Week of ${formatShortDay(monday)}`;
-  thisWeekButton.disabled = isThisWeek();
+  titleEl.textContent = formatWeek(monday, new Date());
+  if (document.activeElement !== dateInput) dateInput.value = formatIsoDate(monday);
   todaySection.hidden = !isThisWeek();
   todayEl.textContent = dayPlan(planAt(shownPath()).text, new Date()) || 'Nothing planned';
   weekInput.disabled = syncing;

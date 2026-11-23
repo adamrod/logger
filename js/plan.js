@@ -1,8 +1,16 @@
-import { formatIsoDate } from './format.js';
+import { formatIsoDate, formatShortDay } from './format.js';
 
 export const weekStart = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() - ((date.getDay() + 6) % 7));
 
 export const addWeeks = (monday, count) => new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 7 * count);
+
+export function formatWeek(monday, today) {
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
+  const range = monday.getMonth() === sunday.getMonth()
+    ? `${monday.getDate()}–${formatShortDay(sunday)}`
+    : `${formatShortDay(monday)} – ${formatShortDay(sunday)}`;
+  return sunday.getFullYear() === today.getFullYear() ? range : `${range} ${sunday.getFullYear()}`;
+}
 
 export const weekPath = (date) => `plans/${formatIsoDate(weekStart(date))}.md`;
 

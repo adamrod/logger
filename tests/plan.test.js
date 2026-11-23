@@ -1,4 +1,4 @@
-import { addWeeks, dayPlan, weekPath, weekStart } from '../js/plan.js';
+import { addWeeks, dayPlan, formatWeek, weekPath, weekStart } from '../js/plan.js';
 import { assertEqual, test } from './harness.js';
 
 const WEEK = `## 2026-11-23 Monday
@@ -22,6 +22,14 @@ test('weeks start on Monday and step by seven days', () => {
   assertEqual(weekStart(new Date(2026, 10, 29)).getTime(), new Date(2026, 10, 23).getTime());
   assertEqual(addWeeks(new Date(2026, 10, 23), -1).getTime(), new Date(2026, 10, 16).getTime());
   assertEqual(addWeeks(new Date(2026, 11, 28), 1).getTime(), new Date(2027, 0, 4).getTime());
+});
+
+test('a week reads as its date range, with the year only outside this year', () => {
+  const today = new Date(2026, 10, 25);
+  assertEqual(formatWeek(new Date(2026, 10, 23), today), '23–29 Nov');
+  assertEqual(formatWeek(new Date(2026, 10, 30), today), '30 Nov – 6 Dec');
+  assertEqual(formatWeek(new Date(2025, 10, 17), today), '17–23 Nov 2025');
+  assertEqual(formatWeek(new Date(2025, 11, 29), today), '29 Dec – 4 Jan');
 });
 
 test('the day plan is the section under that date heading', () => {
