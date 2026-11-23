@@ -79,21 +79,23 @@ function retryUnsynced() {
 
 async function syncWithRepo() {
   const repo = getSettings();
-  for (const log of entryLogs) await syncLog(repo, log);
+  const remotes = await Promise.all(entryLogs.map((log) => readFile(repo, pathOf(log))));
+  for (const [index, log] of entryLogs.entries()) await syncLog(repo, log, remotes[index]);
 }
 
-async function syncLog(repo, log, retriesLeft = CONFLICT_RETRIES) {
+async function syncLog(repo, log, remote, retriesLeft = CONFLICT_RETRIES) {
   try {
-    await mergeWithRepo(repo, log);
+    await mergeWithRepo(repo, log, remote);
   } catch (error) {
     if (retriesLeft === 0 || !isConflict(error)) throw error;
-    await syncLog(repo, log, retriesLeft - 1);
+    await syncLog(repo, log, await readFile(repo, pathOf(log)), retriesLeft - 1);
   }
 }
 
-async function mergeWithRepo(repo, log) {
-  const path = `${DATA_DIR}/${log.file}`;
-  const remote = await readFile(repo, path);
+const pathOf = (log) => `${DATA_DIR}/${log.file}`;
+
+async function mergeWithRepo(repo, log, remote) {
+  const path = pathOf(log);
   const remoteEntries = parseCsv(remote?.text ?? '', log.numbers).filter((entry) => entry.timestamp);
   const local = log.beginSync();
   const entries = mergeEntries(local.entries, remoteEntries, local.syncMeta);

@@ -1,5 +1,5 @@
 import { parseCsv } from '../js/csv.js';
-import { bodyWeights, climbs, gyms, notes, sets } from '../js/store.js';
+import { bodyWeights, climbs, entryLogs, gyms, notes, sets } from '../js/store.js';
 import { mergeEntries, sync, syncState } from '../js/sync.js';
 import { assertEqual, test } from './harness.js';
 import { handleFetch } from './setup.js';
@@ -8,6 +8,8 @@ const files = {};
 let onWrite = () => {};
 let rejectWrite = () => false;
 const signals = [];
+let readsInFlight = 0;
+let mostReadsInFlight = 0;
 
 const response = (status, body) => ({ status, ok: status < 300, json: async () => body });
 
@@ -23,6 +25,10 @@ handleFetch(async (url, { method = 'GET', body, signal } = {}) => {
     onWrite(path);
     return response(200, {});
   }
+  readsInFlight += 1;
+  mostReadsInFlight = Math.max(mostReadsInFlight, readsInFlight);
+  await Promise.resolve();
+  readsInFlight -= 1;
   return path in files ? response(200, { content: toBase64(files[path]), sha: 'sha' }) : response(404, {});
 });
 
@@ -100,6 +106,12 @@ test('every GitHub request gives up after a timeout, so a stalled one cannot blo
   bodyWeights.add({ weight: 73 });
   await sync();
   assertEqual(signals.length > 0 && signals.every((signal) => signal?.timeoutMs > 0), true);
+});
+
+test('all files are read from GitHub at once, so a sync costs one round trip, not one per file', async () => {
+  mostReadsInFlight = 0;
+  await sync();
+  assertEqual(mostReadsInFlight, entryLogs.length);
 });
 
 test('a write rejected because another device synced first is merged and retried', async () => {
