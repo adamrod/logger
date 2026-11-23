@@ -5,7 +5,7 @@ import { isConflict, readFile, writeFile } from './github.js';
 import { getSettings, isSyncConfigured } from './settings.js';
 import { entryLogs } from './store.js';
 
-const EDIT_DELAY = 3000;
+const EDIT_DELAY = 1000;
 const RETRY_INTERVAL = 60000;
 const CONFLICT_RETRIES = 2;
 const DATA_DIR = 'data';
