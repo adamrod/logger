@@ -26,7 +26,7 @@ handleFetch(async (url, { method = 'GET', body, signal } = {}) => {
   return path in files ? response(200, { content: toBase64(files[path]), sha: 'sha' }) : response(404, {});
 });
 
-const remoteWeights = () => parseCsv(files['bodyweight.csv'], ['weight']).map((entry) => entry.weight);
+const remoteWeights = () => parseCsv(files['data/bodyweight.csv'], ['weight']).map((entry) => entry.weight);
 
 const NO_CHANGES = { lastSyncAt: '2026-10-30T12:00:00.000Z', addedIds: [], deletedIds: [], editedIds: [] };
 
@@ -65,7 +65,7 @@ test('sync pushes new entries and marks them synced', async () => {
 test('an edit made while sync writes to GitHub is kept and pushed next sync', async () => {
   const [entry] = bodyWeights.getEntries();
   bodyWeights.add({ weight: 71 });
-  onWrite = (path) => { if (path === 'bodyweight.csv') bodyWeights.update(entry.timestamp, { weight: 69 }); };
+  onWrite = (path) => { if (path === 'data/bodyweight.csv') bodyWeights.update(entry.timestamp, { weight: 69 }); };
   await sync();
   onWrite = () => {};
   assertEqual(bodyWeights.getEntries().map((e) => e.weight), [69, 71], 'local');
@@ -78,7 +78,7 @@ test('an edit made while sync writes to GitHub is kept and pushed next sync', as
 test('a delete made while sync writes to GitHub is kept and pushed next sync', async () => {
   const [entry] = bodyWeights.getEntries();
   bodyWeights.add({ weight: 72 });
-  onWrite = (path) => { if (path === 'bodyweight.csv') bodyWeights.remove(entry.timestamp); };
+  onWrite = (path) => { if (path === 'data/bodyweight.csv') bodyWeights.remove(entry.timestamp); };
   await sync();
   onWrite = () => {};
   assertEqual(bodyWeights.getEntries().map((e) => e.weight), [71, 72], 'local');
@@ -104,7 +104,7 @@ test('every GitHub request gives up after a timeout, so a stalled one cannot blo
 
 test('a write rejected because another device synced first is merged and retried', async () => {
   let conflicts = 1;
-  rejectWrite = (path) => path === 'bodyweight.csv' && conflicts-- > 0;
+  rejectWrite = (path) => path === 'data/bodyweight.csv' && conflicts-- > 0;
   bodyWeights.add({ weight: 74 });
   await sync();
   rejectWrite = () => false;
@@ -115,7 +115,7 @@ test('a write rejected because another device synced first is merged and retried
 
 test('a set from a device whose clock runs ahead counts as synced after sync', async () => {
   const ahead = new Date(Date.now() + 5000).toISOString();
-  files['bodyweight.csv'] += `${ahead},75\n`;
+  files['data/bodyweight.csv'] += `${ahead},75\n`;
   await sync();
   assertEqual(bodyWeights.getEntries().at(-1).timestamp, ahead, 'pulled');
   assertEqual(bodyWeights.hasChanges(), false, 'unsynced changes');
@@ -124,7 +124,7 @@ test('a set from a device whose clock runs ahead counts as synced after sync', a
 test('a note spanning several lines reaches notes.csv intact', async () => {
   notes.add({ exercise: 'Bench press', note: 'Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9' });
   await sync();
-  assertEqual(parseCsv(files['notes.csv']).map((entry) => entry.note), ['Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9']);
+  assertEqual(parseCsv(files['data/notes.csv']).map((entry) => entry.note), ['Eleiko: bar 10, safety 7\nRack: "bar 15", safety 9']);
   assertEqual(notes.hasChanges(), false);
 });
 
@@ -132,8 +132,8 @@ test('climbs reach climbs.csv and gym scales reach gyms.csv, names with commas a
   gyms.add({ gym: 'The "Cave", Wola', grades: '1|2|3' });
   climbs.add({ gym: 'The "Cave", Wola', style: 'boulder', grade: '2', climb: 'c1', name: 'Pink, arete', tags: 'Slab|Dyno', result: 'top' });
   await sync();
-  const [remoteClimb] = parseCsv(files['climbs.csv']);
+  const [remoteClimb] = parseCsv(files['data/climbs.csv']);
   assertEqual([remoteClimb.gym, remoteClimb.name, remoteClimb.tags], ['The "Cave", Wola', 'Pink, arete', 'Slab|Dyno']);
-  assertEqual(parseCsv(files['gyms.csv'])[0].grades, '1|2|3');
+  assertEqual(parseCsv(files['data/gyms.csv'])[0].grades, '1|2|3');
   assertEqual(climbs.hasChanges() || gyms.hasChanges(), false);
 });

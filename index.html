@@ -20,6 +20,7 @@
 <div class="app">
   <header class="top-bar">
     <nav class="tabs" aria-label="Sections">
+      <a class="tab" href="#plan">Plan</a>
       <a class="tab" href="#log">Sets</a>
       <a class="tab" href="#climb">Climb</a>
       <a class="tab" href="#competition">Comp</a>
@@ -687,6 +688,21 @@
       </div>
       <div class="history-list" id="body-weight-history"></div>
     </section>
+  </section>
+
+  <section class="screen" id="screen-plan" hidden>
+    <main class="plan">
+      <section class="plan-today" aria-labelledby="plan-today-heading">
+        <h2 class="label" id="plan-today-heading">Today</h2>
+        <p class="plan-day" id="plan-today"></p>
+      </section>
+      <textarea class="input plan-week" id="plan-week" aria-label="This week's plan"
+        placeholder="No plan for this week" spellcheck="false"></textarea>
+      <div class="sync-row">
+        <span class="sync-status" id="plan-status"></span>
+        <button type="button" class="btn btn-primary" id="plan-save">Save</button>
+      </div>
+    </main>
   </section>
 
   <section class="screen" id="screen-settings" hidden>

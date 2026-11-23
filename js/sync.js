@@ -8,6 +8,7 @@ import { entryLogs } from './store.js';
 const EDIT_DELAY = 3000;
 const RETRY_INTERVAL = 60000;
 const CONFLICT_RETRIES = 2;
+const DATA_DIR = 'data';
 
 export const syncState = { running: false, scheduled: false, error: null };
 
@@ -91,13 +92,14 @@ async function syncLog(repo, log, retriesLeft = CONFLICT_RETRIES) {
 }
 
 async function mergeWithRepo(repo, log) {
-  const remote = await readFile(repo, log.file);
+  const path = `${DATA_DIR}/${log.file}`;
+  const remote = await readFile(repo, path);
   const remoteEntries = parseCsv(remote?.text ?? '', log.numbers).filter((entry) => entry.timestamp);
   const local = log.beginSync();
   const entries = mergeEntries(local.entries, remoteEntries, local.syncMeta);
   const at = syncedAt(entries);
   const text = toCsv(entries, log.columns);
-  if (text !== remote?.text) await writeFile(repo, log.file, text, remote?.sha);
+  if (text !== remote?.text) await writeFile(repo, path, text, remote?.sha);
   log.applySync({ entries, at });
 }
 
