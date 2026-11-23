@@ -146,7 +146,7 @@
         <h2 class="label" id="history-heading">History</h2>
         <a class="icon-button history-calendar" href="#calendar" aria-label="Calendar"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></a>
         <button type="button" class="btn-text history-filter" id="history-all-variants" data-action="toggle-all-variants" aria-pressed="false" hidden>All variants</button>
-        <div class="history-sync" hidden>
+        <div class="sync-state history-sync" hidden>
           <span class="sync-text"></span>
           <button type="button" class="btn-text sync-button">Sync</button>
         </div>
@@ -383,7 +383,7 @@
       <div class="section-head">
         <h2 class="label" id="climb-history-heading">History</h2>
         <a class="icon-button history-calendar" href="#climb-calendar" aria-label="Calendar"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></a>
-        <div class="history-sync" hidden>
+        <div class="sync-state history-sync" hidden>
           <span class="sync-text"></span>
           <button type="button" class="btn-text sync-button">Sync</button>
         </div>
@@ -512,7 +512,7 @@
     <section class="history competition-history" id="competition-history-section" aria-labelledby="competition-history-heading">
       <div class="section-head">
         <h2 class="label" id="competition-history-heading">History</h2>
-        <div class="history-sync" hidden>
+        <div class="sync-state history-sync" hidden>
           <span class="sync-text"></span>
           <button type="button" class="btn-text sync-button">Sync</button>
         </div>
@@ -681,7 +681,7 @@
     <section class="history" aria-labelledby="body-weight-history-heading">
       <div class="section-head">
         <h2 class="label" id="body-weight-history-heading">History</h2>
-        <div class="history-sync" hidden>
+        <div class="sync-state history-sync" hidden>
           <span class="sync-text"></span>
           <button type="button" class="btn-text sync-button">Sync</button>
         </div>
@@ -696,12 +696,17 @@
         <h2 class="label" id="plan-today-heading">Today</h2>
         <p class="plan-day" id="plan-today"></p>
       </section>
-      <textarea class="input plan-week" id="plan-week" aria-label="This week's plan"
-        placeholder="No plan for this week" spellcheck="false"></textarea>
-      <div class="sync-row">
-        <span class="sync-status" id="plan-status"></span>
-        <button type="button" class="btn btn-primary" id="plan-save">Save</button>
-      </div>
+      <section class="plan-week-section" aria-labelledby="plan-week-heading">
+        <div class="section-head">
+          <h2 class="label" id="plan-week-heading">Week</h2>
+          <div class="sync-state" id="plan-sync" hidden>
+            <span class="sync-text" id="plan-sync-text"></span>
+            <button type="button" class="btn-text sync-button" id="plan-sync-button">Sync</button>
+          </div>
+        </div>
+        <textarea class="input plan-week" id="plan-week" aria-label="This week's plan"
+          placeholder="No plan for this week" spellcheck="false"></textarea>
+      </section>
     </main>
   </section>
 

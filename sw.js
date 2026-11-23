@@ -1,4 +1,4 @@
-const VERSION = 118;
+const VERSION = 119;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
