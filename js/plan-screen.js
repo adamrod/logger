@@ -24,6 +24,7 @@ let problem = null;
 
 const shownPath = () => weekPath(monday);
 const planAt = (path) => ({ ...EMPTY_PLAN, ...plans[path] });
+const latestText = ({ text, draft }) => draft ?? text;
 const isThisWeek = () => shownPath() === weekPath(new Date());
 
 export function initPlan() {
@@ -43,7 +44,7 @@ export function renderPlan() {
   titleEl.textContent = formatWeek(monday, new Date());
   if (document.activeElement !== dateInput) dateInput.value = formatIsoDate(monday);
   todaySection.hidden = !isThisWeek();
-  todayEl.textContent = dayPlan(planAt(shownPath()).text, new Date()) || 'Nothing planned';
+  todayEl.textContent = dayPlan(latestText(planAt(shownPath())), new Date()) || 'Nothing planned';
   weekInput.disabled = syncing;
   syncEl.hidden = !isSyncConfigured();
   syncEl.classList.toggle('is-synced', isSynced);
@@ -60,8 +61,7 @@ function showWeek(nextMonday) {
 }
 
 function showText() {
-  const plan = planAt(shownPath());
-  weekInput.value = plan.draft ?? plan.text;
+  weekInput.value = latestText(planAt(shownPath()));
   notifyChange();
 }
 

@@ -1,11 +1,12 @@
 import { addExercise, allExercises, isOtherExercise, removeExercise, renameExercise } from './exercises.js';
 import { escapeHtml } from './format.js';
 import { highlight } from './highlight.js';
+import { EDIT_ICON, TRASH_ICON } from './icons.js';
 import { createPickerMenu } from './picker-menu.js';
 
 const ICON_ACTIONS = {
-  rename: { label: 'Rename', icon: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>' },
-  remove: { label: 'Remove', icon: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>' },
+  rename: { label: 'Rename', icon: EDIT_ICON },
+  remove: { label: 'Remove', icon: TRASH_ICON },
 };
 
 const select = document.getElementById('exercise-select');
@@ -104,6 +105,5 @@ const confirmRemoveHtml = (name) => `<button type="button" class="option-confirm
 
 function iconButtonHtml(action, name) {
   const { label, icon } = ICON_ACTIONS[action];
-  return `<button type="button" class="option-icon" data-action="${action}" data-name="${name}" aria-label="${label} ${name}">
-    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${icon}</svg></button>`;
+  return `<button type="button" class="option-icon" data-action="${action}" data-name="${name}" aria-label="${label} ${name}">${icon}</button>`;
 }

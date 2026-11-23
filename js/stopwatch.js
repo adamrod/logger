@@ -26,7 +26,6 @@ export const restartAfterLog = (state, now) => (state.restartOnLog ? restart(sta
 
 export const restartUnlessStartedSince = (time) => (state, now) => (isRunning(state) && state.startedAt > time ? state : restart(state, now));
 
-
 export function createStopwatch({ id, name, storageKey }) {
   const stopwatchEl = document.getElementById(id);
   const timeEl = document.getElementById(`${id}-time`);

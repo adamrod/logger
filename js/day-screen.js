@@ -3,11 +3,10 @@ import { monthValue } from './calendar.js';
 import { daySummary, daySummaryText, loggedDays, nearbyDays } from './day-summary.js';
 import { onAction } from './events.js';
 import { escapeHtml, formatIsoDate, formatLongDay, parseDateValue } from './format.js';
+import { CHEVRON_ICON } from './icons.js';
 import { editSet, showExercise } from './log-screen.js';
 import { setRowHtml } from './set-history.js';
 import { bodyWeights, sets } from './store.js';
-
-const CHEVRON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
 const titleEl = document.getElementById('day-title');
 const summaryEl = document.getElementById('day-summary');
@@ -76,7 +75,7 @@ function exerciseHtml({ exercise, rows }) {
   const name = escapeHtml(exercise);
   return `
     <section class="day-exercise">
-      <h2><button type="button" class="day-exercise-name" data-action="exercise" data-name="${name}">${name}${CHEVRON}</button></h2>
+      <h2><button type="button" class="day-exercise-name" data-action="exercise" data-name="${name}">${name}${CHEVRON_ICON}</button></h2>
       <div class="day-sets">${rows.map((row) => setRowHtml(row, view)).join('')}</div>
     </section>`;
 }

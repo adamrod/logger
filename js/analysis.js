@@ -1,5 +1,5 @@
 import { entryDate } from './entry-log.js';
-import { dayKey, roundValue } from './format.js';
+import { dayKey, roundToTenth, roundValue } from './format.js';
 
 const MAX_ESTIMATED_REPS = 10;
 
@@ -14,15 +14,13 @@ const topSet = (day, metric) => day.reduce((top, set) => (COMPARE[metric](set, t
 
 const volume = (day) => roundValue(day.reduce((sum, set) => sum + set.reps * set.weight, 0));
 
-const toTenth = (value) => Math.round(value * 10) / 10;
-
 const isMostlyUnweighted = (sets) => sets.filter((set) => set.weight === 0).length > sets.length / 2;
 
 export const defaultMetric = (sets) => (isMostlyUnweighted(sets) ? 'reps' : 'weight');
 
 export const isEstimable = ({ reps, weight }) => weight > 0 && reps <= MAX_ESTIMATED_REPS;
 
-export const estimatedMax = ({ reps, weight }) => (reps === 1 ? weight : weight * (1 + reps / 30));
+const estimatedMax = ({ reps, weight }) => (reps === 1 ? weight : weight * (1 + reps / 30));
 
 export function dailySeries(sets, metric, weighIns = []) {
   const counted = metric === 'estimated' ? sets.filter(isEstimable) : sets;
@@ -42,12 +40,12 @@ export function bestDayIndex(daily, metric) {
 
 function estimatedPoint(day) {
   const set = day.reduce((best, candidate) => (estimatedMax(candidate) > estimatedMax(best) ? candidate : best));
-  return { set, date: entryDate(set), value: toTenth(estimatedMax(set)), isEstimate: true };
+  return { set, date: entryDate(set), value: roundToTenth(estimatedMax(set)), isEstimate: true };
 }
 
 function relativePoint(set, weighIns) {
   const date = entryDate(set);
-  const bodyWeight = toTenth(bodyWeightAt(weighIns, date));
+  const bodyWeight = roundToTenth(bodyWeightAt(weighIns, date));
   return { set, date, bodyWeight, value: Math.round((set.weight / bodyWeight) * 100) };
 }
 

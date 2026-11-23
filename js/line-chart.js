@@ -1,4 +1,4 @@
-import { formatMonth, formatShortDay, roundValue } from './format.js';
+import { formatMonth, formatShortDay, roundToTenth as round, roundValue } from './format.js';
 
 const HEIGHT = 160;
 const PLOT = { top: 8, bottom: 20 };
@@ -166,5 +166,3 @@ function axisDateHtml(x, label, anchor) {
 const selectionHtml = ({ x, y }) => `
   <line class="crosshair" x1="${x}" x2="${x}" y1="${PLOT.top}" y2="${HEIGHT - PLOT.bottom}"/>
   <circle class="marker" cx="${x}" cy="${y}" r="4"/>`;
-
-const round = (value) => Math.round(value * 10) / 10;

@@ -1,9 +1,10 @@
 import { entryDate } from './entry-log.js';
 import { onAction } from './events.js';
-import { formatIsoDate, parseDateValue } from './format.js';
+import { DAY_MS, formatIsoDate, parseDateValue } from './format.js';
 
-const DAY_MS = 86400000;
 const RANGE_DAYS = { '1M': 30, '3M': 91, '1Y': 365, All: Infinity };
+
+const dayAfter = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
 export function markPressed(group, key, value) {
   group.querySelectorAll('button').forEach((button) => button.setAttribute('aria-pressed', button.dataset[key] === value));
@@ -44,7 +45,7 @@ export function createRangePicker(prefix, onPick) {
 
   function bounds() {
     if (range !== 'Custom') return [Date.now() - RANGE_DAYS[range] * DAY_MS, Infinity];
-    return [parseDateValue(from).getTime(), parseDateValue(to).getTime() + DAY_MS];
+    return [parseDateValue(from).getTime(), dayAfter(parseDateValue(to)).getTime()];
   }
 
   function filter(entries) {

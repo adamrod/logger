@@ -3,7 +3,7 @@ import { entryDate } from './entry-log.js';
 import { dayKey, daysBetween, describeSet, escapeHtml, formatDay, formatIsoDate, roundValue } from './format.js';
 import { currentDateAttribute, editAttributes, gapHtml, sinceLastHtml, unsyncedHtml } from './history.js';
 
-const variantOf = (entry) => entry.variant ?? '';
+export const variantOf = (entry) => entry?.variant ?? '';
 
 export const variantRows = (entries) => [...Map.groupBy(entries, variantOf)].map(([variant, sets]) => ({ variant, sets }));
 

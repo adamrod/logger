@@ -1,14 +1,12 @@
 import { isTop } from './climbing.js';
 import { entryDate } from './entry-log.js';
-import { countText, escapeHtml, formatShortDay, formatTime } from './format.js';
+import { countText, escapeHtml, formatShortDay, formatTime, roundToTenth as round } from './format.js';
 
 const WIDTH = 350;
 const HEIGHT = 160;
 const PLOT = { left: 40, right: 8, top: 10, bottom: 24 };
 const MAX_GRADE_LINES = 7;
 const LABEL_OFFSET = 4;
-
-const round = (value) => Math.round(value * 10) / 10;
 
 function gradeAxis(ranks, grades) {
   const low = Math.min(...ranks);

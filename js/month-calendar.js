@@ -1,9 +1,9 @@
 import { addMonths, calendarDays, monthValue, parseMonthValue, startOfMonth } from './calendar.js';
 import { onAction } from './events.js';
 import { dayKey, escapeHtml, formatLongDay, formatMonthYear, formatWeekday, isToday } from './format.js';
+import { CHEVRON_ICON } from './icons.js';
 
 const WEEK_FROM_MONDAY = Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i));
-const CHEVRON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 
 const shortWeekday = (date) => formatWeekday(date).slice(0, 2);
 
@@ -60,7 +60,7 @@ export function createMonthCalendar(route, { entriesIn, latestDate, summary }) {
         <span class="calendar-entry-title">${escapeHtml(title)}</span>
         <span class="calendar-entry-meta">${escapeHtml(meta)}</span>
       </span>
-      ${CHEVRON}
+      ${CHEVRON_ICON}
     </a>`;
 
   return {

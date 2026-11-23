@@ -8,7 +8,7 @@ import { roundValue } from './format.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
 import { onHoldStep } from './hold-step.js';
 import { DECIMAL, INTEGER, bindNumberInput, stepInput } from './number-field.js';
-import { setHistoryHtml } from './set-history.js';
+import { setHistoryHtml, variantOf } from './set-history.js';
 import { getSettings, updateSettings } from './settings.js';
 import { getChosenVariant, notes, saveChosenVariant, sets } from './store.js';
 import { createStopwatch, restartAfterLog } from './stopwatch.js';
@@ -18,8 +18,6 @@ const FIELDS = {
   weight: { ...DECIMAL, step: 1, min: 0 },
 };
 const EMPTY_SET = { reps: 0, weight: 0 };
-
-const variantOf = (entry) => entry?.variant ?? '';
 
 const stopwatch = createStopwatch({ id: 'stopwatch', name: 'stopwatch', storageKey: 'logger.v2.stopwatch' });
 

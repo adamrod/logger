@@ -12,17 +12,19 @@ const ERRORS = {
 export const isConflict = (error) => CONFLICTS.includes(error.status);
 
 export async function readFile(repo, path) {
-  const file = await request(repo, path);
-  return file && { text: decodeBase64(file.content), sha: file.sha };
+  const file = await request(repo, `contents/${path}`);
+  if (!file) return null;
+  const { content } = file.encoding === 'none' ? await request(repo, `git/blobs/${file.sha}`) : file;
+  return { text: decodeBase64(content), sha: file.sha };
 }
 
 export function writeFile(repo, path, text, sha) {
   const body = JSON.stringify({ message: `Update ${path} from Logger`, content: encodeBase64(text), sha });
-  return request(repo, path, { method: 'PUT', body });
+  return request(repo, `contents/${path}`, { method: 'PUT', body });
 }
 
-async function request({ owner, repo, token }, path, options = {}) {
-  const response = await fetch(`${API}/repos/${owner}/${repo}/contents/${path}`, {
+async function request({ owner, repo, token }, endpoint, options = {}) {
+  const response = await fetch(`${API}/repos/${owner}/${repo}/${endpoint}`, {
     ...options,
     cache: 'no-store',
     signal: AbortSignal.timeout(TIMEOUT_MS),

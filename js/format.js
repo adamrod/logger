@@ -1,6 +1,6 @@
 const LOCALE = 'en-GB';
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
-const DAY_MS = 86400000;
+export const DAY_MS = 86400000;
 const SIGNS = { '-1': '−', 0: '±', 1: '+' };
 
 const dateFormat = (options) => new Intl.DateTimeFormat(LOCALE, options);
@@ -18,6 +18,8 @@ const pad = (number) => String(number).padStart(2, '0');
 export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 
 export const roundValue = (value) => Math.round(value * 100) / 100;
+
+export const roundToTenth = (value) => Math.round(value * 10) / 10;
 
 export const formatSet = ({ reps, weight }) => `${reps} × ${roundValue(weight)}`;
 

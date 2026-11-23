@@ -68,11 +68,11 @@ function newCompetition(name) {
   return { ...DEFAULTS, name, start: new Date(startAt).toISOString(), end: new Date(startAt + DEFAULT_LENGTH_MS).toISOString() };
 }
 
-const readWhen = (input) => (input.value ? parseDateTimeValue(input.value) : null);
+const readDateTime = (input) => (input.value ? parseDateTimeValue(input.value) : null);
 
 function moveEndWithStart() {
-  const start = readWhen(startInput);
-  const end = readWhen(endInput);
+  const start = readDateTime(startInput);
+  const end = readDateTime(endInput);
   if (!start) return;
   if (end) endInput.value = formatDateTimeValue(new Date(end.getTime() + start.getTime() - shownStart.getTime()));
   shownStart = start;
@@ -81,8 +81,8 @@ function moveEndWithStart() {
 function formFields() {
   return {
     name: nameInput.value.trim(),
-    start: readWhen(startInput)?.toISOString() ?? '',
-    end: readWhen(endInput)?.toISOString() ?? '',
+    start: readDateTime(startInput)?.toISOString() ?? '',
+    end: readDateTime(endInput)?.toISOString() ?? '',
     first: INTEGER.parse(firstInput.value),
     last: INTEGER.parse(lastInput.value),
     topPoints: INTEGER.parse(topPointsInput.value),

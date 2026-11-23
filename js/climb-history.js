@@ -2,9 +2,9 @@ import { STYLES, climbsIn, isTop, outcomeOf, recordSends, sessionCount } from '.
 import { countText, daysBetween, escapeHtml, formatDay, formatShortDay } from './format.js';
 import { gradesAt } from './gyms.js';
 import { UNSYNCED_HTML, currentDateAttribute, gapHtml, sinceLastHtml } from './history.js';
+import { REMOVE_ICON } from './icons.js';
 import { climbs } from './store.js';
 
-const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const RECORD_HTML = '<span class="set-record">PR</span>';
 
 const metaText = (parts) => parts.filter(Boolean).map(escapeHtml).join(' · ');

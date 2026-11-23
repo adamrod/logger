@@ -9,6 +9,7 @@ import { countText, escapeHtml, formatDateTimeSecondsValue, formatDuration } fro
 import { initGymForm, isGymFormOpen, openGymForm, showFirstGymForm } from './gym-form.js';
 import { allGyms, gradesAt, gymGrades } from './gyms.js';
 import { arrivingEntries, fadeOutEntries, leavingEntries, revealEntries, revealNewest } from './history.js';
+import { EDIT_ICON, REMOVE_ICON } from './icons.js';
 import { createPickerMenu } from './picker-menu.js';
 import { createStopwatch, restartUnlessStartedSince } from './stopwatch.js';
 import { climbs } from './store.js';
@@ -17,8 +18,6 @@ import { readSecondsValue } from './when-field.js';
 
 const STATE_KEY = 'logger.v2.climb';
 const TICK_MS = 1000;
-const EDIT_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
-const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 const NEW_CLIMB = { grade: null, name: '', tags: [] };
 
 const gymBar = document.getElementById('gym-bar');
@@ -362,12 +361,14 @@ function saveClimb() {
     if (attempt) climbs.update(timestamp, { ...climbFields, result: attempt.result, timestamp: readSecondsValue(timestamp, attempt.when) });
     else climbs.remove(timestamp);
   }));
+  renderClimb();
 }
 
 function deleteClimb() {
   const { id } = editing;
   stopEditing();
   undoable(() => attemptsOfClimb(allAttempts(), id).forEach(({ timestamp }) => climbs.remove(timestamp)));
+  renderClimb();
 }
 
 function setHtml(element, html) {

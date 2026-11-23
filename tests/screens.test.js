@@ -170,6 +170,24 @@ test('saving an edited set updates it and leaves edit mode', () => {
   assertEqual(element('log-button').hidden, false, 'log button after saving');
 });
 
+test('saving an edited set without changing it still leaves edit mode', () => {
+  openScreens();
+  sets.add({ exercise: 'Lunges', reps: 10, weight: 0 });
+  const { timestamp } = sets.getEntries().at(-1);
+  click('history-list', { action: 'edit', id: timestamp });
+  click('log-controls', { action: 'save' });
+  assertEqual([element('log-button').hidden, element('edit-actions').hidden], [false, true]);
+});
+
+test('saving an edited body weight without changing it still leaves edit mode', () => {
+  openScreens();
+  bodyWeights.add({ weight: 81 });
+  const { timestamp } = bodyWeights.getEntries().at(-1);
+  click('body-weight-history', { action: 'edit', id: timestamp });
+  click('body-weight-controls', { action: 'save' });
+  assertEqual([element('body-weight-log').hidden, element('body-weight-edit-actions').hidden], [false, true]);
+});
+
 test('moving an edited set to another variant keeps the history on the variant being logged', () => {
   openScreens();
   sets.add({ exercise: 'Split squat', variant: 'Left', reps: 8, weight: 20 });

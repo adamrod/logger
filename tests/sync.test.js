@@ -10,6 +10,7 @@ let rejectWrite = () => false;
 const signals = [];
 let readsInFlight = 0;
 let mostReadsInFlight = 0;
+const largeFiles = new Set();
 
 const response = (status, body) => ({ status, ok: status < 300, json: async () => body });
 
@@ -17,6 +18,8 @@ const toBase64 = (text) => btoa(String.fromCharCode(...new TextEncoder().encode(
 const fromBase64 = (base64) => new TextDecoder().decode(Uint8Array.from(atob(base64), (char) => char.charCodeAt(0)));
 
 handleFetch(async (url, { method = 'GET', body, signal } = {}) => {
+  const blob = url.split('/git/blobs/')[1];
+  if (blob) return response(200, { content: toBase64(files[blob]), encoding: 'base64' });
   const path = url.split('/contents/')[1];
   signals.push(signal);
   if (method === 'PUT' && rejectWrite(path)) return response(409, {});
@@ -29,7 +32,8 @@ handleFetch(async (url, { method = 'GET', body, signal } = {}) => {
   mostReadsInFlight = Math.max(mostReadsInFlight, readsInFlight);
   await Promise.resolve();
   readsInFlight -= 1;
-  return path in files ? response(200, { content: toBase64(files[path]), sha: 'sha' }) : response(404, {});
+  if (largeFiles.has(path)) return response(200, { content: '', encoding: 'none', sha: path });
+  return path in files ? response(200, { content: toBase64(files[path]), encoding: 'base64', sha: 'sha' }) : response(404, {});
 });
 
 const remoteWeights = () => parseCsv(files['data/bodyweight.csv'], ['weight']).map((entry) => entry.weight);
@@ -148,4 +152,13 @@ test('climbs reach climbs.csv and gym scales reach gyms.csv, names with commas a
   assertEqual([remoteClimb.gym, remoteClimb.name, remoteClimb.tags], ['The "Cave", Wola', 'Pink, arete', 'Slab|Dyno']);
   assertEqual(parseCsv(files['data/gyms.csv'])[0].grades, '1|2|3');
   assertEqual(climbs.hasChanges() || gyms.hasChanges(), false);
+});
+
+test('a data file too big for GitHub to inline is read whole, so its entries are not lost', async () => {
+  files['data/bodyweight.csv'] += '2019-06-01T07:00:00.000Z,90\n';
+  largeFiles.add('data/bodyweight.csv');
+  await sync();
+  largeFiles.clear();
+  assertEqual(remoteWeights().includes(90), true, 'remote');
+  assertEqual(bodyWeights.getEntries()[0].weight, 90, 'pulled');
 });

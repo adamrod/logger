@@ -189,4 +189,4 @@ export function recordSends(attempts, gradesAt) {
   }));
 }
 
-export const stylesText =(attempts) => [...new Set(attempts.map((attempt) => STYLES[attempt.style]))].join(', ');
+export const stylesText = (attempts) => [...new Set(attempts.map((attempt) => STYLES[attempt.style]))].join(', ');

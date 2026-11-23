@@ -1,4 +1,4 @@
-const VERSION = 124;
+const VERSION = 125;
 const CACHE = `logger-v${VERSION}`;
 const APP_SHELL = [
   './',
@@ -46,6 +46,7 @@ const APP_SHELL = [
   'js/highlight.js',
   'js/history.js',
   'js/hold-step.js',
+  'js/icons.js',
   'js/keep-awake.js',
   'js/line-chart.js',
   'js/month-calendar.js',

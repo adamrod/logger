@@ -160,6 +160,15 @@ test('the climb editor changes the grade and name of every attempt, and each att
   assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [false, true], 'after saving');
 });
 
+test('saving the climb editor without changes closes it', () => {
+  openClimb();
+  startFresh('3');
+  log('attempt');
+  editTheClimb(last().climb);
+  controls({ action: 'save' });
+  assertEqual([element('climb-log-buttons').hidden, element('climb-attempts').hidden], [false, true]);
+});
+
 test('tapping the current climb\'s name opens its attempts under that name, tapping it again closes them', () => {
   openClimb();
   startFresh('3');

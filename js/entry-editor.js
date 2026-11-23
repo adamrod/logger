@@ -24,13 +24,14 @@ export function createEntryEditor(log, { logButton, editActions, deleteActions, 
       if (!changes) return;
       const id = stopEditing();
       log.update(id, { ...changes, timestamp: readWhen(whenInput, id) });
+      screen.render();
     },
     'cancel-edit': () => { stopEditing(); screen.render(); },
     delete: () => { confirmingDelete = true; screen.render(); },
     'cancel-delete': () => { confirmingDelete = false; screen.render(); },
     'confirm-delete': () => {
-      const id = stopEditing();
-      log.remove(id);
+      log.remove(stopEditing());
+      screen.render();
     },
   };
 

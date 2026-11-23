@@ -103,3 +103,11 @@ test('picking any day in the calendar shows its week', async () => {
   assertEqual(element('plan-week').value, 'Last week', 'shown');
   assertEqual(element('plan-date').value, formatIsoDate(addWeeks(weekStart(new Date()), -1)), 'calendar starts on Monday');
 });
+
+test('today follows an edit before it is synced', async () => {
+  openPlan();
+  files[path] = '';
+  await enterPlan();
+  type(`## ${formatIsoDate(new Date())}\nHangboard`);
+  assertEqual(element('plan-today').textContent, 'Hangboard');
+});

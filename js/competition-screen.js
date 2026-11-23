@@ -5,6 +5,7 @@ import { allCompetitions, competitionById, competitionNamed } from './competitio
 import { onAction } from './events.js';
 import { countText, escapeHtml, formatDuration, formatTime, formatWhen } from './format.js';
 import { historyHtml } from './history.js';
+import { REMOVE_ICON } from './icons.js';
 import { createPickerMenu } from './picker-menu.js';
 import { createStopwatch, restartAfterLog } from './stopwatch.js';
 import { competitionAttempts } from './store.js';
@@ -17,7 +18,6 @@ const SECOND_MS = 1000;
 const REVERSIBLE_RESULTS = ['zone', 'top'];
 const RESULT_CELLS = { attempt: 'cell', zone: 'cell is-zone', top: 'cell is-top' };
 const STATE_NAMES = { untouched: 'not tried', tried: 'tried', zone: 'zone', top: 'top' };
-const REMOVE_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
 const pickerEl = document.getElementById('competition-picker');
 const actionsEl = document.getElementById('competition-actions');
